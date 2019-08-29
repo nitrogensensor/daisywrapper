@@ -3,7 +3,7 @@ apply plugin: 'java-library'
 dependencies {
     implementation project(path: ':datamodel')
 }
+// Værdien kan være mellem 7 og 9. JDK 10+ fanges ikke af Android Studio
+sourceCompatibility = "8"
 
 
-sourceCompatibility = "1.8"
-targetCompatibility = "1.8"
