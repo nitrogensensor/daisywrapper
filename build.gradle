@@ -2,6 +2,7 @@ apply plugin: 'java-library'
 
 dependencies {
     implementation project(path: ':datamodel')
+    testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 // Værdien kan være mellem 7 og 9. JDK 10+ fanges ikke af Android Studio
 sourceCompatibility = "8"

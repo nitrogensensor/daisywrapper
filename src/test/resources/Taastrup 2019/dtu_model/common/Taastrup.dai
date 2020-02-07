@@ -1,0 +1,712 @@
+;; Including external library-files
+(path "/Users/bhw318/Documents/PhD/Maalingerne/Taastrup/DAISY/" &old)
+(input file "tillage.dai")
+(input file "crop.dai")
+(input file "dk-fertilizer.dai")
+;(input file "log3.dai")
+(input file "log.dai")
+(input file "dk-crop.dai")
+(input file "Winter Wheat JG.dai")
+(input file "Springbarley_MES_23.dai")
+(input file "Horizons_drainagetrial_taastrup.dai")
+
+(deflog "Weather2" column
+  (where "${colfid}weather.dlf")
+  (when daily)
+  (entries (number (handle sum)
+                   (path weather "*" precipitation)
+                   (dimension "mm"))
+				   ; indsat KJ 
+		   (number (handle average)
+		           (path weather "*" cloudiness)
+                   ;(dimension "mm"))
+		   )
+		   (number (handle average)
+		           (path weather "*" wind)
+                   (dimension "m/s")
+		   )
+		   (number (handle average)
+		           (path weather "*" relative humidity)
+                   ;(dimension "mm"))
+		   )
+           (number (handle sum)
+                   (path weather "*" rain)
+                   (dimension "mm"))
+           (number (handle sum)
+                   (path weather "*" snow)
+                   (dimension "mm"))
+           (number (handle sum)
+                   (path weather "*" reference_evapotranspiration)
+                   (tag "RefEvap-file")
+                   (dimension "mm"))
+           (number (path column "${column}" Bioclimate "*" 
+                         pet "*" reference_evapotranspiration)
+                   (tag "RefEvap-used")
+                   (handle sum)
+                   (dimension "mm"))
+           (number (path weather "*" daily_global_radiation)
+                   (dimension "W/m^2"))
+           (number (path weather "*" global_radiation)
+                   (tag "Mim GR")
+                   (handle min)
+                   (dimension "W/m^2"))
+           (number (path weather "*" global_radiation)
+                   (tag "Average GR")
+                   (handle average)
+                   (dimension "W/m^2"))
+           (number (path weather "*" global_radiation)
+                   (tag "Max GR")
+                   (handle max)
+                   (dimension "W/m^2"))
+           (number (path weather "*" daily_air_temperature)
+                   (dimension "dg C"))
+           (number (path weather "*" daily_min_air_temperature)
+                   (dimension "dg C"))
+           (number (path weather "*" daily_max_air_temperature)
+                   (dimension "dg C"))
+           (number (path weather "*" air_temperature)
+                   (tag "Avg T")
+                   (handle average)
+                   (dimension "dg C"))
+           (number (path weather "*" air_temperature)
+                   (tag "Min T")
+                   (handle min)
+                   (dimension "dg C"))
+           (number (path weather "*" air_temperature)
+                   (tag "Max T")
+                   (handle max)
+                   (dimension "dg C"))           ))
+;; Weather data
+(weather combine ;fra Per til anvendelse af to vejrfiler
+           (entry ((begin 2014 1 1 0); start for vejrfil #2 
+                   (end   2018 12 31 0); til slut vejrfil #2
+                   (source time 
+					       (offset (days 0) (hours 0) (minutes 30) (seconds 0) (microseconds 0))
+		;		           (source table (file "DK-taastrupdaily_2014-2018_five_parametres.dwf"));vejrfil #2 
+				           (source table (file "dk-taastrup-hourly2014_2018.dwf"));vejrfil #2 
+				   ))			   
+                  ((source table (file "DK-taastrup.dwf"));vejrfil #1
+				  )
+		   )
+)				  
+
+;;; SOIL PROFILES: 
+;Change of denitrifikation model
+(defchemistry low_denit multi
+  (combine (N (reaction nitrification
+                        (denitrification
+                         (water_factor (0.8 0.0) (0.9 0.2) (1.0 1.0))))))
+)
+	(defcolumn "Taastrup 27" default
+      (Surface (temperature_change_rate -1 [h^-1]))
+      (SoilHeat (q_lim -1 [erg/cm^2/h]))
+	  (Groundwater aquitard
+	               (K_aquitard 0.02 [cm/h]);was 0.05 mod KJ
+	               (Z_aquitard 200 [cm])
+				   (pressure_table file "Aquiferpressure29.txt"))
+	  (Drain lateral (x 0.5 [m]) (pipe_position -10 [cm])); svarende til anisotropi i pløjelag
+	  (Bioclimate original (svat SSOC))
+	  (Soil (MaxRootingDepth 30 [cm])
+	  		(border	-300[cm])
+	        (horizons (-17 "27 Ap 0-17")
+	                  (-35 "27 Ap 17-35")
+					  (-47 "27 B 35-47")
+	                  (-81 "27 C1 47-81")
+	                  (-100 "27 C2 81-100")
+					  (-160 "27 C3 100-160")
+					  (-300 "27 C4 160-300")	
+		))
+        (Movement vertical
+                       (Geometry
+                           (zplus 
+                           -0.5 -1 -1.5 -2 -2.5 -3 -3.5 -4 -4.5 
+                           -5 -6 -7 -8 -9 -10 
+                           -12 -14 -16 -18 -20 -22 -24 -26 -28
+                           -30 -32 -34 -36 -38 -40 -42 -44 -46 -48 -50
+                           -55 -60 -65 -70 -75 -80 -85 -90 -95 -100 
+                           -110 -120 -130 -140 -150 -160 -170 -180 -190 -200 -210 -220 -230 -240 -250 -260 -270 -280 -290 -300[cm])))
+	   (Chemistry low_denit) ; gl. denitrifikations model              
+	   (OrganicMatter original 
+	   (init (input 4121 [kg C/ha/y])
+	     					(bioinc 903 [kg C/ha/y])
+	     					(root 1195 [kg C/ha/y])
+	     					(end -20 [cm])))
+)
+	(defcolumn "Taastrup 36" default
+;      (Surface (temperature_change_rate -1 [h^-1]))
+;      (SoilHeat (q_lim -1 [erg/cm^2/h]))
+	  (Groundwater aquitard
+	               (K_aquitard 0.010 [cm/h]);was 0.05 mod KJ
+	               (Z_aquitard 200 [cm])
+				   (pressure_table file "Aquiferpressure38.txt"));svarende til 1,5 ms dybde
+	  (Drain lateral (x 1.5 [m])); svarende til dybde på 1,1m KJ
+	  (Bioclimate original ;(svat SSOC)
+	  )
+	  (Soil (MaxRootingDepth 200 [cm])
+	  		(border	-300[cm])
+	        (horizons (-15 "36 Ap 0-15")
+	                  (-30 "36 Ap 15-30")
+					  (-50 "36 E 30-50")
+	                  (-80 "36 B 50-80")
+	                  (-100 "36 C1 80-100")
+					  (-180 "36 C2 100-180")
+					  (-300 "36 C3 180-300")	
+		))
+        (Movement vertical
+                       (Geometry
+                           (zplus 
+                           -0.5 -1 -1.5 -2 -2.5 -3 -3.5 -4 -4.5 
+                           -5 -6 -7 -8 -9 -10 
+                           -12 -14 -16 -18 -20 -22 -24 -26 -28
+                           -30 -32 -34 -36 -38 -40 -42 -44 -46 -48 -50
+                           -55 -60 -65 -70 -75 -80 -85 -90 -95 -100 
+                            -110 -120 -130 -140 -150 -160 -170 -180 -190 -200 -210 -220 -230 -240 -250 -260 -270 -280 -290 -300[cm])))
+	   (Chemistry low_denit) ; gl. denitrifikations model              
+	   (OrganicMatter original 
+	   (init (input 4121 [kg C/ha/y])
+	     					(bioinc 903 [kg C/ha/y])
+	     					(root 1195 [kg C/ha/y])
+	     					(end -20 [cm])))
+)
+	
+	(defcolumn "Taastrup 29" default
+	  (SoilWater (max_exfiltration_gradient 0.7 [cm/cm]));was 400
+	  (Surface (temperature_change_rate -1 [h^-1])
+      (EpFactor 1 []);was 0.65 Finn Plauborg
+   (EpFactor_SWE 	(0.0 [pF] 	1.0  []) (1.0 [pF] 	1.0  [])(2.0 [pF] 	1.0 [])(3.0 [pF]	0.5  [])(4.0 [pF] 	0.4  [])(5.0 [pF] 	0.3  [])
+	   				;(0.0 [pF] 	0.65  []) (1.0 [pF] 	0.65  [])(2.0 [pF] 	0.65 [])(3.0 [pF]	0.65  [])(4.0 [pF] 	0.65  [])(5.0 [pF] 	0.65  [])
+   				 )
+               (DetentionCapacity 2 [mm]));overflade afstrømning
+	  (SoilHeat (q_lim -1 [erg/cm^2/h]))
+	  (Groundwater ;source (column (file "Measurements/Measured_Taastrup_29.ddf") (tag "29 Groundwater D")))
+		  		   aquitard
+	               (K_aquitard 0.020 [cm/h]);was 0.035 mod KJ
+	               (Z_aquitard 200 [cm])
+					(pressure_table file "Aquiferpressure29a.txt"))
+	  (Bioclimate original 
+		  (pet  (FAO_PM_hourly ;(use_wet true) ;FAO_PM ;makkink ;FAO_PM_70
+   		  ))
+		  (svat SSOC 
+							(epsilon_soil_SWE   (0 [pF] 1.026)
+  												(1.65 [pF] 1.019)
+					  						  	(5 [pF] 0.997)
+												(7 [pF] 0.989)) ;std 0.95
+							(z_0b 0.02[m]))
+	  						(maxTdiff 0.0001 [K])
+							(maxEdiff 1 [Pa])
+							(raddist sun-shade
+							        (Ps_PAR 0.1);std
+					       			(Ps_PAR_SWE (1 [pF] 0.25)
+							   	 				(2 [pF] 0.4)
+							   				 	(3 [pF] 0.5)
+												(4 [pF] 0.65)
+												(5 [pF] 0.9)
+												(6 [pF] 1.1))
+									(Ps_NIR 0.18);std			
+					       			(Ps_NIR_SWE (1 [pF] 0.6)
+							   	 				(2 [pF] 0.9)
+							   				 	(3 [pF] 1.2)
+												(4 [pF] 1.5)
+												(5 [pF] 1.7)
+												(6 [pF] 1.9)))
+)							
+					(Vegetation crops
+					  (ForcedLAI    ;(2014 ((300 0.2) (365 0.3)));30/10
+					   			    ;(2015 ((1 0.5) (84 0.5)(97 0.7) (110 1.25)(126 2)(140 3)))
+							    	;(2015 ((300 0.2) (365 0.3)))
+									;(2016 ((1 0.5) (84 0.5)(101 0.8)(109 1.35)(124 1.5)(131 1.7)(139 2)(150 1.8)))
+						 		    (2016 ((208 0.5)(250 0.5) (365 1.0)));was ;(2016 ((260 0.3) (365 0.8)))
+							    	(2017 ((0 0.5) (115 1.2)));was ;(2017 ((1 0.5) (115 1)))
+					))
+	  (Soil (MaxRootingDepth 200 [cm])
+	  		(border	-600[cm])
+	        (horizons (-4 "29 Ap 0-17 skorpe")
+				      (-6 "29 Ap 0-17 harrow pan")
+					  (-20 "29 Ap 0-17")
+	                  (-26 "29 Ap 17-32")
+					  (-32 "29 Ap 17-32 plowpan")
+					  (-47 "29 B 32-47")
+	                  (-81 "29 C1 47-81")
+	                  (-100 "29 C2 81-100")
+					  (-180 "29 C3 100-180")
+					  (-600 "27 C4 160-300")	
+		))
+        (Movement vertical
+			  ;(matrix_water (richards (K_average harmonic))
+			   ;             (richards (K_average arithmetic))
+			  	;            lr)
+                       (Geometry 
+						   (zplus
+                           -0.5 -1 -1.5 -2 -2.5 -3 -3.5 -4 -4.5 
+						   -5 -6 -7 -8 -9 -10 
+                           -12 -14 -16 -18 -20 -22 -24 -26 -28
+                           -30 -32 -34 -36 -38 -40 -42 -44 -46 -48 -50
+                           -55 -60 -65 -70 -75 -80 -85 -90 -95 -100 -107.5 
+                            -112.5 -120 -130 -140 -150 -160 -170 -180 -190 -200 -210 -220 -230 -240 -250 -260 -270 -280 -290 -300
+							-310 -320 -330 -340 -350 -360 -370 -380 -390 -400 -410 -420 -430 -440 -450 -460 -470 -480 -490 -500[cm]))
+			(Tertiary original
+	                      (macro default
+	                             (distribution (-150 [cm] 100 [%]); macro porer fordelingen kan måske forbedres....
+	                                           ( -120 [cm]  90 [%])
+											   ( -26 [cm]  89 [%])
+											   ( -20 [cm]  10 [%])
+	                                           (   0 [cm]   0 [%]))
+								(pressure_initiate -3 [cm]); -3
+								(pressure_end -30 [cm])))); -30		
+	   (Chemistry low_denit) ; gl. denitrifikations model              
+	   (OrganicMatter original 
+	   (init (input 4121 [kg C/ha/y])
+	     					(bioinc 903 [kg C/ha/y])
+	     					(root 1195 [kg C/ha/y])
+	     					(end -20 [cm])))
+)
+
+
+	(defcolumn "Taastrup 38" default
+	(SoilWater (max_exfiltration_gradient 0.7 [cm/cm]));was 400
+	 (Litter Maize ;Millet 
+		 ;(vapor_flux_factor 0 [])
+	     ;(water_capacity 0.1 [L/kg])
+	  )
+	  (Surface (temperature_change_rate -1 [h^-1])
+;		  		(EpFactor 0.65 []);was 0.65 Finn Plauborg
+	  	       (EpFactor 1 []);was 0.65 Finn Plauborg
+			   (EpFactor_SWE 	(0.0 [pF] 	1.0  []) (1.0 [pF] 	1.0  [])(2.0 [pF] 	1.0 [])(3.0 [pF]	0.5  [])(4.0 [pF] 	0.4  [])(5.0 [pF] 	0.3  [])
+				   				;(0.0 [pF] 	0.65  []) (1.0 [pF] 	0.65  [])(2.0 [pF] 	0.65 [])(3.0 [pF]	0.65  [])(4.0 [pF] 	0.65  [])(5.0 [pF] 	0.65  [])
+			   				 )
+	  ) 
+      (SoilHeat (q_lim -1 [erg/cm^2/h]))
+	  (Groundwater ;source (column (file "Measurements/Measured_Taastrup_38.ddf") (tag "38 Groundwater D" [mm]))
+		           aquitard
+	               (K_aquitard 0.015 [cm/h]);was 0.05 mod KJ
+	               (Z_aquitard 200 [cm])
+				   (pressure_table file "Aquiferpressure38a.txt" ;table (file "Measurements/Manpejtaastrup.ddf")  (offset 0 [cm])
+				   ))
+	  (Drain lateral (x 1.5 [m])); svarende til dybde på 1,1m KJ OBS evt. indsæt anisotropi
+	  (Bioclimate original 
+		  (pet  (FAO_PM_hourly ;(use_wet true) ;FAO_PM ;makkink ;FAO_PM_70
+   		  ))
+		  (svat SSOC 
+ 		   					(epsilon_soil_SWE   (0 [pF] 1.026)
+			      		  						(1.65 [pF] 1.019)
+			      							  	(5 [pF] 0.997)
+												(7 [pF] 0.989)) ;std 0.95
+							(z_0b 0.02[m]))
+	  						(maxTdiff 0.0001 [K])
+							(maxEdiff 1 [Pa])
+							(raddist sun-shade
+							        (Ps_PAR 0.1);std
+					       			(Ps_PAR_SWE (1 [pF] 0.25)
+							   	 				(2 [pF] 0.4)
+							   				 	(3 [pF] 0.5)
+												(4 [pF] 0.65)
+												(5 [pF] 0.9)
+												(6 [pF] 1.1))
+	 								(Ps_NIR 0.18);std			
+					       			(Ps_NIR_SWE (1 [pF] 0.6)
+							   	 				(2 [pF] 0.9)
+							   				 	(3 [pF] 1.2)
+												(4 [pF] 1.5)
+												(5 [pF] 1.7)
+												(6 [pF] 1.9)))
+)
+	  
+		(Vegetation crops
+					  (ForcedLAI   ; (2014 ((300 0.2) (365 0.3)));30/10
+					   			    ;(2015 ((1 0.5) (84 0.5)(97 0.7) (110 1.25)(126 2)(140 3)))
+							    	;(2015 ((215 0.5) (265 0.5)))
+									;(2016 ((1 0.5) (84 0.5)(101 0.8)(109 1.35)(124 1.5)(131 1.7)(139 2)(150 1.8)))
+						 		    (2016 ((208 0.5)(250 0.5) (365 1.0)))
+							    	(2017 ((0 0.5) (115 1.2)))
+					))
+	  (Soil (MaxRootingDepth 200 [cm])
+	  		(border	-600[cm])
+	        (horizons (-4 "38 Ap 0-3 skorpe")
+					  ;(-8 "38 Ap 0-15")
+					  (-6 "38 Ap 0-15 harrowpan")
+					  (-15 "38 Ap 0-15")
+			          (-26 "38 Ap 15-30")
+					  (-30 "38 Ap 15-30 plowpan")
+					  (-45 "38 E 30-45")
+	                  (-80 "38 B 45-80")
+	                  (-100 "38 C1 80-100")
+					  (-160 "38 C2 100-180")
+					  (-600 "38 C3 180-300")	
+		))
+        (Movement vertical
+			  ;(matrix_water (richards (K_average harmonic))
+			   ;             (richards (K_average arithmetic))
+			  	;            lr)
+                       (Geometry 
+						   (zplus
+                           -0.5 -1 -1.5 -2 -2.5 -3 -3.5 -4 -4.5 
+						   -5 -6 -7 -8 -9 -10 
+                           -12 -14 -16 -18 -20 -22 -24 -26 -28
+                           -30 -32 -34 -36 -38 -40 -42 -44 -46 -48 -50
+                           -55 -60 -65 -70 -75 -80 -85 -90 -95 -100 -107.5
+                            -112.5 -120 -130 -140 -150 -160 -170 -180 -190 -200 -210 -220 -230 -240 -250 -260 -270 -280 -290 -300
+							-310 -320 -330 -340 -350 -360 -370 -380 -390 -400 -410 -420 -430 -440 -450 -460 -470 -480 -490 -500[cm]))
+		(Tertiary original
+                      (macro default
+                             (distribution (-150 [cm] 100 [%]); macro porer fordelingen kan måske forbedres....
+                                           ( -120 [cm]  90 [%])
+										   ( -26 [cm]  89 [%])
+										   ( -20 [cm]  10 [%])
+                                           (   0 [cm]   0 [%]))
+							(pressure_initiate -3 [cm]); -3
+							(pressure_end -30 [cm])))); -30		
+	   (Chemistry low_denit) ; gl. denitrifikations model              
+	   (OrganicMatter original 
+	   (init (input 4121 [kg C/ha/y])
+	     					(bioinc 903 [kg C/ha/y])
+	     					(root 1195 [kg C/ha/y])
+	     					(end -20 [cm])))
+)
+;;;CROP PARAMETERS mulige modeficeringer af afgroeder
+;(defunit [mm/dg C/d] SIfactor
+;  (length 1)
+;  (thermodynamic_temperature -1)
+;  (time -1)
+;  (factor 1.157e-8))
+
+;(defunit [cm/dg C/d] SIfactor
+;  (length 1)
+;  (thermodynamic_temperature -1)
+;  (time -1)
+;  (factor 1.157e-7))
+
+  (defcrop "Winter Rape; PA" "Winter Rape"
+    (Root (MxNH4Up     2.5E-8)
+          (MxNO3Up     2.5E-8)
+		  (MaxPen 200 [cm])
+		  (Rxylem 25);was 10
+		  (PenWaterFac (0 1) (0.989 1) (0.99 0) (1 0))
+		  )
+;		  (LeafPhot FC_C3
+;		  	;(ABAeffect ABA-exp);;The effect of xylem ABA on stomata conductivity turned off
+;		  	(Stomatacon Leuning (delta 0.142 [MPa^-1]); værdi ref Per http://www.sciencedirect.com/science/article/pii/S0168192309000975 formel: wsf = exp (-delta * |h_x])
+;		 						(m 11)           ;;"Stomatal slope factor." 
+;		 	   			 		(b 0.01));;Leuning model for stomata conductance
+;		 	(Xn 1.0e-3);was 4.5e-3 potatoes and tomatoes
+;		 	;(TempEff (4.0 0.00) (5.0 1.00))
+;		 	(TempEff (10.0 0.01) (15.0 0.15) (20.0 0.55) (25.0 1.0) (30.0 1.10) (35.0 1.0));;This function is fitted!! by BGJ was 10dg C
+;		 	)
+;		  (Canopy (leaf_width (0 0.5[cm])(1 0.5[cm])(2 1.5[cm])); change of resistens between canopy and leaf 
+;		  	     (HvsDS   (0.00    1)  (0.09    3) (0.2    4) (0.6    22) (0.95  40) (1.00  70)   (2.00 80))
+;		  )	  
+   )
+			
+;; Farquahar photosynthesis	BGJ
+
+(defcrop "Winter Wheat JG_def1" "Winter Wheat JG"
+ (enable_N_stress false) ;Rubisco controls the N stress
+ (water_stress_effect none) ; wsf = 1
+ (Devel original
+	 	(EmrTSum  110));original 100
+ (Root (DptEmr 5[cm])
+ 	   (Rxylem 40)
+	   (MaxPen 150)
+	   (PenWaterFac (0 1) (0.989 1) (0.99 0) (1 0))
+;		(PenWaterFac (0 1) (0.95 1) (0.97 0) (1 0)) ;original Merete 
+	   )
+ (LeafPhot FC_C3
+ 	;(ABAeffect ABA-exp);;The effect of xylem ABA on stomata conductivity turned off
+ 	(Stomatacon Leuning (delta 0.142 [MPa^-1]); værdi ref Per http://www.sciencedirect.com/science/article/pii/S0168192309000975 formel: wsf = exp (-delta * |h_x])
+						(m 11)           ;;"Stomatal slope factor." 
+	   			 		(b 0.01));;Leuning model for stomata conductance
+	(Xn 1.0e-3);was 4.5e-3 potatoes and tomatoes
+	;(TempEff (4.0 0.00) (5.0 1.00))
+	(TempEff (10.0 0.01) (15.0 0.15) (20.0 0.55) (25.0 1.0) (30.0 1.10) (35.0 1.0));;This function is fitted!! by BGJ was 10dg C
+	)
+ (Canopy (leaf_width (0 0.5[cm])(1 0.5[cm])(2 1.5[cm])); change of resistens between canopy and leaf 
+ 	     (HvsDS   (0.00    1)  (0.09    3) (0.2    4) (0.6    22) (0.95  40) (1.00  70)   (2.00 80))
+ )	      
+)	
+		  
+;;; From MST project Notat vedr. tidlig saaning KJSJ
+(defcrop "Winter Wheat T" "Winter Wheat JG"
+ (Seed release
+ (initial_weight 124 [kg/ha])
+    (DM_fraction 87 [%])
+    (C_fraction 45 [%])
+    (N_fraction 2 [%])
+    (rate 0.1 [d^-1]))
+    ;(enable_N_stress false)(water_stress_effect none);giver afgroede potentialet da N og W stress er slaaet fra.
+    )
+    
+;;; From MST project Notat vedr. tidlig saaning KJSJ
+(defcrop "Winter Wheat N" "Winter Wheat JG" 
+ (Seed release
+ (initial_weight 180 [kg/ha])
+    (DM_fraction 87 [%])
+    (C_fraction 45 [%])
+    (N_fraction 2 [%])
+    (rate 0.1 [d^-1]))
+    ;(enable_N_stress false)(water_stress_effect none);giver afgroede potentialet da N og W stress er slaaet fra.
+    )
+        
+; Spring barley modified parametrisation
+
+(defcrop "Spring Barley2" "SB"
+)
+
+(defcrop "CoverRyegrass" "Ryegrass" 
+(Root (DptEmr 1)
+(MaxPen 3)                    
+(Rxylem 10000)
+(PenWaterFac (0 1) (0.95 1) (0.97 0) (1 0))
+)
+    ;(enable_N_stress false)(water_stress_effect none);giver afgroede potentialet da N og W stress er slaaet fra.
+    )
+
+			  			  			  
+;;;MANAGEMENT PARAMETERS mulige modeficeringer af afgroeder 
+;;; Plowing modefied to less mixing
+(defaction "myplowing" "plowing" 
+ (middle -5.0);was -9.0
+ (depth -25.0));was -18
+                     
+					 
+;;; SÆDSKIFTE opvarmningsperiode TAASTRUP inden forsøgsstart efterår 2009 og frem til efteråret 2014 og forsøgstart
+;; Spring Barley m udlæg setup.
+(defaction "SBarley_management2010" activity
+  (wait_mm_dd 11 25)
+  (myplowing)
+  (wait_mm_dd 4 18)  
+  (fertilize (NPK01 (weight 100 [kg N/ha])))
+  (seed_bed_preparation)
+  (sow "Spring Barley2")
+  (sow "Froegraes")
+  (wait (or (crop_ds_after "Spring Barley2" 2.0) ;Ripe
+            (mm_dd 9 1))) 
+  (harvest "Spring Barley2"(stub 10[cm])(stem 0.0[])(leaf 0.0 [])))
+
+;; Red fescue setup.
+(defaction "Red_fescue_management2011" activity
+  (wait_mm_dd 9 9) 
+  (fertilize (NPK01 (weight 89 [kg N/ha]))) 
+  (wait_mm_dd 3 23) 
+  (fertilize (NPK01 (weight 70 [kg N/ha]))) 
+  (wait (or (crop_ds_after "Froegraes" 2.0) ;Ripe
+            (mm_dd 9 1))) 
+  (cut "Froegraes"(stub 10[cm])(stem 0.0[])(leaf 0.0 [])))
+
+;; Winter Wheat setup.
+    (defaction "WWheat_management2012" activity
+    (wait_mm_dd 9 27)
+    (fertilize (kvaeg_gylle 
+     (first_year_utilization 70 [%]); gødskningsregler udnyttelsesgrad
+     (volatilization 0.15))
+     (equivalent_weight 30 [kg N/ha])) 
+    (myplowing)
+    (seed_bed_preparation)
+    (sow "Winter Wheat N")
+    (wait_mm_dd 4 5) 
+    (fertilize (NPK01 (weight 88 [kg N/ha])))
+    (wait_mm_dd 4 27) 
+    (fertilize (NPK01 (weight 80 [kg N/ha])))
+    (wait (or (crop_ds_after "Winter Wheat N" 2.0) ;Ripe
+              (mm_dd 9 1))) 
+    (harvest "Winter Wheat N"(stub 25[cm])(stem 0.0[])(leaf 0.0 [])))
+	
+;; Spring Barley setup 2013.
+(defaction "SBarley_management2013" activity
+  (wait_mm_dd 12 11)
+  (myplowing)
+  (wait_mm_dd 4 19)   
+  (fertilize (NPK01 (weight 103 [kg N/ha])))
+  (wait_mm_dd 5 7) 
+  (seed_bed_preparation)
+  (sow "Spring Barley2")
+  (wait (or (crop_ds_after "Spring Barley2" 2.0) ;Ripe
+            (mm_dd 9 1))) 
+  (harvest "Spring Barley2"(stub 20[cm])(stem 0.0[])(leaf 0.0 [])))  
+  
+;; Spring Barley setup 2014.
+(defaction "SBarley_management2014" activity
+  (wait_mm_dd 11 6)
+  (myplowing)
+  (wait_mm_dd 4 5)   
+  (seed_bed_preparation)
+  (sow "Spring Barley2")
+  (wait_mm_dd 4 16) 
+  (fertilize (NPK01 (weight 102 [kg N/ha])))
+  (wait (or (crop_ds_after "Spring Barley2" 2.0) ;Ripe
+            (mm_dd 9 1))) 
+  (harvest "Spring Barley2"(stub 20[cm])(stem 1.0[])(leaf 0.5 [])))
+  ;; Winter Rape setup 2017.
+(defaction "Wrape_management2017" activity; OBS ikke eksakte datoer eller gødskningsmængde
+  (wait_mm_dd 8 20)
+  (myplowing)
+  (wait_mm_dd 8 21)   
+  (seed_bed_preparation); sået mellem 15/8 og 22/8
+  (wait_mm_dd 8 22)   
+  (sow "Winter Rape; PA")
+  (wait_mm_dd 3 16) 
+  (fertilize (NPK01 (weight 182 [kg N/ha])))
+  (wait (or (crop_ds_after "Winter Rape" 2.0) ;Ripe
+              (mm_dd 8 15))) 
+  (harvest "Winter Rape"(stub 20[cm])(stem 1.0[])(leaf 0.5 []))
+  (sow "Ryegrass")
+  )
+  (defaction "SBarley_management2018" activity; OBS ikke eksakte datoer eller gødskningsmængde
+    (wait_mm_dd 12 20);øverste del 10/11-2017
+    (myplowing)
+    (wait_mm_dd 4 17)   
+    (seed_bed_preparation)
+    (wait_mm_dd 4 30)  
+	(fertilize (NPK01 (weight 55 [kg N/ha])))
+	(seed_bed_preparation) 
+    (sow "Spring Barley2")
+    (wait_mm_dd 5 1) 
+    (fertilize (NPK01 (weight 55 [kg N/ha])))
+    (wait (or (crop_ds_after "Spring Barley2" 2.0) ;Ripe
+                (mm_dd 8 15))) 
+    (harvest "Spring Barley2"(stub 20[cm])(stem 1.0[])(leaf 0.5 []))
+    (sow "Ryegrass")
+    )
+
+(defaction "OpvarmningDrainageTrialTaastrup" activity
+"SBarley_management2010"
+"Red_fescue_management2011"
+"WWheat_management2012"
+"SBarley_management2013"
+"SBarley_management2014"
+); kendt historik fra efterår 2009, kan evt gentages to gange og dermed sim start 2004 i stedet for 2009
+
+;;; Behandlinger i forsøg første år høstår 2015 Taastrup
+;; Led 3 Winter Wheat tidl saaet setup 2014-2016
+    (defaction "Norm+60_2015" activity
+    (wait_mm_dd 9 23)
+    (myplowing)
+    (seed_bed_preparation)
+    (sow "Winter Wheat N")
+    (wait_mm_dd 9 24) 
+    (fertilize (NPK01 (weight 62 [kg N/ha])))
+    (wait_mm_dd 3 18) 
+    (fertilize (NPK01 (weight 75 [kg N/ha])))
+    (wait_mm_dd 5 8) 
+    (fertilize (NPK01 (weight 100 [kg N/ha])))
+    (wait ;(or (crop_ds_after "Winter Wheat N" 2.0) ;Ripe
+              (mm_dd 8 14)) 
+    (harvest "Winter Wheat N"(stub 25[cm])(stem 0.0[])(leaf 0.0 []))) 
+	
+    (defaction "Norm_2015" activity
+    (wait_mm_dd 9 23)
+    (myplowing)
+    (seed_bed_preparation)
+    (sow "Winter Wheat N")
+    (wait_mm_dd 3 18) 
+    (fertilize (NPK01 (weight 75 [kg N/ha])))
+	;(sow "CoverRyegrass")
+    (wait_mm_dd 5 8) 
+    (fertilize (NPK01 (weight 100 [kg N/ha])))
+    (wait ;(or (crop_ds_after "Winter Wheat N" 2.0) ;Ripe
+              (mm_dd 8 14)) ;was 8 19
+    (harvest "Winter Wheat N"(stub 25[cm])(stem 0.0[])(leaf 0.0 [])))  
+    
+	(defaction "Norm_2016" activity
+    (wait_mm_dd 9 11)
+    (myplowing)
+    (seed_bed_preparation)
+    (sow "Winter Wheat T")
+    (wait_mm_dd 3 22) 
+    (fertilize (NPK01 (weight 80 [kg N/ha])))
+	;(sow "CoverRyegrass")
+    (wait_mm_dd 4 28) 
+    (fertilize (NPK01 (weight 100 [kg N/ha])))
+    (wait ;(or (crop_ds_after "Winter Wheat T" 2.0) ;Ripe
+              (mm_dd 8 15));was 8 19 
+    (harvest "Winter Wheat T"(stub 25[cm])(stem 0.0[])(leaf 0.0 [])))
+    
+	(defaction "HalfNorm_2016" activity
+    (wait_mm_dd 9 11)
+    (myplowing)
+    (seed_bed_preparation)
+    (sow "Winter Wheat T")
+    (wait_mm_dd 3 22) 
+    (fertilize (NPK01 (weight 80 [kg N/ha])))
+    (wait ;(or (crop_ds_after "Winter Wheat T" 2.0) ;Ripe
+              (mm_dd 8 15))
+    (harvest "Winter Wheat T"(stub 25[cm])(stem 0.0[])(leaf 0.0 [])))
+
+; Forsøgsled Taastrup:
+(defaction "treatm 1" activity
+;"OpvarmningDrainageTrialTaastrup"
+"Norm_2015"
+"Norm_2016"
+"Wrape_management2017"
+"SBarley_management2018"
+); Norm begge år
+
+(defaction "treatm 2" activity
+"OpvarmningDrainageTrialTaastrup"
+"Norm+60_2015"
+"Norm_2016"
+"Wrape_management2017"
+"SBarley_management2018") ; Norm +60 2015 norm 2016
+
+(defaction "treatm 3" activity
+"OpvarmningDrainageTrialTaastrup" 
+"Norm_2015"
+"HalfNorm_2016"
+"Wrape_management2017"
+"SBarley_management2018"); Norm 2015 halfnorm 2016
+
+(time 2013 3 13)
+;(timestep (seconds 5));
+;(timestep (minutes 5));
+(stop 2018 12 30)
+(manager activity "treatm 1")
+
+;; Selecting output 
+;;  Description that will occur in all output files
+;(description "Taastrup 29 final")
+(description "Taastrup 38 final")
+;;  Selecting column;
+;(column "Taastrup 29")	
+(column "Taastrup 36")
+ 
+(activate_output (after 2014 9 1 0))
+;(log_prefix "Results Frost/Plot29/svat/Test2/")
+;(log_prefix "Results Frost/Plot29/svat/Test1/")
+;(log_prefix "Results Frost/Plot29/svat/")
+(log_prefix "Results Frost/Plot38/svat/Test3/")
+;(log_prefix "Results Frost/Plot38/svat/Test2/")
+;(log_prefix "Results Frost/Plot38/svat/Test1/")
+;(log_prefix "Results Frost/Plot38/svat/")
+(log_time_columns year month mday hour minute second)
+(output 
+		("Weather"  (where "weather.csv"))
+		("Weather" (when true)(where "weather_hourly.csv"))
+		("Weather2" (when hourly)(where "weather_hourly2.csv"))
+    	("harvest" (where "harvest.csv"))
+        ("Crop Production" (when daily)(where "crop_prod.csv"))
+		("Crop Production" (when hourly)(where "crop_prod_hourly.csv"))
+		("Crop Photosynthesis" (when daily)(where "crop_photo.csv"));canopy as, minus stress med FORCES LAI
+;;      Water balance  
+        ("Field water" (when daily)(where "daily_FWB.csv"))  
+;;      Nitrogen balance 0-200 cm  
+		;("Field nitrogen" (to -300 [cm])(when daily)(where "Daily_FNB_to_300.csv")) 
+;;      Soil profile data
+		;("Soil nitrogen" (from 0) (to -300 [cm])(when daily)(where "Daily_SNB_0_300.csv"))	
+		;("Soil water" (to -300 [cm])(when daily)(where "Daily_SWB.csv"))  
+        ("Soil Water Content"       (	when hourly)(where "soil_water_content.csv"))
+        ("Groundwater"       (when hourly)(where "groundwater.dlf"))
+        ("Soil Water Potential (pF)"(when hourly)(where "soil_water_pF.dlf"))
+        ;("Soil Water Potential"(when daily)(where "soil_water_potential.csv"))
+        ;("Soil NO3 Concentration"   (when daily)(where "soil_NO3.csv"))
+        ("Soil Temperature"(when true)(where "soil_temperature.dlf"))
+		("Soil Temperature"(when true)(where "soil_temperature.csv"))
+		("Soil Heat Capacity"(when hourly)(where "soil_heat_capacity.csv"))
+		("Soil Heat Conductivity"(when hourly)(where "soil_heat_coductivity.csv"))
+		;("Soil Heat Flux"(when hourly)(where "soil_heat_flux.dlf"))
+		("Matrix Water Flux"(when hourly)(where "soil_water_flux.dlf"))
+		("Preferential Water Flux"(when hourly)(where "preferential_water_flux.dlf"))
+        ;("Carbon Balance"   (when yearly)(where "C_Bal.csv"))
+        ;("Root Density"(where "root_dens.csv"))
+		("SSOC"(when true)(where "SSOC.csv")(E_unit mm/h))
+		("SSOC"(when daily)(where "SSOC_daily.csv")(E_unit mm/h))
+		("SSOC"(when true)(where "SSOC.dlf")(E_unit mm/h))
+		;("SSOC2"(when true)(where "SSOC2.dlf"))
+)

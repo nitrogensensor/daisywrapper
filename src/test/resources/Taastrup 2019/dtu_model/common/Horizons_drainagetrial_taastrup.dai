@@ -1,0 +1,286 @@
+(defhorizon Danish numeric
+  "Classification used in some Danish sites."
+  (limits    2   20   50  200 2000 [um])
+)
+(defhorizon "Standard_horizon" Danish
+;	(quartz 70 [%])
+); umodificeret
+
+  ;;; Taastrup Drainage Trial
+  ; Plot 29 Maalte horisonter
+
+(defhorizon "29 Ap 0-17" Standard_horizon
+    (dry_bulk_density 1.35 [g/cm^3])
+    (humus 3.7 [%])
+    (fractions 7 14.5 8.5 31.4 34.9 [%])
+;    (hydraulic
+;    M_vG
+;	(l -1.34822)
+;	;; (m 0.224459)
+;	(n 1.28942)
+;	(alpha 0.044474 [cm^-1])
+;	(K_sat 2.23655 [cm/h])
+;	(Theta_sat 0.436837))
+); umodificeret
+(defhorizon "29 Ap 0-17 skorpe" Standard_horizon
+    (dry_bulk_density 1.6 [g/cm^3]);was 1.6
+    (humus 3.7 [%])
+    (fractions 7 14.5 8.5 31.4 34.9 [%])
+;    (hydraulic
+;    M_vG
+;	(l -1.34822)
+;	;; (m 0.224459)
+;	(n 1.28942)
+;	(alpha 0.03 [cm^-1])
+;	(K_sat 0.916 [cm/h])
+;	(Theta_sat 0.361))
+	
+	); umodificeret	
+(defhorizon "29 Ap 0-17 harrow pan" Standard_horizon
+    (dry_bulk_density 1.6 [g/cm^3])
+    (humus 3.7 [%])
+    (fractions 7 14.5 8.5 31.4 34.9 [%])
+	(hydraulic original (K_sat 0.15 [cm/h]));was 0.916
+;    (hydraulic
+;    M_vG
+;	(l -1.34822)
+;	;; (m 0.224459)
+;	(n 1.28942)
+;	(alpha 0.032 [cm^-1])
+;	(K_sat 0.15 [cm/h]);was 0.916
+;	(Theta_sat 0.361)
+;)	
+); umodificeret
+(defhorizon "29 Ap 17-32" Standard_horizon
+  (dry_bulk_density 1.49 [g/cm^3])
+  (humus 3.7 [%])
+  (fractions 7 14.5 8.5 31.4 34.9 [%]); umodificeret
+;  (hydraulic
+;   M_vG
+;  (l -1.34989)
+  ;; (m 0.216921)
+;  (n 1.27701)
+ ; (alpha 0.0458553 [cm^-1])
+;  (K_sat 0.94 [cm/h])
+;  (Theta_sat 0.397978)) 
+)
+(defhorizon "29 Ap 17-32 plowpan" Standard_horizon
+  (dry_bulk_density 1.6 [g/cm^3])
+  (humus 3.7 [%])
+  (fractions 7 14.5 8.5 31.4 34.9 [%])
+  (hydraulic original (K_sat 0.009 [cm/h]));was 0.94
+;  (hydraulic
+;   M_vG
+;  (l -1.34989)
+  ;; (m 0.216921)
+;  (n 1.27701)
+;  (alpha 0.0458553 [cm^-1])
+;  (K_sat 0.009 [cm/h]);was 0.94
+;  (Theta_sat 0.397978))
+)  ; umodificeret
+
+(defhorizon "29 B 32-47" Standard_horizon
+  (dry_bulk_density 1.68 [g/cm^3]);
+  (humus 0.9 [%])
+  (fractions 8.1 8.4 6.4 43.2 33.0 [%])
+  ; umodificeret
+)
+
+(defhorizon "29 C1 47-81" Standard_horizon
+  (dry_bulk_density 1.83 [g/cm^3]);
+  (humus 0.4 [%])
+  (fractions 6.9 6.5 5 46.4 34.8 [%])
+  ; umodificeret
+)
+
+(defhorizon "29 C2 81-100" Standard_horizon
+  (dry_bulk_density 1.87 [g/cm^3])
+  (humus 0.2 [%])
+  (fractions 2.9 2.9 1.4 22.9 69.7 [%])
+  ; umodificeret
+)
+
+(defhorizon "29 C3 100-180" Standard_horizon
+  (dry_bulk_density 1.87 [g/cm^3])
+  (humus 0.2 [%])
+  (fractions 7.5 2.9 1.4 22.9 65.1 [%])
+  ; 29 C2 81-100 modificeret til GLBS ved forøgelse af lerindhold
+)
+
+
+  ;;; Taastrup Drainage Trial
+  ; Plot 38 Maalte horisonter
+
+  (defhorizon "38 Ap 0-3 skorpe" Standard_horizon
+      (dry_bulk_density 1.6 [g/cm^3]);was 1.6 
+      (humus 3.5 [%])
+      (fractions 8 17 9.5 27.3 34.7 [%]); umodificeret
+;	  (hydraulic
+;	   M_vG
+ ;     (l -1.51124)
+      ;; (m 0.213186)
+  ;    (n 1.27095)
+   ;   (alpha 0.06 [cm^-1]);was0.029
+    ;  (K_sat 0.840145 [cm/h])
+     ; (Theta_sat 0.362166))     
+  )
+(defhorizon "38 Ap 0-15" Standard_horizon
+    (dry_bulk_density 1.44 [g/cm^3])
+    (humus 3.5 [%])
+;	(anisotropy 10)
+    (fractions 8 17 9.5 27.3 34.7 [%]); umodificeret
+;	(hydraulic original (K_sat 10 [cm/h]));was 0.63
+;    (hydraulic
+;	M_vG
+;	(l -1.48173)
+	;; (m 0.208593)
+;	(n 1.26357)
+;	(alpha 0.09 [cm^-1]);was 0.045
+;	(K_sat 10 [cm/h]);mod kj 
+;	(Theta_sat 0.415421))   
+)
+(defhorizon "38 Ap 0-15 harrowpan" Standard_horizon
+    (dry_bulk_density 1.6 [g/cm^3])
+    (humus 3.5 [%])
+	(hydraulic original (K_sat 0.00626732 [cm/h]));was 0.63
+    (fractions 8 17 9.5 27.3 34.7 [%]); umodificeret
+;    (hydraulic
+;	M_vG
+;	(l -1.51124)
+;; (m 0.20371)
+;	(n 1.25582)
+;	(alpha 0.07 [cm^-1]);was 0.034
+;	(K_sat 0.00626732 [cm/h]);was 0.63
+;	(Theta_sat 0.366576))    
+)
+(defhorizon "38 Ap 15-30" Standard_horizon
+  (dry_bulk_density 1.59 [g/cm^3])
+  (humus 3.5 [%])
+  (fractions 8 17 9.5 27.3 34.7 [%]); umodificeret
+;  (hydraulic
+;	M_vG
+;	(l -1.5094)
+	;; (m 0.204344)
+;	(n 1.25682)
+;	(alpha 0.07 [cm^-1]);was 0.035
+;	(K_sat 0.65089 [cm/h])
+;	(Theta_sat 0.369628))   
+)
+(defhorizon "38 Ap 15-30 plowpan" Standard_horizon
+  (dry_bulk_density 1.59 [g/cm^3])
+  (humus 3.5 [%])
+  (hydraulic original (K_sat 0.065 [cm/h]) ;as plowpan
+  );was 0.65 mod til plowpan 1/10
+  (fractions 8 17 9.5 27.3 34.7 [%]); umodificeret
+  
+)
+(defhorizon "38 E 30-45" Standard_horizon
+  (dry_bulk_density 1.73 [g/cm^3])
+  (humus 0.9 [%])
+  ;(hydraulic original (K_sat 10 [cm/h]))
+  (fractions 11 20.2 11.8 27.1 29 [%]); umodificeret
+   ;
+)
+(defhorizon "38 B 45-80" Standard_horizon
+  (dry_bulk_density 1.81 [g/cm^3])
+  (humus 1.1 [%])
+  (fractions 21.8 17.7 8.4 21.7 29.3 [%]); umodificeret
+  
+)
+(defhorizon "38 C1 80-100" Standard_horizon
+  (dry_bulk_density 1.87 [g/cm^3])
+  (humus 0.5 [%])
+  (fractions 16.9 18.8 7.6 23.6 32.6 [%]); umodificeret
+  
+)
+(defhorizon "38 C2 100-180" Standard_horizon
+  (dry_bulk_density 1.87 [g/cm^3])
+  (humus 0.2 [%])
+  (fractions 16.9 18.8 7.6 23.6 32.9 [%]); 38 80-100 Lerjord med reduceret org indhold
+  
+)
+(defhorizon "38 C3 180-300" Standard_horizon
+  (dry_bulk_density 2.07 [g/cm^3]);was 1.87 ændret grundet kalk
+  (humus 0.2 [%])
+  (fractions 16.9 18.8 7.6 23.6 32.9 [%]); 38 80-100 Lerjord med reduceret org indhold
+  
+)
+
+  ;;; Taastrup Drainage Trial
+  ; Plot 27 Maalte horisonter
+
+(defhorizon "27 Ap 0-17" Standard_horizon
+    (dry_bulk_density 1.37 [g/cm^3])
+    (humus 4.0 [%])
+    (fractions 5.4 14.3 7.0 35.0 34.3 [%]); umodificeret
+	)
+(defhorizon "27 Ap 17-35" Standard_horizon
+  (dry_bulk_density 1.40 [g/cm^3])
+  (humus 4.0 [%])
+  (fractions 5.4 14.3 7.0 35.0 34.3 [%]); umodificeret
+)
+(defhorizon "27 B 35-47" Standard_horizon
+  (dry_bulk_density 1.74 [g/cm^3])
+  (humus 0.8 [%])
+  (fractions 9.8 9.0 6.7 42.1 31.6 [%]); umodificeret
+)
+(defhorizon "27 C1 47-81" Standard_horizon
+  (dry_bulk_density 2.03 [g/cm^3])
+  (humus 0.5 [%])
+  (fractions 7.5 6.0 5.6 41.7 38.7 [%]); umodificeret
+)
+(defhorizon "27 C2 81-100" Standard_horizon
+  (dry_bulk_density 1.98 [g/cm^3])
+  (humus 0.3 [%])
+  (fractions 3.8 4.8 3.5 31.5 56.1 [%]); umodificeret
+)
+(defhorizon "27 C3 100-160" Standard_horizon
+  (dry_bulk_density 1.98 [g/cm^3])
+  (humus 0.2 [%])
+  (fractions 7.5 2.9 1.4 22.9 65.1 [%]); 29 C2 81-100 modificeret til GLBS ved forøgelse af lerindhold
+)
+(defhorizon "27 C4 160-300" Standard_horizon
+  (dry_bulk_density 1.98 [g/cm^3])
+  (humus 0.2 [%])
+  (fractions 22.5 17.1 9.7 28.5 22.0 [%]); 36 50-80 og 38 46-80 anvendt da dette også er katagoriseret Lerjord 
+)
+
+  ;;; Taastrup Drainage Trial
+  ; Plot 36 Maalte horisonter
+
+(defhorizon "36 Ap 0-15" Standard_horizon
+    (dry_bulk_density 1.59 [g/cm^3])
+    (humus 3.1 [%])
+    (fractions 9.6 16.6 8.0 29.3 33.4 [%]); umodificeret
+)
+(defhorizon "36 Ap 15-30" Standard_horizon
+  (dry_bulk_density 1.67 [g/cm^3])
+  (humus 3.1 [%])
+  (fractions 9.6 16.6 8.0 29.3 33.4 [%]); umodificeret
+)
+(defhorizon "36 E 30-50" Standard_horizon
+  (dry_bulk_density 1.68 [g/cm^3])
+  (humus 1.2 [%])
+  (fractions 16.8 18.2 9.3 28.3 26.2 [%]); umodificeret
+)
+(defhorizon "36 B 50-80" Standard_horizon
+  (dry_bulk_density 1.84 [g/cm^3])
+  (humus 1.2 [%])
+  (fractions 22.5 17.1 9.7 28.6 20.9 [%]); umodificeret
+)
+(defhorizon "36 C1 80-100" Standard_horizon
+  (dry_bulk_density 1.87 [g/cm^3]);was2.07
+  (humus 0.5 [%])
+  (fractions 9.1 16.2 16.7 30.7 26.8 [%]); umodificeret
+)
+(defhorizon "36 C2 100-180" Standard_horizon
+  (dry_bulk_density 1.87 [g/cm^3]);was2.07
+  (humus 0.2 [%])
+  (fractions 9.1 16.2 16.7 30.7 27.1 [%]); 36 80-100 FSBL med reduceret org indhold
+)
+(defhorizon "36 C3 180-300" Standard_horizon
+  (dry_bulk_density 2.07 [g/cm^3]);was2.07
+  (humus 0.2 [%])
+  (fractions 22.5 17.1 9.7 28.6 21.9 [%]); 36 50-80 defineret Lerjord med reduceret org indhold
+)
+

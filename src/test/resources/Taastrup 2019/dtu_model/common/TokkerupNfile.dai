@@ -1,0 +1,702 @@
+;; Including external library-files
+(path "/Users/bhw318/Documents/PhD/Maalingerne/Taastrup/DAISY/" &old)
+(input file "tillage.dai")
+(input file "crop.dai")
+(input file "dk-fertilizer.dai")
+(input file "log.dai")
+(input file "dk-grass.dai")
+(input file "OM_JG.dai")
+(input file "Denitrification_JG.dai")
+(input file "Winter Wheat JG.dai")
+(input file "Winter Wheat JG (BENCHMARK).dai")
+(input file "Springbarley_MES_23.dai")
+(input file "Horizons_drainagetrial_tokkerup.dai")
+
+;; Weather data
+(weather combine ;fra Per til anvendelse af to vejrfiler
+           (entry ((begin 2012 6 18 0); start for vejrfil #2 
+                   (end   2019 8 20 0); til slut vejrfil #2
+                   (source time 
+					       (offset (days 0) (hours 0) (minutes 30) (seconds 0) (microseconds 0))
+				           (source table (file "dk-tokkerup_hourly.dwf"));vejrfil #2 
+				   ))
+                  ((source table (file "dk-tokkerup.dwf"));vejrfil #1
+				  )
+		   )
+)		
+
+
+
+ (defcolumn "plot 2" default
+
+      (Soil (MaxRootingDepth 150 [cm]); was 150cm
+	  		(border	 -50 -100 -150 -200 -250[cm])
+            (horizons (  -10 [cm] "Ap (0-10)plot2")
+					  (  -30 [cm] "Ap (10-30)plot2")
+                      (  -60 [cm] "C1 (30-60)plot2")
+                      ( -125 [cm] "C2 (60-125)plot2")
+                      ( -170 [cm] "C2_2 (125-170)plot2")
+                      (  -190 [cm] "C3 (170-190)plot2")
+                      (  -250 [cm] "C4 (190-250)plot2")))
+                     
+ ;     (Chemistry multi
+  ;    	(combine DENITRIFICATION_JG))   
+     	
+      (Movement vertical
+                (Geometry
+                    (zplus 
+                    -0.5 -1 -1.5 -2 -2.5 -3 -3.5 -4 -4.5 
+                    -5 -6 -7 -8 -9 -10 
+                    -12 -14 -16 -18 -20 -22 -24 -26 -28
+                    -30 -35 -40 -45 -50
+                    -55 -60 -65 -70 -75 -80 -85 -90 -95 -100 
+              	   -110 -120 -130 -140 -150 -160 -170 -180 -190 -200 -210 -220 -230 -240 -250 [cm])))
+      (Drain lateral (L 16 [m]) (x 4.25[m]) (pipe_position -1.2 [m])         
+      		(pipe_outlet file "Aavand plot 2.txt"))
+     
+      (Groundwater aquitard
+      		(pressure_table file "Akvifertryk plot 2.txt") 
+           	(Z_aquitard 2.0 [m])(K_aquitard 0.033 [cm/h]))
+     
+      (OrganicMatter OM_JG (init (input 5385 [kg C/ha/y])
+      					(bioinc 1502 [kg C/ha/y])
+      					(root 1123 [kg C/ha/y])
+      					(end -20 [cm])))
+)
+
+(defcolumn "plot 3" default
+     
+     (Soil (MaxRootingDepth 150 [cm])
+           (border -30 [cm]
+           	   -75 [cm]
+           	   -130 [cm]
+           	   -250 [cm])
+           (horizons (  -10 [cm] "Ap (0-10)plot3")
+			   		 (  -30 [cm] "Ap (10-30)plot3")
+                     (  -75 [cm] "C1 Plot 3 MK")
+                     ( -130 [cm] "C2 Plot 3 MK")
+                     ( -250 [cm] "C3 Plot 3 MK")))
+     
+     (Chemistry multi
+     	(combine DENITRIFICATION_JG))
+     
+     
+     (Movement vertical
+                    (Geometry
+                        (zplus 
+                        -0.5 -1 -1.5 -2 -2.5 -3 -3.5 -4 -4.5 
+                        -5 -6 -7 -8 -9 -10 
+                        -12 -14 -16 -18 -20 -22 -24 -26 -28
+                        -30 -35 -40 -45 -50
+                        -55 -60 -65 -70 -75 -80 -85 -90 -95 -100 
+                        -110 -120 -130 -140 -150 -160 -170 -180 -190 -200 -210 -220 -230 -240 -250 [cm])))
+              
+	(Drain lateral (L 16 [m]) (x 4 [m]) (pipe_position -0.76 [m])
+	      		(pipe_outlet file "Aavand plot 3.txt"))    		
+             
+        (Groundwater aquitard
+     		(pressure_table file "Akvifertryk plot 3.txt")
+          	(Z_aquitard 2.00 [m])(K_aquitard 0.02 [cm/h])) 
+          
+     	(OrganicMatter OM_JG (init (input 5105 [kg C/ha/y])
+     					(bioinc 1339 [kg C/ha/y])
+     					(root 1054 [kg C/ha/y])
+     					(end -20 [cm]))))
+						
+(defcolumn "plot 4" default
+
+     (Soil (MaxRootingDepth 150 [cm])
+           (horizons (  -10 [cm] "Ap (0-10)plot4")
+			   	     (  -30 [cm] "Ap (10-30)plot4")
+                     (  -60 [cm] "C1 (30-60)plot4")
+                     (  -180 [cm] "C2 (60-180)plot4")
+                     ( -200 [cm] "C3 (180-200)plot4")
+                     (  -250 [cm] "C4 (200-250)plot4")))
+			         (Chemistry multi
+			         	(combine DENITRIFICATION_JG))   
+     	
+			         (Movement vertical
+			                   (Geometry
+			                       (zplus 
+			                       -0.5 -1 -1.5 -2 -2.5 -3 -3.5 -4 -4.5 
+			                       -5 -6 -7 -8 -9 -10 
+			                       -12 -14 -16 -18 -20 -22 -24 -26 -28
+			                       -30 -35 -40 -45 -50
+			                       -55 -60 -65 -70 -75 -80 -85 -90 -95 -100 
+			                 	   -110 -120 -130 -140 -150 -160 -170 -180 -190 -200 -210 -220 -230 -240 -250 [cm])))
+	 (Drain lateral (L 16 [m]) (x 4.25 [m]) (pipe_position -1.1 [m])
+	 (pipe_outlet file "Akvifertryk plot 4.txt"))    	
+     (Groundwater aquitard
+     		(pressure_table file "Akvifertryk plot 4.txt") 
+          	(Z_aquitard 2.0 [m])(K_aquitard 0.015 [cm/h]))
+     (OrganicMatter original (init (input 5653 [kg C/ha/y])
+          					(bioinc 1539 [kg C/ha/y])
+          					(root 1148 [kg C/ha/y])
+     					(end -20 [cm])))
+) 
+
+(defcolumn "plot 5" default
+     
+     (Soil (MaxRootingDepth 150 [cm])
+           (border -30 [cm]
+           	   -75 [cm]
+           	   -130 [cm]
+           	   -250 [cm])
+           (horizons (  -10 [cm] "Ap (0-10)plot5")
+			   		 (  -30 [cm] "Ap (10-30)plot5")
+                     (  -75 [cm] "C1 Plot 5 MK")
+                     ( -130 [cm] "C2 Plot 5 MK")
+                     ( -250 [cm] "C3 Plot 5 MK")))
+     
+     (Chemistry multi
+     	(combine DENITRIFICATION_JG))
+     
+     
+     (Movement vertical
+                    (Geometry
+                        (zplus 
+                        -0.5 -1 -1.5 -2 -2.5 -3 -3.5 -4 -4.5 
+                        -5 -6 -7 -8 -9 -10 
+                        -12 -14 -16 -18 -20 -22 -24 -26 -28
+                        -30 -35 -40 -45 -50
+                        -55 -60 -65 -70 -75 -80 -85 -90 -95 -100 
+                        -110 -120 -130 -140 -150 -160 -170 -180 -190 -200 -210 -220 -230 -240 -250 [cm])))
+              
+	(Drain lateral (L 16 [m]) (x 4 [m]) (pipe_position -0.75 [m]))    		
+             
+        (Groundwater aquitard
+     		(pressure_table file "Akvifertryk plot 5.txt")
+          	(Z_aquitard 2.00 [m])(K_aquitard 0.015 [cm/h])) 
+          
+     	(OrganicMatter OM_JG (init (input 5105 [kg C/ha/y])
+     					(bioinc 1339 [kg C/ha/y])
+     					(root 1054 [kg C/ha/y])
+     					(end -20 [cm])))
+)						
+ 
+;;  Parameterisation of column (Plot6)
+(defcolumn "plot 6" default
+	  		(Surface ;(temperature_change_rate -1 [h^-1])
+ 				(EpFactor 0.5 []);was 1. and constant 0.65 Finn Plauborg
+				(EpFactor_SWE 	(0.0 [pF] 	1.0  []) (1.0 [pF] 	1.0  [])(2.0 [pF] 	1.0 [])(3.0 [pF]	0.5  [])(4.0 [pF] 	0.4  [])(5.0 [pF] 	0.3  [])
+   				;(0.0 [pF] 	0.65  []) (1.0 [pF] 	0.65  [])(2.0 [pF] 	0.65 [])(3.0 [pF]	0.65  [])(4.0 [pF] 	0.65  [])(5.0 [pF] 	0.65  [])
+				 )
+           	  	;(DetentionCapacity 2 [mm])
+				);overflade afstrømning
+     (Soil (MaxRootingDepth 50 [cm]);was 150
+           (border -30 -50 -75 -100  -130 -150 -200 -250[cm])
+           (horizons (  -10 [cm] "Ap (0-10)plot6")
+			   		 (  -30 [cm] "Ap (10-30)plot6")
+                     (  -75 [cm] "C1 Plot 6 MK")
+                     ( -130 [cm] "C2 Plot 6 MK")
+                     ( -250 [cm] "C3 Plot 6 MK")))
+     
+ ;    (Chemistry multi
+  ;   	(combine DENITRIFICATION_JG))
+     
+     
+     (Movement vertical
+                    (Geometry
+                        (zplus 
+                        -0.5 -1 -1.5 -2 -2.5 -3 -3.5 -4 -4.5 
+                        -5 -6 -7 -8 -9 -10 
+                        -12 -14 -16 -18 -20 -22 -24 -26 -28
+                        -30 -35 -40 -45 -50
+                        -55 -60 -65 -70 -75 -80 -85 -90 -95 -100 
+                        -110 -120 -130 -140 -150 -160 -170 -180 -190 -200 -210 -220 -230 -240 -250 [cm]))
+	
+	(Tertiary original
+                  (macro default
+                         (distribution (-170 [cm] 100 [%]); macro porer fordelingen kan måske forbedres....
+                                       ( -135 [cm]  80 [%]);was 90
+									   ( -100 [cm]  40 [%]);was 89
+									   ( -50 [cm]   1 [%]) 
+                                       (   0 [cm]   0 [%]))
+						(pressure_initiate -10 [cm]); -3
+						(pressure_end -30 [cm])))
+	); -30	
+						          
+	(Drain lateral (L 16 [m]) (x 4.25 [m]) (pipe_position -0.66 [m]))    		
+             
+        (Groundwater flux 0 );aquitard
+;     		(pressure_table file "Akvifertryk plot 6.txt")
+ ;         	(Z_aquitard 2.00 [m])(K_aquitard 0.00000018 [cm/h]));was 0.018 
+          
+     	(OrganicMatter OM_JG (init (input 5105 [kg C/ha/y])
+     					(bioinc 1339 [kg C/ha/y])
+     					(root 1054 [kg C/ha/y])
+     					(end -20 [cm]))))
+
+
+
+(defaction "myplowing" "plowing" 
+ (middle -5.0);was -9.0
+ (depth -25.0));was -18
+ 
+; CROP PARAMETRISATION
+
+    (defcrop "Winter Rape; PA" "Winter Rape"
+      (Root (MxNH4Up     2.5E-8)
+            (MxNO3Up     2.5E-8)
+  		  (MaxPen 200 [cm])
+  		  (Rxylem 25);was 10
+  		  (PenWaterFac (0 1) (0.989 1) (0.99 0) (1 0))
+  		  ) 
+     )
+			
+  (defcrop "Winter Wheat JG_def1" "Winter Wheat JG (BENCHMARK)"
+;   (enable_N_stress false) ;Rubisco controls the N stress
+;   (water_stress_effect none) ; wsf = 1
+   (LeafPhot original
+	   (TempEff (0.0  0.00) (4.0 0.1) (8.0 0.38) (12.0  0.76) (16.0  1.18) (20.0  1.60) (24.0 1.90) (28.0 2.00) (32.0 1.82) (34.0 1.58) (35.0 1.42) (40.0 0.1))); Jacobs foulum parameterisering. 
+   (Devel original
+  	 	(EmrTSum  110));original 100
+   (Root (DptEmr 5[cm])
+;   	   (Rxylem 40)
+ ; 	   (MaxPen 150))
+ 	   (PenWaterFac (0 1) (0.989 1) (0.99 0) (1 0))
+  	 )
+	)	      	
+		  
+  ;;; From MST project Notat vedr. tidlig saaning KJSJ
+  (defcrop "Winter Wheat T"  "Winter Wheat JG_def1"
+   (Seed release
+   (initial_weight 124 [kg/ha])
+      (DM_fraction 87 [%])
+      (C_fraction 45 [%])
+      (N_fraction 2 [%])
+      (rate 0.4 [d^-1]))
+      (enable_N_stress false)(water_stress_effect none);giver afgroede potentialet da N og W stress er slaaet fra.
+      )
+    
+  ;;; From MST project Notat vedr. tidlig saaning KJSJ
+  (defcrop "Winter Wheat N" "Winter Wheat JG_def1" 
+   (Seed release
+   (initial_weight 100 [kg/ha])
+      (DM_fraction 87 [%])
+      (C_fraction 45 [%])
+      (N_fraction 2 [%])
+      (rate 0.4 [d^-1]))
+      (enable_N_stress false)(water_stress_effect none);giver afgroede potentialet da N og W stress er slaaet fra.
+      )
+
+	  (defcrop MySB "SB"; Meretes
+	    ;; Phenology.
+		(enable_N_stress false)(water_stress_effect none)
+	    (Root (MaxPen 110))
+
+	    ;; Photosynthesis.
+	    (LeafPhot original 
+	        (Fm 3.5 [g CO2/m^2/h])
+	        (Qeff   0.05 [(g CO2/m^2/h)/(W/m^2)]))
+	     )                     
+
+; CROP MANAGEMENT
+
+;; Winter rape setup mark 5 2000.
+(defaction "Wrape_management2000" activity
+  (wait_mm_dd 8 17)
+  (disk_harrowing)
+  (sow "Winter Rape; PA")
+  (wait_mm_dd 9 16) 
+    (fertilize (AmmoniumNitrate (weight 32 [kg N/ha])))
+  (wait_mm_dd 3 17) 
+  (fertilize (AmmoniumNitrate (weight 142 [kg N/ha])))
+  (wait (or (crop_ds_after "Winter Rape; PA" 2.0) ;Ripe
+            (mm_dd 9 1))) 
+  (harvest "Winter Rape; PA"(stub 8[cm])(stem 0.0[])(leaf 0.0 [])))
+  
+;; Winter Wheat setup mark 5 2001.
+(defaction "WWheat_management2001" activity
+  (wait_mm_dd 9 7)
+  (disk_harrowing)
+  (wait_mm_dd 9 10)
+  (disk_harrowing)
+  (wait_mm_dd 9 17)
+  (sow "Winter Wheat N")
+  (wait_mm_dd 3 4)
+    (fertilize (NPK01 (weight 15 [kg N/ha])))
+    (wait_mm_dd 4 9) 
+    (fertilize (AmmoniumNitrate (weight 38 [kg N/ha])))
+    (wait_mm_dd 5 14) 
+    (fertilize (AmmoniumNitrate (weight 117 [kg N/ha])))
+    (wait_mm_dd 6 18) 
+    (fertilize (AmmoniumNitrate (weight 38 [kg N/ha])))
+  (wait (or (crop_ds_after "Winter Wheat N" 2.0) ;Ripe
+            (mm_dd 9 1))) 
+  (harvest "Winter Wheat N"(stub 8[cm])(stem 0.0[])(leaf 0.0 [])))
+  
+  ;; Winter Wheat setup mark 5 2002.
+  (defaction "WWheat_management2002" activity
+    (wait_mm_dd 10 12)
+    (plowing)
+    (wait_mm_dd 10 14)
+    (seed_bed_preparation)
+    (sow "Winter Wheat N")
+      (wait_mm_dd 3 26) 
+      (fertilize (AmmoniumNitrate (weight 49 [kg N/ha])))
+    (wait_mm_dd 4 2)
+          (fertilize (NPK01 (weight 13 [kg N/ha])))
+    (wait_mm_dd 5 3) 
+      (fertilize (AmmoniumNitrate (weight 110 [kg N/ha])))
+      (wait_mm_dd 6 18) 
+      (fertilize (AmmoniumNitrate (weight 65 [kg N/ha])))
+    (wait (or (crop_ds_after "Winter Wheat N" 2.0) ;Ripe
+              (mm_dd 9 1))) 
+  (harvest "Winter Wheat N"(stub 8[cm])(stem 0.0[])(leaf 0.0 [])))
+  
+  ;; Winter Wheat setup mark 5 2003.
+    (defaction "WWheat_management2003" activity
+      (wait_mm_dd 9 29)
+      (plowing)
+      (wait_mm_dd 9 30)
+      (seed_bed_preparation)
+      (sow "Winter Wheat N")
+        (wait_mm_dd 3 22) 
+        (fertilize (AmmoniumNitrate (weight 126 [kg N/ha])))
+      (wait_mm_dd 5 5) 
+        (fertilize (AmmoniumNitrate (weight 115 [kg N/ha])))
+        (wait_mm_dd 6 1) 
+        (fertilize (AmmoniumNitrate (weight 60 [kg N/ha])))
+      (wait (or (crop_ds_after "Winter Wheat N" 2.0) ;Ripe
+                (mm_dd 9 1))) 
+  (harvest "Winter Wheat N"(stub 8[cm])(stem 0.0[])(leaf 0.0 [])))
+  
+  ;; Pea setup mark 5 2004.
+  (defaction "Pea_management2004" activity
+    (wait_mm_dd 11 12)
+    (plowing)
+    (wait_mm_dd 4 19) 
+    (seed_bed_preparation)
+    (wait_mm_dd 5 6) 
+    (seed_bed_preparation)
+    (wait_mm_dd 5 28) 
+    (seed_bed_preparation)
+    (wait_mm_dd 6 4) 
+    (seed_bed_preparation)
+    (sow "Pea")
+    (wait (or (crop_ds_after "Pea" 2.0) ;Ripe
+              (mm_dd 8 20))) 
+    (harvest "Pea"(stub 8[cm])(stem 0.0[])(leaf 0.0 [])))
+  
+  
+  ;; Winter Wheat setup mark 5 2005.
+      (defaction "WWheat_management2005" activity
+        (wait_mm_dd 9 23)
+        (plowing)
+        (wait_mm_dd 9 25)
+        (seed_bed_preparation)
+        (sow "Winter Wheat N")
+          (wait_mm_dd 3 31) 
+          (fertilize (AmmoniumNitrate (weight 74 [kg N/ha])))
+        (wait_mm_dd 5 1) 
+          (fertilize (AmmoniumNitrate (weight 98 [kg N/ha])))
+        (wait (or (crop_ds_after "Winter Wheat N" 2.0) ;Ripe
+                  (mm_dd 9 1))) 
+  (harvest "Winter Wheat N"(stub 8[cm])(stem 0.0[])(leaf 0.0 [])))
+  
+  ;; Winter Wheat setup mark 5 2006.
+      (defaction "WWheat_management2006" activity
+        (wait_mm_dd 8 18)
+        (stubble_cultivation)
+        (wait_mm_dd 9 15)
+        (plowing)
+        (seed_bed_preparation)
+        (sow "Winter Wheat N")
+          (wait_mm_dd 3 1) 
+          (fertilize (AmmoniumNitrate (weight 108 [kg N/ha])))
+        (wait_mm_dd 5 1) 
+          (fertilize (AmmoniumNitrate (weight 98 [kg N/ha])))
+        (wait (or (crop_ds_after "Winter Wheat N" 2.0) ;Ripe
+                  (mm_dd 9 1))) 
+  (harvest "Winter Wheat N"(stub 8[cm])(stem 0.0[])(leaf 0.0 [])))
+
+ ;; Winter Barley setup mark 5 2007.
+(defaction "WBarley_management2007" activity
+  (wait_mm_dd 8 20)
+  (disk_harrowing)
+  (wait_mm_dd 8 24)
+    (fertilize (novogro-30_slam (weight 18.5 [Mg w.w./ha])))
+  (wait_mm_dd 9 14)
+  (plowing)
+  (seed_bed_preparation)
+  (sow "Winter Barley")
+    (wait_mm_dd 3 16) 
+    (fertilize (AmmoniumNitrate (weight 29 [kg N/ha])))
+    (wait_mm_dd 3 21) 
+    (fertilize (AmmoniumNitrate (weight 44 [kg N/ha])))
+    (wait_mm_dd 4 13) 
+    (fertilize (AmmoniumNitrate (weight 62 [kg N/ha])))
+  (wait (or (crop_ds_after "Winter Barley" 2.0) ;Ripe
+            (mm_dd 9 1))) 
+  (harvest "Winter Barley"(stub 8[cm])(stem 0.0[])(leaf 0.0 [])))
+ 
+
+;; Spring Barley setup mark 5 2008.
+(defaction "SBarley_management2008" activity
+  (wait_mm_dd 9 15)
+  (stubble_cultivation)
+  (wait_mm_dd 12 20)
+  (plowing)
+  (wait_mm_dd 4 1) 
+    (fertilize (NPK01 (weight 12 [kg N/ha])))
+  (wait_mm_dd 4 16) 
+  (fertilize (Ammonia (weight 102 [kg N/ha])))
+  (wait_mm_dd 4 16) 
+  (seed_bed_preparation)
+  (sow "MySB")
+  (wait (or (crop_ds_after "MySB" 2.0) ;Ripe
+            (mm_dd 8 15))) 
+  (harvest "MySB"(stub 8[cm])(stem 0.0[])(leaf 0.0 [])))
+  
+  ;; Spring Barley setup mark 5 2009.
+  (defaction "SBarley_management2009" activity
+    (wait_mm_dd 8 15)
+    (stubble_cultivation)
+    (wait_mm_dd 11 20)
+    (plowing)
+    (wait_mm_dd 4 7) 
+    (fertilize (Ammonia (weight 119 [kg N/ha])))
+    (wait_mm_dd 4 7) 
+    (seed_bed_preparation)
+    (sow "MySB")
+    (wait (or (crop_ds_after "MySB" 2.0) ;Ripe
+              (mm_dd 9 8))) 
+  (harvest "MySB"(stub 8[cm])(stem 0.0[])(leaf 0.0 [])))
+  
+  ;; Spring Barley setup mark 5 2010.
+  (defaction "SBarley_management2010" activity
+    (wait_mm_dd 12 1)
+    (plowing)
+    (wait_mm_dd 4 15) 
+    (fertilize (Ammonia (weight 101 [kg N/ha])))
+    (wait_mm_dd 4 16) 
+    (seed_bed_preparation)
+    (sow "MySB")
+    (sow "Grass")
+    (fertilize (NPK01 (weight 18 [kg N/ha])))
+    (wait (or (crop_ds_after "MySB" 2.0) ;Ripe
+              (mm_dd 8 24))) 
+    (harvest "MySB"(stub 8[cm])(stem 0.0[])(leaf 0.0 []))
+  (wait_mm_dd 11 1)
+ (harvest "Grass" (stub 8[cm])(stem 0.0[])(leaf 0.0 [])))
+ 
+ ;; Spring Barley setup mark 5 2011.
+ (defaction "SBarley_management2011" activity
+   (wait_mm_dd 4 9)
+   (disk_harrowing)
+   (wait_mm_dd 4 11) 
+   (fertilize (Ammonia (weight 121 [kg N/ha])))
+   (wait_mm_dd 4 11) 
+   (disk_harrowing)
+   (sow "MySB")
+   (fertilize (NPK01 (weight 11 [kg N/ha])))
+   (wait (or (crop_ds_after "MySB" 2.0) ;Ripe
+             (mm_dd 9 1))) 
+  (harvest "MySB"(stub 8[cm])(stem 0.0[])(leaf 0.0 [])))
+
+;; Spring Barley setup mark 5 2012.
+(defaction "SBarley_management2012" activity
+  (wait_mm_dd 3 31)
+  (plowing)
+  (wait_mm_dd 4 2) 
+  (fertilize (Ammonia (weight 93 [kg N/ha])))
+  (wait_mm_dd 4 3) 
+  (seed_bed_preparation)
+  (sow "MySB")
+  (fertilize (NPK01 (weight 9 [kg N/ha])))
+  (wait_mm_dd 5 22) 
+  (fertilize (AmmoniumNitrate (weight 9 [kg N/ha])))
+  (wait (or (crop_ds_after "MySB" 2.0) ;Ripe
+            (mm_dd 8 16))) 
+  (harvest "MySB"(stub 8[cm])(stem 0.0[])(leaf 0.0 [])))
+
+;; Winter Wheat setup mark 5 2013.
+(defaction "Wwheat_management2013" activity
+  (wait_mm_dd 9 20)
+  (disk_harrowing) 
+  (seed_bed_preparation)
+  (sow "Winter Wheat N")
+  (wait_mm_dd 3 5)
+  (fertilize (NPK01 (weight 17 [kg N/ha])))
+  (wait_mm_dd 4 18) 
+  (fertilize (NPK01 (weight 77 [kg N/ha])))
+  (wait_mm_dd 5 15) 
+  (fertilize (NPK01 (weight 80 [kg N/ha])))
+  (wait (or (crop_ds_after "Winter Wheat N" 2.0) ;Ripe
+  (mm_dd 8 9))) 
+  (harvest "Winter Wheat N"(stub 8[cm])(stem 0.0[])(leaf 0.0 [])))
+
+;; Winter Wheat setup mark 5 2014.
+  (defaction "Wwheat_management2014" activity
+    (wait_mm_dd 8 16)
+    (disk_harrowing)
+    (wait_mm_dd 9 15)
+    (stubble_cultivation)
+    (wait_mm_dd 9 22)
+    (seed_bed_preparation)
+    (sow "Winter Wheat N")
+    (wait_mm_dd 3 5)
+    (fertilize (NPK01 (weight 17 [kg N/ha])))
+   ; (wait_mm_dd 4 1)
+   ; (cut "Winter Wheat N" (stub 1.4 [cm])(stem 0.0[])(leaf 0.0 []))
+    (wait_mm_dd 4 18) 
+    (fertilize (NPK01 (weight 77 [kg N/ha])))
+    (wait_mm_dd 5 15) 
+    (fertilize (NPK01 (weight 80 [kg N/ha])))
+    (wait (or (crop_ds_after "Winter Wheat N" 2.0) ;Ripe
+    (mm_dd 8 9))) 
+    (harvest "Winter Wheat N"(stub 8[cm])(stem 0.0[])(leaf 0.0 [])))
+
+    
+;; Spring Barley setup mark 5 2015.
+  (defaction "SBarley_management2015" activity
+    (wait_mm_dd 8 10)
+    (disk_harrowing)
+    (wait_mm_dd 9 8)
+    (stubble_cultivation)
+    (wait_mm_dd 4 8)
+    (disk_harrowing)
+    (wait_mm_dd 4 9)
+    (disk_harrowing)
+    (wait_mm_dd 4 11) 
+    (seed_bed_preparation)
+    (sow "MySB")
+    (wait_mm_dd 4 26) 
+    (fertilize (NPK01 (weight 140 [kg N/ha])))
+    (wait (or (crop_ds_after "MySB" 2.0) ;Ripe
+              (mm_dd 8 28))) 
+  (harvest "MySB"(stub 8[cm])(stem 0.0[])(leaf 0.0 [])))
+
+;; Winter Wheat setup mark 5 2016.
+  (defaction "Wwheat_management2016" activity
+    (wait_mm_dd 8 31)
+    (disk_harrowing)
+    (wait_mm_dd 9 29)
+    (disk_harrowing)
+    (wait_mm_dd 9 30)
+    (seed_bed_preparation)
+    (sow "Winter Wheat N")
+   (wait_mm_dd 4 12) 
+   (fertilize (NPK01 (weight 180 [kg N/ha])))
+    (wait (or (crop_ds_after "Winter Wheat N" 2.0) ;Ripe
+    (mm_dd 8 17))) 
+    (harvest "Winter Wheat N"(stub 8[cm])(stem 0.0[])(leaf 0.0 [])))
+
+	;; Winter Wheat setup mark 5 2017. 
+	  (defaction "Wwheat_management2017" activity
+        (wait_mm_dd 8 27)
+        (stubble_cultivation)
+		(wait_mm_dd 9 29)
+	    (disk_harrowing)
+	    (wait_mm_dd 9 30)
+	    (seed_bed_preparation)
+	    (sow "Winter Wheat N")
+	   (wait_mm_dd 3 30) ;KJ fertilization 30/3-2017
+	   (fertilize (NPK01 (weight 90 [kg N/ha])))
+	   (fertilize (NPK01 (weight 90 [kg N/ha])))
+	    (wait (or (crop_ds_after "Winter Wheat N" 2.0) ;Ripe
+	    (mm_dd 8 4))) 
+	    (harvest "Winter Wheat N"(stub 8[cm])(stem 0.0[])(leaf 0.0 []))
+        (wait_mm_dd 8 10)
+        (stubble_cultivation)
+		(wait_mm_dd 10 20)
+		(fertilize (NPK01 (weight 100 [kg N/ha]))); tracer N
+		)
+		
+  	 	;; Spring barley setup mark 5 2018.
+	  (defaction "SBarley_management2018" activity
+  		(wait_mm_dd 4 18)
+  	    (disk_harrowing)
+		(wait_mm_dd 4 22)
+  	    (seed_bed_preparation)
+  	    (sow "MySB")
+  	   (wait_mm_dd 5 1) ;KJ fertilization date
+	    (fertilize (NPK01 (weight 70 [kg N/ha])))
+	   (wait_mm_dd 7 1) ;manglende optag grundet tørke
+  	   (fertilize (NPK01 (weight 70 [kg N/ha])))
+  	    (wait (or (crop_ds_after "MySB" 2.0) ;Ripe
+  	    (mm_dd 8 9))) 
+  	    (harvest "MySB"(stub 8[cm])(stem 0.0[])(leaf 0.0 [])))
+
+		;; Winter Wheat setup mark 5 2019. 
+		  (defaction "Wwheat_management2019" activity
+     		(wait_mm_dd 8 11)
+	        (disk_harrowing)
+	        (wait_mm_dd 9 13)
+	        (stubble_cultivation)
+		    (wait_mm_dd 9 14)
+		    (seed_bed_preparation)
+		    (sow "Winter Wheat N")
+   		    (wait_mm_dd 4 3) 
+		    (fertilize (NPK01 (weight 88 [kg N/ha])))
+		    (wait_mm_dd 4 28)
+		    (fertilize (NPK01 (weight 78 [kg N/ha])))
+		    (wait_mm_dd 5 6)
+		    (fertilize (NPK01 (weight 43 [kg N/ha])))
+		    (wait (or (crop_ds_after "Winter Wheat N" 2.0) ;Ripe
+		    (mm_dd 8 22))) 
+		    (harvest "Winter Wheat N"(stub 8[cm])(stem 0.0[])(leaf 0.0 [])))
+
+
+(defaction "mark52000_2009" activity
+"Wrape_management2000"
+"WWheat_management2001"
+"WWheat_management2002"
+"WWheat_management2003"
+"Pea_management2004"
+"WWheat_management2005"
+"WWheat_management2006"
+"WBarley_management2007"
+"SBarley_management2008"
+"SBarley_management2009"
+)
+(defaction "mark52010_2019" activity
+"SBarley_management2010"
+"SBarley_management2011"
+"SBarley_management2012"
+"Wwheat_management2013"
+"Wwheat_management2014"
+"SBarley_management2015"
+"Wwheat_management2016"
+"Wwheat_management2017"
+"SBarley_management2018"
+"Wwheat_management2019"
+)
+
+(manager activity
+  "mark52010_2019")
+
+  (time 2009 8 13)
+  (stop 2019 8 18)
+
+;;  Selecting column
+(column "plot 6")
+
+;; Selecting output 
+;;  Description that will occur in all output files
+(description "Plot 6")
+
+(activate_output (after 2011 8 1))
+;(log_prefix "SIM Results/Plot2T/"); til Y article
+;(log_prefix "SIM Results/N article/Plot2T/")
+;(log_prefix "SIM Results/N article/Alternative/Plot6T/")
+;(log_prefix "SIM Results/N article/Alternative2/Plot6T/")
+(log_prefix "SIM Results/N article/Plot6T/")
+(output 
+    	("harvest" (where "harvest.csv");(print_header false) (print_dimension false)
+		)
+		("Weather" (when monthly)(where "weather.csv"))
+        ("Crop Production" (when daily)(where "crop_prod.dlf"))
+        ("Groundwater"       (when daily)(where "groundwater.csv"))
+		("Soil Water Potential (pF)"(when daily)(where "soil_water_pF.dlf"))
+;      Nitrogen balance 0-200 cm  
+		("Field nitrogen" (from  0[cm]) (to -200 [cm])(when weekly)(where "Daily_FNB_to_200.csv"))
+;;      Soil profile data
+		("Soil nitrogen" (from 0[cm]) (to -50 [cm])(when weekly)(where "Daily_SNB_0_50.csv"))
+		("Soil nitrogen" (from -50[cm]) (to -100 [cm])(when weekly)(where "Daily_SNB_50_100.csv"))
+		("Soil nitrogen" (from -100[cm]) (to -150 [cm])(when weekly)(where "Daily_SNB_100_150.csv"))
+		("Soil nitrogen" (from -150[cm]) (to -200 [cm])(when weekly)(where "Daily_SNB_150_200.csv"))		
+;;      Water balance  
+		("Field water" (from  0[cm]) (to -250 [cm])(when daily)(where "daily_FWB.csv"))  
+)
