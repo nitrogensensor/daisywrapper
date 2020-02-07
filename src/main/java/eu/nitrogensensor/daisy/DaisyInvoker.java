@@ -27,7 +27,7 @@ public class DaisyInvoker {
 
         Process process = new ProcessBuilder(new File(prop.getProperty("daisy.executable.path")).getAbsolutePath(), inputFilePath)
                 .inheritIO()
-                .directory(new File("/home/j/Projekter/NitrogenSensor/gitlab/nitrogensensor/daisy/src/test/resources/Taastrup 2019/dtu_model"))
+                .directory(new File("daisy/src/test/resources/Taastrup 2019/dtu_model"))
                 .start();
         process.waitFor();
         exitValue = process.exitValue();

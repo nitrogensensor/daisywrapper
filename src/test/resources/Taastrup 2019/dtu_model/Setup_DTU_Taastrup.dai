@@ -1,11 +1,7 @@
 ;;; setup.dai -- Bakkeg�rden experiment.
 
-
-;; (path "." "/opt/daisy/sample" "/opt/daisy/lib" "/home/j/Projekter/NitrogenSensor/gitlab/nitrogensensor/daisy/src/test/resources/Taastrup_2019/dtu_model" "/home/j/Projekter/NitrogenSensor/gitlab/nitrogensensor/daisy/src/test/resources/Taastrup_2019/dtu_model/common")
-;; (directory "/home/j/Projekter/NitrogenSensor/gitlab/nitrogensensor/daisy/src/test/resources/Taastrup_2019/dtu_model")
-
-(path "." "/opt/daisy/sample" "/opt/daisy/lib" "." "./common")
-(directory ".")
+(path "/opt/daisy/sample" "/opt/daisy/lib" "." "./common")
+;; (directory ".")
 
 
 (input file "log.dai")
@@ -315,7 +311,12 @@
 )
 
 (defprogram taastrup batch
-  (run (Mark21_hnlw) (Mark21_lnlw) (Mark21_lnhw) (Mark21_hnhw))
+  (run ;;; Alle 4 kørsler: user	1m9,645s
+  (Mark21_hnlw) ;; real	0m17,016s
+;;  (Mark21_lnlw) ;; user	0m19,061s
+;;  (Mark21_lnhw) ;; user	0m17,404s
+;;  (Mark21_hnhw) ;; user	0m17,095s
+  )
 )
 
 (run taastrup)
