@@ -6,11 +6,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Erstatning {
-    public final String regexp;
+    public final String søgestreng;
     public final String erstatning;
 
-    public Erstatning(String regexp, String erstatning) {
-        this.regexp = regexp;
+    public Erstatning(String søgestreng, String erstatning) {
+        this.søgestreng = søgestreng;
         this.erstatning = erstatning;
     }
 
@@ -21,15 +21,15 @@ public class Erstatning {
         return scriptIndhold;
     }
 
-    String erstat(String scriptIndhold) throws IOException {
+    public String erstat(String scriptIndhold) throws IOException {
         // undgå replaceAll, da det kan være det erstattede indhold bliver erstattet igen
         //String scriptIndholdNy = scriptIndhold.replaceFirst(regexp, erstatning);
 
 
-        Matcher matcher = Pattern.compile(regexp, Pattern.DOTALL).matcher(scriptIndhold);
+        Matcher matcher = Pattern.compile(søgestreng, Pattern.DOTALL).matcher(scriptIndhold);
         //String scriptIndholdNy = matcher.replaceFirst(erstatning);
 
-        if (!matcher.find())  throw new IOException("Fik ikke erstattet "+ regexp +" med "+ erstatning);
+        if (!matcher.find())  throw new IOException("Fik ikke erstattet "+ søgestreng +" med "+ erstatning);
 
         StringBuilder sb = new StringBuilder();
         matcher.appendReplacement(sb, erstatning);

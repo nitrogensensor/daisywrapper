@@ -20,10 +20,12 @@ public class DaisyMain
     String scriptIndholdOrg = new String(Files.readAllBytes(orgMappe.resolve(scriptFil)));
 
 
+
     ArrayList<Erstatning> erstatninger = new ArrayList<>();
     erstatninger.add(new Erstatning("stop 2018 8 20", "stop 2015 8 20"));
-    erstatninger.add(new Erstatning("\\(path .+?\\)", "(path \"/opt/daisy/sample\" \"/opt/daisy/lib\" \".\" \"./common\")"));
-//    erstatninger.add(new Erstatning("\\(defprogram.+?\\(run.+?\\).+?\\)","(defprogram taastrup batch (run (Mark21_hnlw)))"));
+//    erstatninger.add(new Erstatning("\\(path .+?\\)", "(path \"/opt/daisy/sample\" \"/opt/daisy/lib\" \".\" \"./common\")"));
+    erstatninger.add(new SimpelErstatning("(path *)", "(path \"/opt/daisy/sample\" \"/opt/daisy/lib\" \".\" \"./common\")"));
+    erstatninger.add(new SimpelErstatning("(defprogram taastrup batch*)","(defprogram taastrup batch (run (Mark21_lnlw)))"));
 
     String scriptIndhold = Erstatning.udfør(scriptIndholdOrg, erstatninger);
 
