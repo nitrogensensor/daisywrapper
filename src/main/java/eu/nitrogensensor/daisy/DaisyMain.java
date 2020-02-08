@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 
 public class DaisyMain
 {
@@ -19,7 +20,12 @@ public class DaisyMain
     String scriptIndholdOrg = new String(Files.readAllBytes(orgMappe.resolve(scriptFil)));
 
 
-    String scriptIndhold = Utils.erstat(scriptIndholdOrg, "stop 2018 8 20", "stop 2015 8 20");
+    ArrayList<Erstatning> erstatninger = new ArrayList<>();
+    erstatninger.add(new Erstatning("stop 2018 8 20", "stop 2015 8 20"));
+    erstatninger.add(new Erstatning("\\(path .+?\\)", "(path \"/opt/daisy/sample\" \"/opt/daisy/lib\" \".\" \"./common\")"));
+//    erstatninger.add(new Erstatning("\\(defprogram.+?\\(run.+?\\).+?\\)","(defprogram taastrup batch (run (Mark21_hnlw)))"));
+
+    String scriptIndhold = Erstatning.udfør(scriptIndholdOrg, erstatninger);
 
     Path tmpMappe = Paths.get("/tmp/work"); // Files.createTempDirectory("work");
     Utils.klonMappe(orgMappe, tmpMappe);

@@ -34,9 +34,4 @@ public class Utils {
         }
     }
 
-    public static String erstat(String scriptIndholdOrg, String regexp, String erstartning) throws IOException {
-        String scriptIndhold = scriptIndholdOrg.replaceAll(regexp, erstartning);
-        if (scriptIndhold.equals(scriptIndholdOrg)) throw new IOException("Fik ikke erstattet "+regexp+" med "+erstartning);
-        return scriptIndhold;
-    }
 }
