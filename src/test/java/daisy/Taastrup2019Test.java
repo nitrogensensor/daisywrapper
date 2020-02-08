@@ -13,6 +13,7 @@ import static org.junit.Assert.assertEquals;
 
 public class Taastrup2019Test {
 
+
     @Test
     public void timeCompilation() throws IOException {
         System.out.println(Arrays.asList(Paths.get("src/test/resources/Taastrup 2019/dtu_model").toFile().list()));

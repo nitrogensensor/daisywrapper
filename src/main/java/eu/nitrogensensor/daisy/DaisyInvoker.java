@@ -5,10 +5,11 @@ package eu.nitrogensensor.daisy;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.Properties;
 
 public class DaisyInvoker {
-    public void invokeDaisy(String mappe, String inputFil) throws InterruptedException, IOException {
+    public void invokeDaisy(Path mappe, String inputFil) throws InterruptedException, IOException {
         Properties prop = new Properties();
         try(InputStream input = DaisyInvoker.class.getClassLoader().getResourceAsStream("daisy.properties")){
             if(input==null){
@@ -27,7 +28,7 @@ public class DaisyInvoker {
 
         Process process = new ProcessBuilder(new File(prop.getProperty("daisy.executable.path")).getAbsolutePath(), inputFil)
                 .inheritIO()
-                .directory(new File(mappe))
+                .directory(mappe.toFile())
                 .start();
         process.waitFor();
         exitValue = process.exitValue();

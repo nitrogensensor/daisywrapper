@@ -16,20 +16,21 @@ public class DaisyMain
 
     String scriptFil = "Setup_DTU_Taastrup.dai";
     Path orgMappe = Paths.get("daisy/src/test/resources/Taastrup 2019/dtu_model");
-
-    Path tmpMappe = Files.createTempDirectory("work");
-    tmpMappe =  Paths.get("/tmp/work");// Files.createTempDirectory("work2");
-
-    FileUtils.klonMappe(orgMappe, tmpMappe);
-
-    String indhold = new String(Files.readAllBytes(orgMappe.resolve(scriptFil)));
-
-    Path scriptFilITmp = tmpMappe.resolve(scriptFil);
-    Files.delete(scriptFilITmp);
-    Files.write(scriptFilITmp, indhold.getBytes());
+    String scriptIndholdOrg = new String(Files.readAllBytes(orgMappe.resolve(scriptFil)));
 
 
-    daisyInvoke.invokeDaisy("daisy/src/test/resources/Taastrup 2019/dtu_model", "Setup_DTU_Taastrup.dai");
+    String scriptIndhold = Utils.erstat(scriptIndholdOrg, "stop 2018 8 20", "stop 2015 8 20");
+
+    Path tmpMappe = Paths.get("/tmp/work"); // Files.createTempDirectory("work");
+    Utils.klonMappe(orgMappe, tmpMappe);
+
+    // Overskriv scriptfil med den, hvor diverse felter er blevet erstattet
+    Path scriptfilITmp = tmpMappe.resolve(scriptFil);
+    Files.delete(scriptfilITmp);
+    Files.write(scriptfilITmp, scriptIndhold.getBytes());
+
+
+    daisyInvoke.invokeDaisy(tmpMappe, scriptFil );//daisy/src/test/resources/Taastrup 2019/dtu_model", "Setup_DTU_Taastrup.dai");
 
   }
 

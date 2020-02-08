@@ -5,7 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class FileUtils {
+public class Utils {
     /**
      * Kloner en mappe rekursivt - en kopi af mappestrukturen laves, og fyldes med symbolske links til den oprindelige mappe
      *
@@ -32,5 +32,11 @@ public class FileUtils {
         } catch( Exception ex ) {
             ex.printStackTrace();
         }
+    }
+
+    public static String erstat(String scriptIndholdOrg, String regexp, String erstartning) throws IOException {
+        String scriptIndhold = scriptIndholdOrg.replaceAll(regexp, erstartning);
+        if (scriptIndhold.equals(scriptIndholdOrg)) throw new IOException("Fik ikke erstattet "+regexp+" med "+erstartning);
+        return scriptIndhold;
     }
 }
