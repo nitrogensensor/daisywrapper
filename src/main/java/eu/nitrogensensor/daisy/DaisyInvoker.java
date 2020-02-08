@@ -8,7 +8,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 public class DaisyInvoker {
-    public void invokeDaisy(String inputFilePath) throws InterruptedException, IOException {
+    public void invokeDaisy(String mappe, String inputFil) throws InterruptedException, IOException {
         Properties prop = new Properties();
         try(InputStream input = DaisyInvoker.class.getClassLoader().getResourceAsStream("daisy.properties")){
             if(input==null){
@@ -25,9 +25,9 @@ public class DaisyInvoker {
         System.out.println("RUN DAISY!");
         System.out.println(new File(prop.getProperty("daisy.executable.path")).getAbsolutePath());
 
-        Process process = new ProcessBuilder(new File(prop.getProperty("daisy.executable.path")).getAbsolutePath(), inputFilePath)
+        Process process = new ProcessBuilder(new File(prop.getProperty("daisy.executable.path")).getAbsolutePath(), inputFil)
                 .inheritIO()
-                .directory(new File("daisy/src/test/resources/Taastrup 2019/dtu_model"))
+                .directory(new File(mappe))
                 .start();
         process.waitFor();
         exitValue = process.exitValue();
