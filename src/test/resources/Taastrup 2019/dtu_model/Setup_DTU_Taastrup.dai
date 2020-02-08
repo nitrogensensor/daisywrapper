@@ -314,14 +314,17 @@
 (defprogram taastrup batch
   (run ;;; Alle 4 kørsler: user	1m9,645s
   (Mark21_hnlw) ;; real	0m17,016s
-;;  (Mark21_lnlw) ;; user	0m19,061s
-;;  (Mark21_lnhw) ;; user	0m17,404s
-;;  (Mark21_hnhw) ;; user	0m17,095s
+  (Mark21_lnlw) ;; user	0m19,061s
+  (Mark21_lnhw) ;; user	0m17,404s
+  (Mark21_hnhw) ;; user	0m17,095s
   )
 )
 
 (run taastrup)
 
+;; Serielt i 1 stor Daisy-kørsel tog 54,5 sek
+;; Serielt i 4 seperate Daisy-kørsler tog 55,9 sek
+;; Parallet i 4 seperate Daisy-kørsler tog 14,8 sek
 
 
 ;; setup.dai ends here.

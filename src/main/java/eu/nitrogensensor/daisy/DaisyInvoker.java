@@ -9,18 +9,10 @@ import java.nio.file.Path;
 import java.util.Properties;
 
 public class DaisyInvoker {
-    public void invokeDaisy(Path mappe, String inputFil) throws InterruptedException, IOException {
+    public void invokeDaisy(Path mappe, String inputFil) throws IOException {
         Properties prop = new Properties();
-        try(InputStream input = DaisyInvoker.class.getClassLoader().getResourceAsStream("daisy.properties")){
-            if(input==null){
-                System.out.println("No config properties were found");
-                return;
-            }
-            prop.load(input);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        InputStream input = DaisyInvoker.class.getClassLoader().getResourceAsStream("daisy.properties");
+        prop.load(input);
 
         int exitValue;
         System.out.println("RUN DAISY!");
@@ -30,7 +22,11 @@ public class DaisyInvoker {
                 .inheritIO()
                 .directory(mappe.toFile())
                 .start();
-        process.waitFor();
+        try {
+            process.waitFor();
+        } catch (InterruptedException e) {
+            throw new IOException(e);
+        }
         exitValue = process.exitValue();
         process.destroy();
 

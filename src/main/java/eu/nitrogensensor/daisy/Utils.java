@@ -3,7 +3,7 @@ package eu.nitrogensensor.daisy;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Utils {
     /**
@@ -12,26 +12,29 @@ public class Utils {
      * @param fraMappe Mappen, der skal kopieres
      * @param tilMappe Destination. Indhold i mappen overskrives hvis det allerede findes
      */
-    public static void klonMappe(Path fraMappe, Path tilMappe) {
+    public static void klonMappe(Path fraMappe, Path tilMappe) throws IOException {
         final Path fra = fraMappe.toAbsolutePath(); // Fuld sti
-        try {
-            Files.walk(fra).forEach(fraFil -> {
-                try {
-                    Path tilFil = tilMappe.resolve(fra.relativize(fraFil));
-                    if( Files.isDirectory(fraFil)) {
-                        if(!Files.exists(tilFil)) Files.createDirectory(tilFil);
-                        return;
-                    }
-                    Files.deleteIfExists(tilFil);
-                    //Files.copy( s, d );
-                    Files.createSymbolicLink( tilFil, fraFil );
-                } catch( Exception e ) {
-                    e.printStackTrace();
+        AtomicReference<IOException> fejl = new AtomicReference<>(); // Hvis der opstår en exception skal den kastes videre
+        Files.walk(fra).forEach(fraFil -> {
+            try {
+                if (fejl.get()!=null) return;
+                Path tilFil = tilMappe.resolve(fra.relativize(fraFil));
+                if( Files.isDirectory(fraFil)) {
+                    if(!Files.exists(tilFil)) Files.createDirectories(tilFil);
+                    return;
                 }
-            });
-        } catch( Exception ex ) {
-            ex.printStackTrace();
-        }
+                Files.deleteIfExists(tilFil);
+                //Files.copy( s, d );
+                Files.createSymbolicLink( tilFil, fraFil );
+            } catch( IOException e ) {
+                e.printStackTrace();
+                fejl.set(e);
+            } catch( Exception e ) {
+                e.printStackTrace();
+                fejl.set( new IOException(e));
+            }
+        });
+        if (fejl.get()!=null) throw fejl.get();
     }
 
 }
