@@ -1,7 +1,6 @@
 ;;; setup.dai -- Bakkeg�rden experiment.
 
-(path "/opt/daisy/sample"
-"/opt/daisy/lib" "." "./common")
+(path "/opt/daisy/sample" "/opt/daisy/lib" "." "./common")
 ;; (directory ".")
 
 
