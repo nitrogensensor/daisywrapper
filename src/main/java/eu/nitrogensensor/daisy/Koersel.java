@@ -1,5 +1,6 @@
 package eu.nitrogensensor.daisy;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -55,6 +56,49 @@ public class Koersel implements Cloneable {
         }
     }
 
+    private static final boolean FILPRÆFIX_PÅ_KOLONNER = false;
+    public void lavUdtræk() {
+        for (OutputEkstrakt ekstrakt : outputEkstrakt) {
+            // Opbyg liste over kolonner og enheder
+            int antalRækker = -1;
+            for (String filnavn : ekstrakt.filKolonnerMap.keySet()) {
+                Ouputfilindhold outputfil = output.get(filnavn);
+                for (String kol : ekstrakt.filKolonnerMap.get(filnavn)) {
+                    if (FILPRÆFIX_PÅ_KOLONNER)
+                        ekstrakt.output.kolonnenavne.add(filnavn + ":" + kol);
+                    else
+                        ekstrakt.output.kolonnenavne.add(kol);
+
+                    int idx = outputfil.kolonnenavne.indexOf(kol);
+                    if (ekstrakt.filKolonneIndexMap.get(filnavn) == null)
+                        ekstrakt.filKolonneIndexMap.put(filnavn, new ArrayList<>());
+                    ekstrakt.filKolonneIndexMap.get(filnavn).add(idx);
+                    if (idx == -1) throw new IllegalArgumentException("Kolonne '" + kol + "' fandtes ikke i " + outputfil);
+                    ekstrakt.output.enheder.add(outputfil.enheder.get(idx));
+
+                    if (antalRækker != -1 && antalRækker != outputfil.data.size())
+                        throw new IllegalStateException("Forventede " + antalRækker + " datarækker i " + outputfil);
+                    antalRækker = outputfil.data.size();
+                }
+            }
+
+            // Lav datarækket
+            for (int række = 0; række < antalRækker; række++) {
+                String[] datalineE = new String[ekstrakt.output.kolonnenavne.size()];
+                int kolE = 0;
+                for (String filnavn : ekstrakt.filKolonnerMap.keySet()) {
+                    Ouputfilindhold outputfil = output.get(filnavn);
+                    for (int kol1 : ekstrakt.filKolonneIndexMap.get(filnavn)) {
+                        // Tag højde for at nogle af de sidste kolonner i en Daisy CSV fil kan være tomme
+                        datalineE[kolE] = outputfil.data.get(række).length <= kol1 ? "" : outputfil.data.get(række)[kol1];
+                        kolE++;
+                    }
+                }
+                ekstrakt.output.data.add(datalineE);
+            }
+        }
+    }
+
     public static class Ouputfilindhold {
         public String filnavn;
         public String header;
@@ -70,8 +114,42 @@ public class Koersel implements Cloneable {
                     ", " + (data==null?0:data.size())+" rækker" +
                     '}';
         }
+
+
+        static void printRække(String skilletegn, ArrayList<String> række, BufferedWriter bufferedWriter) throws IOException {
+            boolean førsteKolonne = true;
+            for (String k : række) {
+                if (!førsteKolonne) bufferedWriter.append(skilletegn);
+                bufferedWriter.append(k);
+                førsteKolonne = false;
+            }
+            bufferedWriter.append('\n');
+        }
+
+        static void printRække(String skilletegn, String[] række, BufferedWriter bufferedWriter) throws IOException {
+            boolean førsteKolonne = true;
+            for (String k : række) {
+                if (!førsteKolonne) bufferedWriter.append(skilletegn);
+                bufferedWriter.append(k);
+                førsteKolonne = false;
+            }
+            bufferedWriter.append('\n');
+        }
+
+        public void skrivDatafil(Path fil, String skilletegn, String header) throws IOException {
+            Files.deleteIfExists(fil);
+            BufferedWriter bufferedWriter = Files.newBufferedWriter(fil);
+            bufferedWriter.append(header);
+            printRække(skilletegn, kolonnenavne, bufferedWriter);
+            printRække(skilletegn, enheder, bufferedWriter);
+            for (String[] datarække : data) {
+                printRække(skilletegn, datarække, bufferedWriter);
+            }
+            bufferedWriter.close();
+        }
     }
-    public final Map<String, Ouputfilindhold> output = new LinkedHashMap<String, Ouputfilindhold>();
+
+    public Map<String, Ouputfilindhold> output = new LinkedHashMap<String, Ouputfilindhold>();
 
     public static void main(String[] args) {
         new OutputEkstrakt("xx", "crop.csv (year, month, mday, LAI), crop_prod.csv (year, month, mday, Crop AI, Leaf AI, Stem AI)");
@@ -157,6 +235,8 @@ public class Koersel implements Cloneable {
             Koersel kopi = (Koersel) this.clone();
             kopi.erstatninger = new ArrayList<>();
             kopi.erstatninger.addAll(this.erstatninger);
+            kopi.outputEkstrakt = new ArrayList<>();
+            kopi.output = new LinkedHashMap<String, Ouputfilindhold>();
             return kopi;
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();

@@ -18,7 +18,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class DaisyMain
 {
-  private static final boolean FILPRÆFIX_PÅ_KOLONNER = false;
 
   public static void main(String[] args) throws IOException, InterruptedException {
     System.out.println("hej fra DaisyMain");
@@ -76,56 +75,15 @@ public class DaisyMain
 
           kørsel.læsOutput(tmpMappe);
 
+          kørsel.lavUdtræk();
+
           for (Koersel.OutputEkstrakt ekstrakt : kørsel.outputEkstrakt) {
-            // Opbyg liste over kolonner og enheder
-            int antalRækker = -1;
-            for (String filnavn : ekstrakt.filKolonnerMap.keySet()) {
-              Koersel.Ouputfilindhold outputfil = kørsel.output.get(filnavn);
-              for (String kol : ekstrakt.filKolonnerMap.get(filnavn)) {
-                if (FILPRÆFIX_PÅ_KOLONNER)
-                  ekstrakt.output.kolonnenavne.add(filnavn+":"+kol);
-                else
-                  ekstrakt.output.kolonnenavne.add(kol);
-
-                int idx = outputfil.kolonnenavne.indexOf(kol);
-                if (ekstrakt.filKolonneIndexMap.get(filnavn)==null) ekstrakt.filKolonneIndexMap.put(filnavn, new ArrayList<>());
-                ekstrakt.filKolonneIndexMap.get(filnavn).add(idx);
-                if (idx==-1) throw new IllegalArgumentException("Kolonne '"+kol+"' fandtes ikke i "+outputfil);
-                ekstrakt.output.enheder.add( outputfil.enheder.get(idx));
-
-                if (antalRækker!=-1 && antalRækker!=outputfil.data.size()) throw new IllegalStateException("Forventede "+ antalRækker+ " datarækker i "+outputfil);
-                antalRækker=outputfil.data.size();
-              }
-            }
-
-            // Lav datarækket
-            for (int række=0; række<antalRækker; række++) {
-              String[] datalineE = new String[ekstrakt.output.kolonnenavne.size()];
-              int kolE = 0;
-              for (String filnavn : ekstrakt.filKolonnerMap.keySet()) {
-                Koersel.Ouputfilindhold outputfil = kørsel.output.get(filnavn);
-                for (int kol1 : ekstrakt.filKolonneIndexMap.get(filnavn)) {
-                  // Tag højde for at nogle af de sidste kolonner i en Daisy CSV fil kan være tomme
-                  datalineE[kolE] = outputfil.data.get(række).length<=kol1 ? "" : outputfil.data.get(række)[kol1];
-                  kolE++;
-                }
-              }
-              ekstrakt.output.data.add(datalineE);
-            }
-
             // Skriv outputfil med ekstrakt
             Path fil = tmpMappe.resolve(ekstrakt.output.filnavn);
             String skilletegn = ", ";
-            Files.deleteIfExists(fil);
-            BufferedWriter bufferedWriter = Files.newBufferedWriter(fil);
-            bufferedWriter.append("# Udtræk af "+ekstrakt.filKolonnerMap+" fra "+kørsel.scriptFil).append('\n');
-            bufferedWriter.append("# "+kørsel.beskrivelse).append('\n');
-            printRække(skilletegn, ekstrakt.output.kolonnenavne, bufferedWriter);
-            printRække(skilletegn, ekstrakt.output.enheder, bufferedWriter);
-            for (String[] datarække : ekstrakt.output.data) {
-              printRække(skilletegn, datarække, bufferedWriter);
-            }
-            bufferedWriter.close();
+            String header = "# Udtræk af "+ekstrakt.filKolonnerMap+" fra "+kørsel.scriptFil + "\n" +
+                    "# "+kørsel.beskrivelse + "\n";
+            ekstrakt.output.skrivDatafil(fil, skilletegn, header);
 
           }
 
@@ -149,25 +107,5 @@ public class DaisyMain
 
 
     System.out.printf("Det tog %.1f sek", (System.currentTimeMillis()-tid)/1000.0);
-  }
-
-  static void printRække(String skilletegn, ArrayList<String> række, BufferedWriter bufferedWriter) throws IOException {
-    boolean førsteKolonne = true;
-    for (String k : række) {
-      if (!førsteKolonne) bufferedWriter.append(skilletegn);
-      bufferedWriter.append(k);
-      førsteKolonne = false;
-    }
-    bufferedWriter.append('\n');
-  }
-
-  static void printRække(String skilletegn, String[] række, BufferedWriter bufferedWriter) throws IOException {
-    boolean førsteKolonne = true;
-    for (String k : række) {
-      if (!førsteKolonne) bufferedWriter.append(skilletegn);
-      bufferedWriter.append(k);
-      førsteKolonne = false;
-    }
-    bufferedWriter.append('\n');
   }
 }
