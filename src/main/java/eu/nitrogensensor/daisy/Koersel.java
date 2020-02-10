@@ -159,9 +159,21 @@ public class Koersel implements Cloneable {
 
     public ArrayList<OutputEkstrakt> outputEkstrakt = new ArrayList<>();
     public static class OutputEkstrakt {
-        public final LinkedHashMap<String, ArrayList<String>> filKolonnerMap = new LinkedHashMap<String, ArrayList<String>>();
+        public LinkedHashMap<String, ArrayList<String>> filKolonnerMap = new LinkedHashMap<String, ArrayList<String>>();
         public final LinkedHashMap<String, ArrayList<Integer>> filKolonneIndexMap = new LinkedHashMap<String, ArrayList<Integer>>();
         public final Ouputfilindhold output = new Ouputfilindhold();
+
+        public OutputEkstrakt(OutputEkstrakt org) {
+            filKolonnerMap = (LinkedHashMap<String, ArrayList<String>>) org.filKolonnerMap.clone();
+            output.filnavn = org.output.filnavn;
+        }
+
+        @Override
+        public String toString() {
+            return "OutoutEkstrakt{" +
+                    ", filKolonnerMap=" + filKolonnerMap +
+                    '}';
+        }
 
         /**
          *
@@ -211,14 +223,6 @@ public class Koersel implements Cloneable {
             for (String kol : s.split("[,\t]+")) kolonner.add(kol.trim());
             return kolonner;
         }
-
-
-        @Override
-        public String toString() {
-            return "OutoutEkstrakt{" +
-                    ", filKolonnerMap=" + filKolonnerMap +
-                    '}';
-        }
     }
 
 
@@ -235,7 +239,10 @@ public class Koersel implements Cloneable {
             Koersel kopi = (Koersel) this.clone();
             kopi.erstatninger = new ArrayList<>();
             kopi.erstatninger.addAll(this.erstatninger);
-            kopi.outputEkstrakt = new ArrayList<>();
+            kopi.outputEkstrakt = new ArrayList<OutputEkstrakt>();
+            for (OutputEkstrakt ekstrakt : outputEkstrakt) {
+                kopi.outputEkstrakt.add(new OutputEkstrakt(ekstrakt));
+            }
             kopi.output = new LinkedHashMap<String, Ouputfilindhold>();
             return kopi;
         } catch (CloneNotSupportedException e) {
