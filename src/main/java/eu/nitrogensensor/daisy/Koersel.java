@@ -10,20 +10,21 @@ import java.util.regex.Pattern;
 public class Koersel implements Cloneable {
     public final Path orgMappe;
     public final String scriptFil;
+    public String beskrivelse;
     private ArrayList<Erstatning> erstatninger = new ArrayList<>();
 
     public static class Ouputfilindhold {
         public String filnavn;
         public String header;
-        public String[] kolonnenavne;
-        public String[] enheder;
-        public ArrayList<String[]> data;
+        public ArrayList<String> kolonnenavne = new ArrayList<>();
+        public ArrayList<String> enheder = new ArrayList<>();
+        public ArrayList<String[]> data = new ArrayList<>();
 
         @Override
         public String toString() {
             return "Ouputfilindhold{" +
                     "'" + filnavn + '\'' +
-                    ", " + kolonnenavne.length +" kolonner"+
+                    ", " + kolonnenavne.size() +" kolonner"+
                     ", " + (data==null?0:data.size())+" rækker" +
                     '}';
         }
@@ -39,6 +40,7 @@ public class Koersel implements Cloneable {
     public ArrayList<OutputEkstrakt> outputEkstrakt = new ArrayList<>();
     public static class OutputEkstrakt {
         public final LinkedHashMap<String, ArrayList<String>> filKolonnerMap = new LinkedHashMap<String, ArrayList<String>>();
+        public final LinkedHashMap<String, ArrayList<Integer>> filKolonneIndexMap = new LinkedHashMap<String, ArrayList<Integer>>();
         public final Ouputfilindhold output = new Ouputfilindhold();
 
         /**

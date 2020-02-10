@@ -1,12 +1,15 @@
 package eu.nitrogensensor.daisy;
 
 
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -15,7 +18,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class DaisyMain
 {
-  private static final boolean FILPRÆFIX_PÅ_KOLONNER = true;
+  private static final boolean FILPRÆFIX_PÅ_KOLONNER = false;
 
   public static void main(String[] args) throws IOException, InterruptedException {
     System.out.println("hej fra DaisyMain");
@@ -48,7 +51,8 @@ public class DaisyMain
 //            "(run Mark21 (column (\"High_N_High_W\")))",
     };
 
-    kørsel0.outputEkstrakt.add(new Koersel.OutputEkstrakt("crop-leaf-stem-AI.csv", "crop.csv (year, month, mday, LAI), crop_prod.csv (year, month, mday, Crop AI, Leaf AI, Stem AI)"));
+    //kørsel0.outputEkstrakt.add(new Koersel.OutputEkstrakt("crop-leaf-stem-AI.csv", "crop.csv (year, month, mday, LAI), crop_prod.csv (year, month, mday, Crop AI, Leaf AI, Stem AI)"));
+    kørsel0.outputEkstrakt.add(new Koersel.OutputEkstrakt("crop-leaf-stem-AI.csv", "crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)"));
     //kørsel0.outputfilnavne = new String[]{"crop.csv", "crop_prod.csv" };
     long tid = System.currentTimeMillis();
 
@@ -63,6 +67,7 @@ public class DaisyMain
           if (fejl.get() != null) return;
           Koersel kørsel = kørsel0.kopi();
           kørsel.erstat("(run taastrup)", program);
+          kørsel.beskrivelse = program;
           Path tmpMappe = Files.createTempDirectory("ns-daisy");
           tmpMappe = Paths.get("/tmp/p5/k"+kørselsNr_); // Anden mappe i udviklingsøjemed
           //kørsel.klargørTilMappe(tmpMappe);
@@ -78,28 +83,54 @@ public class DaisyMain
             kørsel.output.put(filnavn, output);
           }
 
-          for (Koersel.OutputEkstrakt outputEkstrakt : kørsel.outputEkstrakt) {
+          for (Koersel.OutputEkstrakt ekstrakt : kørsel.outputEkstrakt) {
+            // Opbyg liste over kolonner og enheder
+            int antalRækker = -1;
+            for (String filnavn : ekstrakt.filKolonnerMap.keySet()) {
+              Koersel.Ouputfilindhold outputfil = kørsel.output.get(filnavn);
+              for (String kol : ekstrakt.filKolonnerMap.get(filnavn)) {
+                if (FILPRÆFIX_PÅ_KOLONNER)
+                  ekstrakt.output.kolonnenavne.add(filnavn+":"+kol);
+                else
+                  ekstrakt.output.kolonnenavne.add(kol);
 
-            ArrayList<String> kolonner = new ArrayList<>();
-            ArrayList<String> enheder = new ArrayList<>();
+                int idx = outputfil.kolonnenavne.indexOf(kol);
+                if (ekstrakt.filKolonneIndexMap.get(filnavn)==null) ekstrakt.filKolonneIndexMap.put(filnavn, new ArrayList<>());
+                ekstrakt.filKolonneIndexMap.get(filnavn).add(idx);
+                if (idx==-1) throw new IllegalArgumentException("Kolonne '"+kol+"' fandtes ikke i "+outputfil);
+                ekstrakt.output.enheder.add( outputfil.enheder.get(idx));
 
-            for (String filnavn : outputEkstrakt.filKolonnerMap.keySet()) {
-              Koersel.Ouputfilindhold output = kørsel.output.get(filnavn);
-              for (String kol : outputEkstrakt.filKolonnerMap.get(filnavn)) {
-                if (FILPRÆFIX_PÅ_KOLONNER) kolonner.add(filnavn+":"+kol);
-                else kolonner.add(kol);
-
-                int idx = 0;
-                while (idx<output.kolonnenavne.length && output.kolonnenavne[idx].equals(kol)) idx++;
-                if (idx==output.kolonnenavne.length) throw new IllegalArgumentException("Kolonne '"+kol+"' fandtes ikke i "+output);
-
-
-                enheder.add( output.enheder[idx] );
+                if (antalRækker!=-1 && antalRækker!=outputfil.data.size()) throw new IllegalStateException("Forventede "+ antalRækker+ " datarækker i "+outputfil);
+                antalRækker=outputfil.data.size();
               }
-
-
             }
 
+            // Lav datarækket
+            for (int række=0; række<antalRækker; række++) {
+              String[] datalineE = new String[ekstrakt.output.kolonnenavne.size()];
+              int kolE = 0;
+              for (String filnavn : ekstrakt.filKolonnerMap.keySet()) {
+                Koersel.Ouputfilindhold outputfil = kørsel.output.get(filnavn);
+                for (int kol1 : ekstrakt.filKolonneIndexMap.get(filnavn)) {
+                  // Tag højde for at nogle af de sidste kolonner i en Daisy CSV fil kan være tomme
+                  datalineE[kolE] = outputfil.data.get(række).length<=kol1 ? "" : outputfil.data.get(række)[kol1];
+                  kolE++;
+                }
+              }
+              ekstrakt.output.data.add(datalineE);
+            }
+
+            // Skriv outputfil med ekstrakt
+            String skilletegn = ", ";
+            BufferedWriter bufferedWriter = Files.newBufferedWriter(kørsel.orgMappe.resolve(ekstrakt.output.filnavn));
+            bufferedWriter.append("# Udtræk af "+ekstrakt.filKolonnerMap+" fra "+kørsel.scriptFil).append('\n');
+            bufferedWriter.append("# "+kørsel.beskrivelse).append('\n');
+            printRække(skilletegn, ekstrakt.output.kolonnenavne, bufferedWriter);
+            printRække(skilletegn, ekstrakt.output.enheder, bufferedWriter);
+            for (String[] datarække : ekstrakt.output.data) {
+              printRække(skilletegn, datarække, bufferedWriter);
+            }
+            bufferedWriter.close();
 
           }
 
@@ -109,6 +140,9 @@ public class DaisyMain
         } catch (IOException e) {
           e.printStackTrace();
           fejl.set(e);
+        } catch (Exception e) {
+          e.printStackTrace();
+          fejl.set(new IOException(e));
         }
       };
       //runnable.run(); // serielt
@@ -122,6 +156,26 @@ public class DaisyMain
     System.out.printf("Det tog %.1f sek", (System.currentTimeMillis()-tid)/1000.0);
   }
 
+  static void printRække(String skilletegn, ArrayList<String> række, BufferedWriter bufferedWriter) throws IOException {
+    boolean førsteKolonne = true;
+    for (String k : række) {
+      if (!førsteKolonne) bufferedWriter.append(skilletegn);
+      bufferedWriter.append(k);
+      førsteKolonne = false;
+    }
+    bufferedWriter.append('\n');
+  }
+
+  static void printRække(String skilletegn, String[] række, BufferedWriter bufferedWriter) throws IOException {
+    boolean førsteKolonne = true;
+    for (String k : række) {
+      if (!førsteKolonne) bufferedWriter.append(skilletegn);
+      bufferedWriter.append(k);
+      førsteKolonne = false;
+    }
+    bufferedWriter.append('\n');
+  }
+
   static Koersel.Ouputfilindhold getOuputfilindhold(Path tmpMappe, String filnavn) throws IOException {
     Koersel.Ouputfilindhold output = new Koersel.Ouputfilindhold();
     output.filnavn = filnavn;
@@ -129,28 +183,26 @@ public class DaisyMain
     String[] csvsplit = csv.split("--------------------");
     output.header = csvsplit[0].trim();
     String[] linjer = csvsplit[1].trim().split("\n");
-    output.kolonnenavne = linjer[0].split("\t");
-    output.enheder = linjer[1].split("\t");
+    if (output.kolonnenavne.size()!=0) throw new IllegalStateException("Outputfil er allerede parset");
+    output.kolonnenavne.addAll(Arrays.asList(linjer[0].split("\t")));
+    output.enheder.addAll(Arrays.asList(linjer[1].split("\t")));
 
-    if (output.kolonnenavne.length < output.enheder.length) { // crop.csv har 24 kolonner, men 21 enheder (de sidste 3 kolonner er uden enhed), derfor < og ikke !=
-      throw new IOException(filnavn + " har " +output.kolonnenavne.length +" kolonner, men "+output.enheder.length+
-              " enheder\nkol="+ Arrays.toString(output.kolonnenavne) +"\nenh="+Arrays.toString(output.enheder));
+    if (output.kolonnenavne.size() < output.enheder.size()) { // crop.csv har 24 kolonner, men 21 enheder (de sidste 3 kolonner er uden enhed), derfor < og ikke !=
+      throw new IOException(filnavn + " har " +output.kolonnenavne.size() +" kolonner, men "+output.enheder.size()+
+              " enheder\nkol="+ output.kolonnenavne +"\nenh="+output.enheder);
     }
     output.data = new ArrayList<>(linjer.length);
     for (int n=2; n<linjer.length; n++) {
       String[] linje = linjer[n].split("\t");
-      if (output.kolonnenavne.length < linje.length || linje.length < output.enheder.length) { // data altid mellem
+      if (output.kolonnenavne.size() < linje.length || linje.length < output.enheder.size()) { // data altid mellem
         throw new IOException(filnavn + " linje " + n +  " har " +linje.length +" kolonner, men "+
-                output.kolonnenavne.length + " kolonnenavne og "+
-                output.enheder.length +" enheder\nlin="+ Arrays.toString(linje) +" enheder\nkol="+ Arrays.toString(output.kolonnenavne) +"\nenh="+Arrays.toString(output.enheder));
+                output.kolonnenavne.size() + " kolonnenavne og "+
+                output.enheder.size() +" enheder\nlin="+ Arrays.toString(linje) +" enheder\nkol="+ output.kolonnenavne +"\nenh="+output.enheder);
       }
       output.data.add(linje);
     }
     // Fyld op med tomme enheder
+    while (output.enheder.size()<output.kolonnenavne.size()) output.enheder.add("");
     return output;
-  }
-
-  public void invokeDaisy(String mappe, String inputFil) throws InterruptedException, IOException {
-
   }
 }
