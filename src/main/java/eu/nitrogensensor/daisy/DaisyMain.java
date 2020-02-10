@@ -45,10 +45,10 @@ public class DaisyMain
     };
 */
     String[] programmer = {
-            "(run Mark21 (column (\"High_N_Low_W\")))",
-//            "(run Mark21 (column (\"Low_N_Low_W\")))",
-//            "(run Mark21 (column (\"Low_N_High_W\")))",
-//            "(run Mark21 (column (\"High_N_High_W\")))",
+            "High_N_Low_W",
+            "Low_N_Low_W",
+            "Low_N_High_W",
+            "High_N_High_W",
     };
 
     //kørsel0.outputEkstrakt.add(new Koersel.OutputEkstrakt("crop-leaf-stem-AI.csv", "crop.csv (year, month, mday, LAI), crop_prod.csv (year, month, mday, Crop AI, Leaf AI, Stem AI)"));
@@ -66,22 +66,15 @@ public class DaisyMain
         try {
           if (fejl.get() != null) return;
           Koersel kørsel = kørsel0.kopi();
-          kørsel.erstat("(run taastrup)", program);
+          kørsel.erstat("(run taastrup)", "(run Mark21 (column (\""+program+"\")))");
           kørsel.beskrivelse = program;
           Path tmpMappe = Files.createTempDirectory("ns-daisy");
-          tmpMappe = Paths.get("/tmp/p5/k"+kørselsNr_); // Anden mappe i udviklingsøjemed
-          //kørsel.klargørTilMappe(tmpMappe);
-          //daisyInvoke.invokeDaisy(tmpMappe, scriptFil);
+          tmpMappe = Paths.get("/tmp/p6/out_"+program); // Anden mappe i udviklingsøjemed
+          kørsel.klargørTilMappe(tmpMappe);
+          daisyInvoke.invokeDaisy(tmpMappe, scriptFil);
 
 
-          HashSet<String> outputfilnavne = new HashSet<>();
-          for (Koersel.OutputEkstrakt outputEkstrakt : kørsel.outputEkstrakt) {
-            outputfilnavne.addAll(outputEkstrakt.filKolonnerMap.keySet());
-          }
-          for (String filnavn : outputfilnavne) {
-            Koersel.Ouputfilindhold output = getOuputfilindhold(tmpMappe, filnavn);
-            kørsel.output.put(filnavn, output);
-          }
+          kørsel.læsOutput(tmpMappe);
 
           for (Koersel.OutputEkstrakt ekstrakt : kørsel.outputEkstrakt) {
             // Opbyg liste over kolonner og enheder
@@ -121,8 +114,10 @@ public class DaisyMain
             }
 
             // Skriv outputfil med ekstrakt
+            Path fil = tmpMappe.resolve(ekstrakt.output.filnavn);
             String skilletegn = ", ";
-            BufferedWriter bufferedWriter = Files.newBufferedWriter(kørsel.orgMappe.resolve(ekstrakt.output.filnavn));
+            Files.deleteIfExists(fil);
+            BufferedWriter bufferedWriter = Files.newBufferedWriter(fil);
             bufferedWriter.append("# Udtræk af "+ekstrakt.filKolonnerMap+" fra "+kørsel.scriptFil).append('\n');
             bufferedWriter.append("# "+kørsel.beskrivelse).append('\n');
             printRække(skilletegn, ekstrakt.output.kolonnenavne, bufferedWriter);
@@ -174,35 +169,5 @@ public class DaisyMain
       førsteKolonne = false;
     }
     bufferedWriter.append('\n');
-  }
-
-  static Koersel.Ouputfilindhold getOuputfilindhold(Path tmpMappe, String filnavn) throws IOException {
-    Koersel.Ouputfilindhold output = new Koersel.Ouputfilindhold();
-    output.filnavn = filnavn;
-    String csv = new String(Files.readAllBytes(tmpMappe.resolve(filnavn)));
-    String[] csvsplit = csv.split("--------------------");
-    output.header = csvsplit[0].trim();
-    String[] linjer = csvsplit[1].trim().split("\n");
-    if (output.kolonnenavne.size()!=0) throw new IllegalStateException("Outputfil er allerede parset");
-    output.kolonnenavne.addAll(Arrays.asList(linjer[0].split("\t")));
-    output.enheder.addAll(Arrays.asList(linjer[1].split("\t")));
-
-    if (output.kolonnenavne.size() < output.enheder.size()) { // crop.csv har 24 kolonner, men 21 enheder (de sidste 3 kolonner er uden enhed), derfor < og ikke !=
-      throw new IOException(filnavn + " har " +output.kolonnenavne.size() +" kolonner, men "+output.enheder.size()+
-              " enheder\nkol="+ output.kolonnenavne +"\nenh="+output.enheder);
-    }
-    output.data = new ArrayList<>(linjer.length);
-    for (int n=2; n<linjer.length; n++) {
-      String[] linje = linjer[n].split("\t");
-      if (output.kolonnenavne.size() < linje.length || linje.length < output.enheder.size()) { // data altid mellem
-        throw new IOException(filnavn + " linje " + n +  " har " +linje.length +" kolonner, men "+
-                output.kolonnenavne.size() + " kolonnenavne og "+
-                output.enheder.size() +" enheder\nlin="+ Arrays.toString(linje) +" enheder\nkol="+ output.kolonnenavne +"\nenh="+output.enheder);
-      }
-      output.data.add(linje);
-    }
-    // Fyld op med tomme enheder
-    while (output.enheder.size()<output.kolonnenavne.size()) output.enheder.add("");
-    return output;
   }
 }

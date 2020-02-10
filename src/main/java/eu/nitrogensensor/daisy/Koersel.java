@@ -13,6 +13,48 @@ public class Koersel implements Cloneable {
     public String beskrivelse;
     private ArrayList<Erstatning> erstatninger = new ArrayList<>();
 
+
+    static Koersel.Ouputfilindhold getOuputfilindhold(Path tmpMappe, String filnavn) throws IOException {
+        Koersel.Ouputfilindhold output = new Koersel.Ouputfilindhold();
+        output.filnavn = filnavn;
+        String csv = new String(Files.readAllBytes(tmpMappe.resolve(filnavn)));
+        String[] csvsplit = csv.split("--------------------");
+        output.header = csvsplit[0].trim();
+        String[] linjer = csvsplit[1].trim().split("\n");
+        if (output.kolonnenavne.size()!=0) throw new IllegalStateException("Outputfil er allerede parset");
+        output.kolonnenavne.addAll(Arrays.asList(linjer[0].split("\t")));
+        output.enheder.addAll(Arrays.asList(linjer[1].split("\t")));
+
+        if (output.kolonnenavne.size() < output.enheder.size()) { // crop.csv har 24 kolonner, men 21 enheder (de sidste 3 kolonner er uden enhed), derfor < og ikke !=
+            throw new IOException(filnavn + " har " +output.kolonnenavne.size() +" kolonner, men "+output.enheder.size()+
+                    " enheder\nkol="+ output.kolonnenavne +"\nenh="+output.enheder);
+        }
+        output.data = new ArrayList<>(linjer.length);
+        for (int n=2; n<linjer.length; n++) {
+            String[] linje = linjer[n].split("\t");
+            if (output.kolonnenavne.size() < linje.length || linje.length < output.enheder.size()) { // data altid mellem
+                throw new IOException(filnavn + " linje " + n +  " har " +linje.length +" kolonner, men "+
+                        output.kolonnenavne.size() + " kolonnenavne og "+
+                        output.enheder.size() +" enheder\nlin="+ Arrays.toString(linje) +" enheder\nkol="+ output.kolonnenavne +"\nenh="+output.enheder);
+            }
+            output.data.add(linje);
+        }
+        // Fyld op med tomme enheder
+        while (output.enheder.size()<output.kolonnenavne.size()) output.enheder.add("");
+        return output;
+    }
+
+    public void læsOutput(Path tmpMappe) throws IOException {
+        HashSet<String> outputfilnavne = new HashSet<>();
+        for (Koersel.OutputEkstrakt outputEkstrakt : outputEkstrakt) {
+            outputfilnavne.addAll(outputEkstrakt.filKolonnerMap.keySet());
+        }
+        for (String filnavn : outputfilnavne) {
+            Koersel.Ouputfilindhold ouputfilindhold = getOuputfilindhold(tmpMappe, filnavn);
+            output.put(filnavn, ouputfilindhold);
+        }
+    }
+
     public static class Ouputfilindhold {
         public String filnavn;
         public String header;
