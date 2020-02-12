@@ -1,16 +1,10 @@
 package eu.nitrogensensor.daisy;
 
 
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -27,22 +21,10 @@ public class DaisyMain
     String scriptFil = "Setup_DTU_Taastrup.dai";
     Path orgMappe = Paths.get("daisy/src/test/resources/Taastrup 2019/dtu_model");
     Koersel kørsel0 = new Koersel(orgMappe, scriptFil);
-    //kørsel0.erstat("stop 2018 8 20", "stop 2015 8 20"); // for hurtigere kørsel
+    kørsel0.erstat("stop 2018 8 20", "stop 2015 8 20"); // for hurtigere kørsel
+    //kørsel0.erstat("stop 2018 8 20", "stop 2019 8 31"); // fuld kørsel
     kørsel0.erstat("(path *)", "(path \"/opt/daisy/sample\" \"/opt/daisy/lib\" \".\" \"./common\")");
 
-/*
-    kørsel.erstat("(defprogram taastrup batch*)", "(defprogram taastrup batch (run (Mark21_hnlw)))");
-    kørsel.erstat("(defprogram taastrup batch*)", "(defprogram taastrup batch (run (Mark21_lnlw)))");
-    kørsel.erstat("(defprogram taastrup batch*)", "(defprogram taastrup batch (run (Mark21_lnhw)))");
-    kørsel.erstat("(defprogram taastrup batch*)", "(defprogram taastrup batch (run (Mark21_hnhw)))");
-
-    String[] programmer = {
-            "(run (Mark21_hnlw))",
-            "(run (Mark21_lnlw))",
-            "(run (Mark21_lnhw))",
-            "(run (Mark21_hnhw))",
-    };
-*/
     String[] programmer = {
             "High_N_Low_W",
             "Low_N_Low_W",
@@ -88,7 +70,7 @@ public class DaisyMain
           }
 
 
-          System.out.println(kørsel);
+          //System.out.println(kørsel);
 
         } catch (IOException e) {
           e.printStackTrace();

@@ -256,7 +256,7 @@
 
 (defaction "SB_2019" activity
   (wait_mm_dd 3 29) 
-  (fertilize (N25S (weight 40 [kg N/ha])))                    
+  (fertilize (N25S (weight 40 [kg N/ha])))
   (seed_bed_preparation)
   (sow "SB_Normal")
   (wait_mm_dd 7 30)                      
@@ -283,6 +283,7 @@
     	("harvest"(where "harvest.csv"));(print_header false) (print_dimension false)
       ("Crop Production"(when daily)(where "crop_prod.csv"))
       ("Crop" (when daily)(where "crop.csv"))
+;;      ("Field nitrogen" (when daily))
       ("Soil Water Content"(when daily)(where "soil_water_content.csv"))
       ("Soil Water Potential (pF)"(when daily)(where "soil_water_pF.csv"))))
 
