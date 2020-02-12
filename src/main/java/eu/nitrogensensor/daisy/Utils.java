@@ -1,8 +1,10 @@
 package eu.nitrogensensor.daisy;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Utils {
@@ -14,6 +16,8 @@ public class Utils {
      */
     public static void klonMappe(Path fraMappe, Path tilMappe) throws IOException {
         final Path fra = fraMappe.toAbsolutePath(); // Fuld sti
+        sletMappe(tilMappe);
+
         AtomicReference<IOException> fejl = new AtomicReference<>(); // Hvis der opstår en exception skal den kastes videre
         Files.walk(fra).forEach(fraFil -> {
             try {
@@ -35,6 +39,14 @@ public class Utils {
             }
         });
         if (fejl.get()!=null) throw fejl.get();
+    }
+
+    public static void sletMappe(Path tilMappe) throws IOException {
+        // Slet mappe
+        Files.walk(tilMappe)
+                .sorted(Comparator.reverseOrder())
+                .map(Path::toFile)
+                .forEach(File::delete);
     }
 
 }

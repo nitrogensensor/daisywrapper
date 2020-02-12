@@ -51,13 +51,17 @@ public class DaisyMain
           kørsel.beskrivelse = program;
           Path tmpMappe = Files.createTempDirectory("ns-daisy");
           tmpMappe = Paths.get("/tmp/p6/out_"+program); // Anden mappe i udviklingsøjemed
+
+
           kørsel.klargørTilMappe(tmpMappe);
           daisyInvoke.invokeDaisy(tmpMappe, scriptFil);
 
 
           kørsel.læsOutput(tmpMappe);
 
-          kørsel.lavUdtræk();
+          for (Koersel.OutputEkstrakt ekstrakt1 : kørsel.outputEkstrakt) {
+              ekstrakt1.lavUdtræk(kørsel.output);
+          }
 
           for (Koersel.OutputEkstrakt ekstrakt : kørsel.outputEkstrakt) {
             // Skriv outputfil med ekstrakt
@@ -87,7 +91,6 @@ public class DaisyMain
     executorService.awaitTermination(30, TimeUnit.MINUTES);
     if (fejl.get()!=null) throw fejl.get();
 
-
-    System.out.printf("Det tog %.1f sek", (System.currentTimeMillis()-tid)/1000.0);
+    System.out.printf("Det tog %.1f sek\n", (System.currentTimeMillis()-tid)/1000.0);
   }
 }
