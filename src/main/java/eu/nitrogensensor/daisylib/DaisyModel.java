@@ -1,22 +1,80 @@
-package eu.nitrogensensor.daisy;
+package eu.nitrogensensor.daisylib;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Koersel implements Cloneable {
+public class DaisyModel implements Cloneable {
     public final Path orgMappe;
     public final String scriptFil;
     public String beskrivelse;
     private ArrayList<Erstatning> erstatninger = new ArrayList<>();
 
+    public DaisyModel(String directory, String daisyInputfile) {
+        this(Paths.get(directory), daisyInputfile);
+    }
 
-    static Koersel.Ouputfilindhold getOuputfilindhold(Path tmpMappe, String filnavn) throws IOException {
-        Koersel.Ouputfilindhold output = new Koersel.Ouputfilindhold();
+
+    public DaisyModel(Path orgMappe, String scriptFil) {
+        this.orgMappe = orgMappe;
+        this.scriptFil = scriptFil;
+    }
+
+    /** Opretter en kopi af en kørsel og kopi af dets erstatninger */
+    public DaisyModel kopi() {
+        if (!output.isEmpty()) throw new IllegalStateException("Du bør ikke bruge en kørsel der allerede har output som skabelon for en anden kørsel");
+        try {
+            DaisyModel kopi = (DaisyModel) this.clone();
+            kopi.erstatninger = new ArrayList<>();
+            kopi.erstatninger.addAll(this.erstatninger);
+            kopi.outputEkstrakt = new ArrayList<OutputEkstrakt>();
+            for (OutputEkstrakt ekstrakt : outputEkstrakt) {
+                kopi.outputEkstrakt.add(new OutputEkstrakt(ekstrakt));
+            }
+            kopi.output = new LinkedHashMap<String, Ouputfilindhold>();
+            return kopi;
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "Koersel{" +
+                "orgMappe=" + orgMappe +
+                ", scriptFil='" + scriptFil + '\'' +
+                ", erstatninger=" + erstatninger +
+                ", outputfilnavne=" + outputEkstrakt +
+                ", output=" + output +
+                '}';
+    }
+
+    public void klargørTilMappe(Path destMappe) throws IOException {
+        Utils.klonMappe(orgMappe, destMappe);
+
+        String scriptIndholdOrg = new String(Files.readAllBytes(orgMappe.resolve(scriptFil)));
+
+        String scriptIndhold = Erstatning.udfør(scriptIndholdOrg, erstatninger);
+
+        // Overskriv scriptfil med den, hvor diverse felter er blevet erstattet
+        Path scriptfilITmp = destMappe.resolve(scriptFil);
+        Files.delete(scriptfilITmp);
+        Files.write(scriptfilITmp, scriptIndhold.getBytes());
+    }
+
+    public DaisyModel replace(String søgestreng, String erstatning) {
+        erstatninger.add(new Erstatning(søgestreng, erstatning));
+        return this;
+    }
+
+    static DaisyModel.Ouputfilindhold getOuputfilindhold(Path tmpMappe, String filnavn) throws IOException {
+        DaisyModel.Ouputfilindhold output = new DaisyModel.Ouputfilindhold();
         output.filnavn = filnavn;
         String csv = new String(Files.readAllBytes(tmpMappe.resolve(filnavn)));
         String[] csvsplit = csv.split("--------------------");
@@ -47,11 +105,11 @@ public class Koersel implements Cloneable {
 
     public void læsOutput(Path tmpMappe) throws IOException {
         HashSet<String> outputfilnavne = new HashSet<>();
-        for (Koersel.OutputEkstrakt outputEkstrakt : outputEkstrakt) {
+        for (DaisyModel.OutputEkstrakt outputEkstrakt : outputEkstrakt) {
             outputfilnavne.addAll(outputEkstrakt.filKolonnerMap.keySet());
         }
         for (String filnavn : outputfilnavne) {
-            Koersel.Ouputfilindhold ouputfilindhold = getOuputfilindhold(tmpMappe, filnavn);
+            DaisyModel.Ouputfilindhold ouputfilindhold = getOuputfilindhold(tmpMappe, filnavn);
             output.put(filnavn, ouputfilindhold);
         }
     }
@@ -233,57 +291,4 @@ public class Koersel implements Cloneable {
     }
 
 
-
-    public Koersel(Path orgMappe, String scriptFil) {
-        this.orgMappe = orgMappe;
-        this.scriptFil = scriptFil;
-    }
-
-    /** Opretter en kopi af en kørsel og kopi af dets erstatninger */
-    public Koersel kopi() {
-        if (!output.isEmpty()) throw new IllegalStateException("Du bør ikke bruge en kørsel der allerede har output som skabelon for en anden kørsel");
-        try {
-            Koersel kopi = (Koersel) this.clone();
-            kopi.erstatninger = new ArrayList<>();
-            kopi.erstatninger.addAll(this.erstatninger);
-            kopi.outputEkstrakt = new ArrayList<OutputEkstrakt>();
-            for (OutputEkstrakt ekstrakt : outputEkstrakt) {
-                kopi.outputEkstrakt.add(new OutputEkstrakt(ekstrakt));
-            }
-            kopi.output = new LinkedHashMap<String, Ouputfilindhold>();
-            return kopi;
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public String toString() {
-        return "Koersel{" +
-                "orgMappe=" + orgMappe +
-                ", scriptFil='" + scriptFil + '\'' +
-                ", erstatninger=" + erstatninger +
-                ", outputfilnavne=" + outputEkstrakt +
-                ", output=" + output +
-                '}';
-    }
-
-    public void klargørTilMappe(Path destMappe) throws IOException {
-        Utils.klonMappe(orgMappe, destMappe);
-
-        String scriptIndholdOrg = new String(Files.readAllBytes(orgMappe.resolve(scriptFil)));
-
-        String scriptIndhold = Erstatning.udfør(scriptIndholdOrg, erstatninger);
-
-        // Overskriv scriptfil med den, hvor diverse felter er blevet erstattet
-        Path scriptfilITmp = destMappe.resolve(scriptFil);
-        Files.delete(scriptfilITmp);
-        Files.write(scriptfilITmp, scriptIndhold.getBytes());
-    }
-
-    public Koersel erstat(String søgestreng, String erstatning) {
-        erstatninger.add(new Erstatning(søgestreng, erstatning));
-        return this;
-    }
 }

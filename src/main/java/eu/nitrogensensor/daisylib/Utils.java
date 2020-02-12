@@ -1,4 +1,4 @@
-package eu.nitrogensensor.daisy;
+package eu.nitrogensensor.daisylib;
 
 import java.io.File;
 import java.io.IOException;

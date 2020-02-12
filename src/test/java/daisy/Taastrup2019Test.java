@@ -1,10 +1,9 @@
 package daisy;
 
 
-import eu.nitrogensensor.daisy.DaisyInvoker;
-import eu.nitrogensensor.daisy.Erstatning;
-import eu.nitrogensensor.daisy.Koersel;
-import eu.nitrogensensor.daisy.Utils;
+import eu.nitrogensensor.daisylib.DaisyInvoker;
+import eu.nitrogensensor.daisylib.Erstatning;
+import eu.nitrogensensor.daisylib.DaisyModel;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -23,19 +22,19 @@ public class Taastrup2019Test {
     public void testFuldKørsel() throws IOException { // burde nok splittes op i stedet for at være jumbo-test. Tager 4 sekunder
         String scriptFil = "Setup_DTU_Taastrup.dai";
         Path orgMappe = Paths.get("src/test/resources/Taastrup 2019/dtu_model");
-        Koersel kørsel = new Koersel(orgMappe, scriptFil);
-        kørsel.erstat("stop 2018 8 20", "stop 2015 4 30"); // for hurtigere kørsel
-        kørsel.erstat("(path *)", "(path \"/opt/daisy/sample\" \"/opt/daisy/lib\" \".\" \"./common\")");
+        DaisyModel kørsel = new DaisyModel(orgMappe, scriptFil);
+        kørsel.replace("(stop *)", "(stop 2015 4 30)"); // for hurtigere kørsel
+        kørsel.replace("(path *)", "(path \"/opt/daisy/sample\" \"/opt/daisy/lib\" \".\" \"./common\")");
+        kørsel.replace("(run taastrup)", "(run Mark21 (column (\"High_N_High_W\")))");
 
-        kørsel.outputEkstrakt.add(new Koersel.OutputEkstrakt("crop-leaf-stem-AI.csv", "crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)"));
+        kørsel.outputEkstrakt.add(new DaisyModel.OutputEkstrakt("crop-leaf-stem-AI.csv", "crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)"));
         long tid = System.currentTimeMillis();
-        kørsel.erstat("(run taastrup)", "(run Mark21 (column (\"High_N_High_W\")))");
         Path tmpMappe = Files.createTempDirectory("ns-daisy");
         kørsel.klargørTilMappe(tmpMappe);
         DaisyInvoker daisyInvoke = new DaisyInvoker();
         daisyInvoke.invokeDaisy(tmpMappe, scriptFil);
         kørsel.læsOutput(tmpMappe);
-        for (Koersel.OutputEkstrakt ekstrakt1 : kørsel.outputEkstrakt) {
+        for (DaisyModel.OutputEkstrakt ekstrakt1 : kørsel.outputEkstrakt) {
             ekstrakt1.lavUdtræk(kørsel.output);
         }
 
@@ -49,7 +48,7 @@ public class Taastrup2019Test {
 
         // Linje 10 bør være
         // 2015, 1, 10, 00.00, 00.00, 00.00, 00.00
-        Koersel.OutputEkstrakt ekstrakt = kørsel.outputEkstrakt.get(0);
+        DaisyModel.OutputEkstrakt ekstrakt = kørsel.outputEkstrakt.get(0);
         assertEquals("2015", ekstrakt.output.data.get(9)[0]);
         assertEquals("1", ekstrakt.output.data.get(9)[1]);
         assertEquals("10", ekstrakt.output.data.get(9)[2]);
@@ -66,12 +65,12 @@ public class Taastrup2019Test {
 
     @Test
     public void outputEkstrakt() {
-        Koersel.OutputEkstrakt oe = new Koersel.OutputEkstrakt("xx", "crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)");
+        DaisyModel.OutputEkstrakt oe = new DaisyModel.OutputEkstrakt("xx", "crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)");
         assertEquals(oe.filKolonnerMap.get("crop.csv").get(0), "year");
         assertEquals(oe.filKolonnerMap.get("crop_prod.csv").get(1), "Leaf AI");
-        new Koersel.OutputEkstrakt("xx", "crop.csv (*)");
-        new Koersel.OutputEkstrakt("xx", "crop.csv");
-        new Koersel.OutputEkstrakt("crop.csv");
+        new DaisyModel.OutputEkstrakt("xx", "crop.csv (*)");
+        new DaisyModel.OutputEkstrakt("xx", "crop.csv");
+        new DaisyModel.OutputEkstrakt("crop.csv");
     }
 
     @Test

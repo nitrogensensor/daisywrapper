@@ -1,4 +1,4 @@
-package eu.nitrogensensor.daisy;
+package eu.nitrogensensor.daisylib;
 
 
 // Kilde: Jeppes arbejde
