@@ -12,7 +12,7 @@ import java.util.ArrayList;
 public class DaisyMain
 {
 
-  public static void main(String[] args) throws IOException, InterruptedException {
+  public static void main(String[] args) throws IOException {
     System.out.println("hej fra DaisyMain");
 
     DaisyModel d = new DaisyModel("daisy/src/test/resources/Taastrup 2019/dtu_model", "Setup_DTU_Taastrup.dai");
