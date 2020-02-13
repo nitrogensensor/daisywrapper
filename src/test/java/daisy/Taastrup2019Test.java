@@ -19,7 +19,7 @@ public class Taastrup2019Test {
 
 
     @Test
-    public void testFuldKørsel() throws IOException { // burde nok splittes op i stedet for at være jumbo-test. Tager 4 sekunder
+    public void testEnFuldKørsel() throws IOException { // burde nok splittes op i stedet for at være jumbo-test. Tager 4 sekunder
         String scriptFil = "Setup_DTU_Taastrup.dai";
         Path orgMappe = Paths.get("src/test/resources/Taastrup 2019/dtu_model");
         DaisyModel kørsel = new DaisyModel(orgMappe, scriptFil);
@@ -30,7 +30,8 @@ public class Taastrup2019Test {
         kørsel.outputEkstrakt.add(new DaisyModel.OutputEkstrakt("crop-leaf-stem-AI.csv", "crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)"));
         long tid = System.currentTimeMillis();
         Path tmpMappe = Files.createTempDirectory("ns-daisy");
-        kørsel.klargørTilMappe(tmpMappe);
+        kørsel = kørsel.cloneToDirectory(tmpMappe);
+        kørsel.klargørTilMappe2(tmpMappe);
         DaisyInvoker daisyInvoke = new DaisyInvoker();
         daisyInvoke.invokeDaisy(tmpMappe, scriptFil);
         kørsel.læsOutput(tmpMappe);

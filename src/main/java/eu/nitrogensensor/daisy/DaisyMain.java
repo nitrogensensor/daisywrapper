@@ -5,7 +5,6 @@ import eu.nitrogensensor.daisylib.DaisyInvoker;
 import eu.nitrogensensor.daisylib.DaisyModel;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.ExecutorService;
@@ -27,10 +26,10 @@ public class DaisyMain
     //DaisyModel.path_to_daisy_executable =  r'C:\Program Files\Daisy 5.72\bin\Daisy.exe'
     //d.run();
 
-    d.replace("stop 2018 8 20", "stop 2015 8 20"); // for hurtigere kørsel
-    //kørsel0.erstat("stop 2018 8 20", "stop 2019 8 31"); // fuld kørsel
+    d.replace("(stop *)", "(stop 2015 8 20)"); // for hurtigere kørsel
+    //d.erstat("(stop *)", "(stop 2019 8 31)"); // fuld kørsel
     d.replace("(path *)", "(path \"/opt/daisy/sample\" \"/opt/daisy/lib\" \".\" \"./common\")");
-
+    
 
     String[] programmer = {
             "High_N_Low_W",
@@ -39,9 +38,9 @@ public class DaisyMain
             "High_N_High_W",
     };
 
-    //kørsel0.outputEkstrakt.add(new Koersel.OutputEkstrakt("crop-leaf-stem-AI.csv", "crop.csv (year, month, mday, LAI), crop_prod.csv (year, month, mday, Crop AI, Leaf AI, Stem AI)"));
+    //d.outputEkstrakt.add(new Koersel.OutputEkstrakt("crop-leaf-stem-AI.csv", "crop.csv (year, month, mday, LAI), crop_prod.csv (year, month, mday, Crop AI, Leaf AI, Stem AI)"));
     d.outputEkstrakt.add(new DaisyModel.OutputEkstrakt("crop-leaf-stem-AI.csv", "crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)"));
-    //kørsel0.outputfilnavne = new String[]{"crop.csv", "crop_prod.csv" };
+    //d.outputfilnavne = new String[]{"crop.csv", "crop_prod.csv" };
     long tid = System.currentTimeMillis();
 
     ExecutorService executorService = Executors.newWorkStealingPool();
@@ -53,14 +52,14 @@ public class DaisyMain
       Runnable runnable = () -> {
         try {
           if (fejl.get() != null) return;
-          DaisyModel kørsel = d.kopi();
+          //Path tmpMappe = Files.createTempDirectory("ns-daisy");
+          Path tmpMappe = Paths.get("/tmp/p6/out_"+program); // Anden mappe i udviklingsøjemed
+          DaisyModel kørsel = d.cloneToDirectory(tmpMappe);
           kørsel.replace("(run taastrup)", "(run Mark21 (column (\""+program+"\")))");
           kørsel.beskrivelse = program;
-          Path tmpMappe = Files.createTempDirectory("ns-daisy");
-          tmpMappe = Paths.get("/tmp/p6/out_"+program); // Anden mappe i udviklingsøjemed
 
 
-          kørsel.klargørTilMappe(tmpMappe);
+          kørsel.klargørTilMappe2(tmpMappe);
 
           DaisyInvoker daisyInvoke = new DaisyInvoker();
           daisyInvoke.invokeDaisy(tmpMappe, "Setup_DTU_Taastrup.dai");

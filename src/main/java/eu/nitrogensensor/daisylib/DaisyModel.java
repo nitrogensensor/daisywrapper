@@ -10,7 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class DaisyModel implements Cloneable {
-    public final Path orgMappe;
+    public final Path path;
     public final String scriptFil;
     public String beskrivelse;
     private ArrayList<Erstatning> erstatninger = new ArrayList<>();
@@ -20,13 +20,14 @@ public class DaisyModel implements Cloneable {
     }
 
 
-    public DaisyModel(Path orgMappe, String scriptFil) {
-        this.orgMappe = orgMappe;
+    public DaisyModel(Path path, String scriptFil) {
+        this.path = path;
         this.scriptFil = scriptFil;
     }
 
-    /** Opretter en kopi af en kørsel og kopi af dets erstatninger */
-    public DaisyModel kopi() {
+    /** Opretter en kopi af en kørsel og kopi af dets erstatninger
+     * @param tmpMappe*/
+    public DaisyModel cloneToDirectory(Path tmpMappe) throws IOException {
         if (!output.isEmpty()) throw new IllegalStateException("Du bør ikke bruge en kørsel der allerede har output som skabelon for en anden kørsel");
         try {
             DaisyModel kopi = (DaisyModel) this.clone();
@@ -37,6 +38,7 @@ public class DaisyModel implements Cloneable {
                 kopi.outputEkstrakt.add(new OutputEkstrakt(ekstrakt));
             }
             kopi.output = new LinkedHashMap<String, Ouputfilindhold>();
+            Utils.klonMappe(kopi.path, tmpMappe);
             return kopi;
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
@@ -47,7 +49,7 @@ public class DaisyModel implements Cloneable {
     @Override
     public String toString() {
         return "Koersel{" +
-                "orgMappe=" + orgMappe +
+                "orgMappe=" + path +
                 ", scriptFil='" + scriptFil + '\'' +
                 ", erstatninger=" + erstatninger +
                 ", outputfilnavne=" + outputEkstrakt +
@@ -55,11 +57,9 @@ public class DaisyModel implements Cloneable {
                 '}';
     }
 
-    public void klargørTilMappe(Path destMappe) throws IOException {
-        Utils.klonMappe(orgMappe, destMappe);
 
-        String scriptIndholdOrg = new String(Files.readAllBytes(orgMappe.resolve(scriptFil)));
-
+    public void klargørTilMappe2(Path destMappe) throws IOException {
+        String scriptIndholdOrg = new String(Files.readAllBytes(path.resolve(scriptFil)));
         String scriptIndhold = Erstatning.udfør(scriptIndholdOrg, erstatninger);
 
         // Overskriv scriptfil med den, hvor diverse felter er blevet erstattet
