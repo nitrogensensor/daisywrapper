@@ -42,6 +42,7 @@ public class Utils {
     }
 
     public static void sletMappe(Path tilMappe) throws IOException {
+        if (!Files.exists(tilMappe)) return;
         // Slet mappe
         Files.walk(tilMappe)
                 .sorted(Comparator.reverseOrder())

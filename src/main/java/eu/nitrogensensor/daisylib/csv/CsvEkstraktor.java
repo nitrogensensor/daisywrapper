@@ -25,12 +25,12 @@ public class CsvEkstraktor {
 
     /**
      *
-     * @param skrivTilFilnavn Hvilken fil ekstraktet skal skrives til
      * @param indhold Hvilket indhold fra hvilke filer der skal trækkes ud. F.eks. giver "crop.csv (year    month   mday LAI), crop_prod.csv (year    month   mday, Crop AI Leaf AI Stem AI)"
      *                kolonnerne (year    month   mday LAI) fra crop.csv og (year    month   mday, Crop AI Leaf AI Stem AI) fra crop_prod.csv.
      *                "crop.csv (*)" eller blot "crop.csv" giver hele indholdet af en fil
+     * @param skrivTilFilnavn Hvilken fil ekstraktet skal skrives til
      */
-    public CsvEkstraktor(String skrivTilFilnavn, String indhold) {
+    public CsvEkstraktor(String indhold, String skrivTilFilnavn) {
         output.filnavn = skrivTilFilnavn;
 
         Matcher filnavnMatcher = Pattern.compile("[a-zA-Z_. ]+(?![^(]*\\))").matcher(indhold);
@@ -121,9 +121,9 @@ public class CsvEkstraktor {
     }
 
     public static void main(String[] args) {
-        new CsvEkstraktor("xx", "crop.csv (year, month, mday, LAI), crop_prod.csv (year, month, mday, Crop AI, Leaf AI, Stem AI)");
-        new CsvEkstraktor("xx", "crop.csv (*)");
-        new CsvEkstraktor("xx", "crop.csv");
+        new CsvEkstraktor("crop.csv (year, month, mday, LAI), crop_prod.csv (year, month, mday, Crop AI, Leaf AI, Stem AI)", "xx");
+        new CsvEkstraktor("crop.csv (*)", "xx");
+        new CsvEkstraktor("crop.csv", "xx");
         new CsvEkstraktor("crop.csv");
     }
 }

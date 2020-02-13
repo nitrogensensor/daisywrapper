@@ -18,11 +18,11 @@ public class DaisylibTest {
 
     @Test
     public void outputEkstrakt() {
-        CsvEkstraktor oe = new CsvEkstraktor("xx", "crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)");
+        CsvEkstraktor oe = new CsvEkstraktor("crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)", "xx");
         assertEquals(oe.filKolonnerMap.get("crop.csv").get(0), "year");
         assertEquals(oe.filKolonnerMap.get("crop_prod.csv").get(1), "Leaf AI");
-        new CsvEkstraktor("xx", "crop.csv (*)");
-        new CsvEkstraktor("xx", "crop.csv");
+        new CsvEkstraktor("crop.csv (*)", "xx");
+        new CsvEkstraktor("crop.csv", "xx");
         new CsvEkstraktor("crop.csv");
     }
 
