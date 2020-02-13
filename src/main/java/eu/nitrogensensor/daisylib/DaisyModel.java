@@ -12,9 +12,8 @@ import java.util.*;
 public class DaisyModel implements Cloneable {
     public Path directory;
     public String scriptFil;
-    private String scriptIndhold;
-    private boolean scriptIndholdÆndret;
     public String beskrivelse;
+    private ArrayList<Erstatning> erstatninger = new ArrayList<>();
 
     public DaisyModel(String directory, String daisyInputfile) throws IOException {
         this(Paths.get(directory), daisyInputfile);
@@ -24,7 +23,7 @@ public class DaisyModel implements Cloneable {
     public DaisyModel(Path directory, String daisyInputfile) throws IOException {
         this.directory = directory;
         this.scriptFil = daisyInputfile;
-        scriptIndhold = new String(Files.readAllBytes(directory.resolve(scriptFil)));
+        beskrivelse = daisyInputfile;
     }
 
     /** Opretter en kopi af en kørsel og kopi af dets erstatninger
@@ -59,8 +58,7 @@ public class DaisyModel implements Cloneable {
 
 
     public DaisyModel replace(String søgestreng, String erstatning) {
-        scriptIndhold = Erstatning.erstat(this.scriptIndhold, søgestreng, erstatning);
-        scriptIndholdÆndret = true;
+        erstatninger.add(new Erstatning(søgestreng, erstatning));
         return this;
     }
 
@@ -79,10 +77,12 @@ public class DaisyModel implements Cloneable {
     public void run() throws IOException {
         DaisyInvoker daisyInvoke = new DaisyInvoker();
 
-        if (scriptIndholdÆndret) {
+        if (erstatninger.size()>0) {
+            String scriptIndhold = new String(Files.readAllBytes(directory.resolve(scriptFil)));
+            for (Erstatning e : erstatninger) scriptIndhold = e.erstat(scriptIndhold);
             Path scriptfilITmp = Files.createTempFile(directory, "replaced", scriptFil);
             Files.write(scriptfilITmp, scriptIndhold.getBytes());
-            daisyInvoke.invokeDaisy(directory, scriptfilITmp.toString());
+            daisyInvoke.invokeDaisy(directory, directory.relativize(scriptfilITmp).toString());
             Files.delete(scriptfilITmp);
         } else {
             daisyInvoke.invokeDaisy(directory, scriptFil);

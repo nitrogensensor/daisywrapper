@@ -13,6 +13,18 @@ import java.util.regex.Pattern;
 class Erstatning {
 
 
+    private final String søgestreng;
+    private final String erstatning;
+
+    public Erstatning(String søgestreng, String erstatning) {
+        this.søgestreng = søgestreng;
+        this.erstatning = erstatning;
+    }
+
+    public String erstat(String scriptIndhold) {
+        return erstat(scriptIndhold, søgestreng, erstatning);
+    }
+
     /**
      * Finder første position af en operator, f.eks +, -, * eller /.
      * Går uden om de operatorer, der er inde i en parentes.
