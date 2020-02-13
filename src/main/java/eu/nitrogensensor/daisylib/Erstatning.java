@@ -1,6 +1,7 @@
 package eu.nitrogensensor.daisylib;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -10,20 +11,6 @@ import java.util.regex.Pattern;
  * Søgestrengene kan være simple søgeudtryk eller regex
  */
 public class Erstatning {
-    public final String søgestreng;
-    public final String erstatning;
-
-    public Erstatning(String søgestreng, String erstatning) {
-        this.søgestreng = søgestreng;
-        this.erstatning = erstatning;
-    }
-
-    public static String udfør(String scriptIndhold, ArrayList<Erstatning> erstatningsliste) throws IOException {
-        for (Erstatning e : erstatningsliste) {
-            scriptIndhold = e.erstat(scriptIndhold);
-        }
-        return scriptIndhold;
-    }
 
 
     /**
@@ -44,9 +31,7 @@ public class Erstatning {
         return -1; // tegn ikke fundet udenfor parenteser
     }
 
-
-    public String erstat(String scriptIndhold) throws IOException {
-
+    public static String erstat(String scriptIndhold, String søgestreng, String erstatning) {
         // Prøv først super simpel erstatning
         int pos = scriptIndhold.indexOf(søgestreng);
         if (pos!=-1) {
@@ -59,9 +44,9 @@ public class Erstatning {
         {
             String søgEfterDirektivStart = søgestreng.substring(0, søgestreng.length()-2);
             int start = scriptIndhold.indexOf(søgEfterDirektivStart);
-            if (start==-1) throw new IOException("Start på direktiv ikke fundet: "+søgEfterDirektivStart);
+            if (start==-1) throw new IllegalArgumentException("Start på direktiv ikke fundet: "+søgEfterDirektivStart);
             int slutparentes = findUdenforParenteser(')', scriptIndhold, start+1);
-            if (slutparentes==-1) throw new IOException("Slut på direktiv ikke fundet: "+søgestreng);
+            if (slutparentes==-1) throw new IllegalArgumentException("Slut på direktiv ikke fundet: "+søgestreng);
 
             StringBuilder sb = new StringBuilder(scriptIndhold.length()+128);
             sb.append(scriptIndhold.substring(0, start));
@@ -83,6 +68,6 @@ public class Erstatning {
             return sb.toString();
         }
 
-        throw new IOException("Søgestreng ikke fundet: "+søgestreng);
+        throw new IllegalArgumentException("Søgestreng ikke fundet: "+søgestreng);
     }
 }

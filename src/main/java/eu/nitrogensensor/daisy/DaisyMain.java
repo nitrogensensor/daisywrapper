@@ -1,8 +1,8 @@
 package eu.nitrogensensor.daisy;
 
 
-import eu.nitrogensensor.daisylib.DaisyInvoker;
 import eu.nitrogensensor.daisylib.DaisyModel;
+import eu.nitrogensensor.daisylib.OutputEkstrakt;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -29,7 +29,7 @@ public class DaisyMain
     d.replace("(stop *)", "(stop 2015 8 20)"); // for hurtigere kørsel
     //d.erstat("(stop *)", "(stop 2019 8 31)"); // fuld kørsel
     d.replace("(path *)", "(path \"/opt/daisy/sample\" \"/opt/daisy/lib\" \".\" \"./common\")");
-    
+    d.run();
 
     String[] programmer = {
             "High_N_Low_W",
@@ -38,9 +38,7 @@ public class DaisyMain
             "High_N_High_W",
     };
 
-    //d.outputEkstrakt.add(new Koersel.OutputEkstrakt("crop-leaf-stem-AI.csv", "crop.csv (year, month, mday, LAI), crop_prod.csv (year, month, mday, Crop AI, Leaf AI, Stem AI)"));
-    d.outputEkstrakt.add(new DaisyModel.OutputEkstrakt("crop-leaf-stem-AI.csv", "crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)"));
-    //d.outputfilnavne = new String[]{"crop.csv", "crop_prod.csv" };
+    d.outputEkstrakt.add(new OutputEkstrakt("crop-leaf-stem-AI.csv", "crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)"));
     long tid = System.currentTimeMillis();
 
     ExecutorService executorService = Executors.newWorkStealingPool();
@@ -59,19 +57,17 @@ public class DaisyMain
           kørsel.beskrivelse = program;
 
 
-          kørsel.klargørTilMappe2(tmpMappe);
+          kørsel.run();
 
-          DaisyInvoker daisyInvoke = new DaisyInvoker();
-          daisyInvoke.invokeDaisy(tmpMappe, "Setup_DTU_Taastrup.dai");
 
 
           kørsel.læsOutput(tmpMappe);
 
-          for (DaisyModel.OutputEkstrakt ekstrakt1 : kørsel.outputEkstrakt) {
+          for (OutputEkstrakt ekstrakt1 : kørsel.outputEkstrakt) {
               ekstrakt1.lavUdtræk(kørsel.output);
           }
 
-          for (DaisyModel.OutputEkstrakt ekstrakt : kørsel.outputEkstrakt) {
+          for (OutputEkstrakt ekstrakt : kørsel.outputEkstrakt) {
             // Skriv outputfil med ekstrakt
             Path fil = tmpMappe.resolve(ekstrakt.output.filnavn);
             String skilletegn = ", ";

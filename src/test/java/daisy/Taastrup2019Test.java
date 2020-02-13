@@ -1,9 +1,7 @@
 package daisy;
 
 
-import eu.nitrogensensor.daisylib.DaisyInvoker;
-import eu.nitrogensensor.daisylib.Erstatning;
-import eu.nitrogensensor.daisylib.DaisyModel;
+import eu.nitrogensensor.daisylib.*;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -27,15 +25,14 @@ public class Taastrup2019Test {
         kørsel.replace("(path *)", "(path \"/opt/daisy/sample\" \"/opt/daisy/lib\" \".\" \"./common\")");
         kørsel.replace("(run taastrup)", "(run Mark21 (column (\"High_N_High_W\")))");
 
-        kørsel.outputEkstrakt.add(new DaisyModel.OutputEkstrakt("crop-leaf-stem-AI.csv", "crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)"));
+        kørsel.outputEkstrakt.add(new OutputEkstrakt("crop-leaf-stem-AI.csv", "crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)"));
         long tid = System.currentTimeMillis();
         Path tmpMappe = Files.createTempDirectory("ns-daisy");
         kørsel = kørsel.cloneToDirectory(tmpMappe);
-        kørsel.klargørTilMappe2(tmpMappe);
-        DaisyInvoker daisyInvoke = new DaisyInvoker();
-        daisyInvoke.invokeDaisy(tmpMappe, scriptFil);
+
+        kørsel.run();
         kørsel.læsOutput(tmpMappe);
-        for (DaisyModel.OutputEkstrakt ekstrakt1 : kørsel.outputEkstrakt) {
+        for (OutputEkstrakt ekstrakt1 : kørsel.outputEkstrakt) {
             ekstrakt1.lavUdtræk(kørsel.output);
         }
 
@@ -49,7 +46,7 @@ public class Taastrup2019Test {
 
         // Linje 10 bør være
         // 2015, 1, 10, 00.00, 00.00, 00.00, 00.00
-        DaisyModel.OutputEkstrakt ekstrakt = kørsel.outputEkstrakt.get(0);
+        OutputEkstrakt ekstrakt = kørsel.outputEkstrakt.get(0);
         assertEquals("2015", ekstrakt.output.data.get(9)[0]);
         assertEquals("1", ekstrakt.output.data.get(9)[1]);
         assertEquals("10", ekstrakt.output.data.get(9)[2]);
@@ -61,17 +58,18 @@ public class Taastrup2019Test {
         assertTrue(Files.exists(fil));
 
         System.out.printf("Det tog %.1f sek\n", (System.currentTimeMillis()-tid)/1000.0);
-//        Utils.sletMappe(tmpMappe);
+        Utils.sletMappe(tmpMappe);
     }
+
 
     @Test
     public void outputEkstrakt() {
-        DaisyModel.OutputEkstrakt oe = new DaisyModel.OutputEkstrakt("xx", "crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)");
+        OutputEkstrakt oe = new OutputEkstrakt("xx", "crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)");
         assertEquals(oe.filKolonnerMap.get("crop.csv").get(0), "year");
         assertEquals(oe.filKolonnerMap.get("crop_prod.csv").get(1), "Leaf AI");
-        new DaisyModel.OutputEkstrakt("xx", "crop.csv (*)");
-        new DaisyModel.OutputEkstrakt("xx", "crop.csv");
-        new DaisyModel.OutputEkstrakt("crop.csv");
+        new OutputEkstrakt("xx", "crop.csv (*)");
+        new OutputEkstrakt("xx", "crop.csv");
+        new OutputEkstrakt("crop.csv");
     }
 
     @Test
@@ -81,11 +79,10 @@ public class Taastrup2019Test {
         String scriptIndholdOrg = new String(Files.readAllBytes(orgMappe.resolve(scriptFil)));
 
         // sammenlign udkommet af simpel erstatning med regex erstatning
-        String simpelRes = new Erstatning("(path *)", "(path \"/opt/daisy/sample\" \"/opt/daisy/lib\" \".\" \"./common\")").erstat(scriptIndholdOrg);
-        String regExpRes = new Erstatning("\\(path .+?\\)", "(path \"/opt/daisy/sample\" \"/opt/daisy/lib\" \".\" \"./common\")").erstat(scriptIndholdOrg);
+        String simpelRes = Erstatning.erstat(scriptIndholdOrg,"(path *)", "(path \"/opt/daisy/sample\" \"/opt/daisy/lib\" \".\" \"./common\")");
+        String regExpRes = Erstatning.erstat(scriptIndholdOrg,"\\(path .+?\\)", "(path \"/opt/daisy/sample\" \"/opt/daisy/lib\" \".\" \"./common\")");
         //System.out.println(regExpRes.substring(0,200));
         //System.out.println(simpelRes.substring(0,200));
-
 
         assertEquals(regExpRes,simpelRes);
     }
