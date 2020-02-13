@@ -8,7 +8,7 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Properties;
 
-public class DaisyInvoker {
+class DaisyInvoker {
     public void invokeDaisy(Path mappe, String inputFil) throws IOException {
         Properties prop = new Properties();
         InputStream input = DaisyInvoker.class.getClassLoader().getResourceAsStream("daisy.properties");

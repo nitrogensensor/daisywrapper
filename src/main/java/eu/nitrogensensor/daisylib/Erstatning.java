@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
  * Beskriver en erstatning af en tekst i en inputfil med en anden
  * Søgestrengene kan være simple søgeudtryk eller regex
  */
-public class Erstatning {
+class Erstatning {
 
 
     /**

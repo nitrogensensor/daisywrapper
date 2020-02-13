@@ -1,5 +1,8 @@
 package eu.nitrogensensor.daisylib;
 
+import eu.nitrogensensor.daisylib.csv.CsvFile;
+import eu.nitrogensensor.daisylib.csv.CsvEkstraktor;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,11 +33,11 @@ public class DaisyModel implements Cloneable {
         if (!output.isEmpty()) throw new IllegalStateException("Du bør ikke bruge en kørsel der allerede har output som skabelon for en anden kørsel");
         try {
             DaisyModel kopi = (DaisyModel) this.clone();
-            kopi.outputEkstrakt = new ArrayList<OutputEkstrakt>();
-            for (OutputEkstrakt ekstrakt : outputEkstrakt) {
-                kopi.outputEkstrakt.add(new OutputEkstrakt(ekstrakt));
+            kopi.csvEkstraktor = new ArrayList<CsvEkstraktor>();
+            for (CsvEkstraktor ekstrakt : csvEkstraktor) {
+                kopi.csvEkstraktor.add(new CsvEkstraktor(ekstrakt));
             }
-            kopi.output = new LinkedHashMap<String, Ouputfilindhold>();
+            kopi.output = new LinkedHashMap<String, CsvFile>();
             kopi.directory = newFolder;
             Utils.klonMappe(directory, kopi.directory);
             return kopi;
@@ -49,7 +52,7 @@ public class DaisyModel implements Cloneable {
         return "Koersel{" +
                 "orgMappe=" + directory +
                 ", scriptFil='" + scriptFil + '\'' +
-                ", outputfilnavne=" + outputEkstrakt +
+                ", outputfilnavne=" + csvEkstraktor +
                 ", output=" + output +
                 '}';
     }
@@ -64,12 +67,12 @@ public class DaisyModel implements Cloneable {
 
     public void læsOutput(Path tmpMappe) throws IOException {
         HashSet<String> outputfilnavne = new HashSet<>();
-        for (OutputEkstrakt outputEkstrakt : outputEkstrakt) {
-            outputfilnavne.addAll(outputEkstrakt.filKolonnerMap.keySet());
+        for (CsvEkstraktor csvEkstraktor : this.csvEkstraktor) {
+            outputfilnavne.addAll(csvEkstraktor.filKolonnerMap.keySet());
         }
         for (String filnavn : outputfilnavne) {
-            Ouputfilindhold ouputfilindhold = new Ouputfilindhold(tmpMappe, filnavn);
-            output.put(filnavn, ouputfilindhold);
+            CsvFile csvFile = new CsvFile(tmpMappe, filnavn);
+            output.put(filnavn, csvFile);
         }
     }
 
@@ -87,7 +90,7 @@ public class DaisyModel implements Cloneable {
     }
 
 
-    public Map<String, Ouputfilindhold> output = new LinkedHashMap<String, Ouputfilindhold>();
+    public Map<String, CsvFile> output = new LinkedHashMap<String, CsvFile>();
 
-    public ArrayList<OutputEkstrakt> outputEkstrakt = new ArrayList<>();
+    public ArrayList<CsvEkstraktor> csvEkstraktor = new ArrayList<>();
 }

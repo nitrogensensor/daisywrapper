@@ -1,7 +1,8 @@
-package daisy;
+package eu.nitrogensensor.daisylib;
 
 
 import eu.nitrogensensor.daisylib.*;
+import eu.nitrogensensor.daisylib.csv.CsvEkstraktor;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -25,14 +26,14 @@ public class Taastrup2019Test {
         kørsel.replace("(path *)", "(path \"/opt/daisy/sample\" \"/opt/daisy/lib\" \".\" \"./common\")");
         kørsel.replace("(run taastrup)", "(run Mark21 (column (\"High_N_High_W\")))");
 
-        kørsel.outputEkstrakt.add(new OutputEkstrakt("crop-leaf-stem-AI.csv", "crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)"));
+        kørsel.csvEkstraktor.add(new CsvEkstraktor("crop-leaf-stem-AI.csv", "crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)"));
         long tid = System.currentTimeMillis();
         Path tmpMappe = Files.createTempDirectory("ns-daisy");
         kørsel = kørsel.cloneToDirectory(tmpMappe);
 
         kørsel.run();
         kørsel.læsOutput(tmpMappe);
-        for (OutputEkstrakt ekstrakt1 : kørsel.outputEkstrakt) {
+        for (CsvEkstraktor ekstrakt1 : kørsel.csvEkstraktor) {
             ekstrakt1.lavUdtræk(kørsel.output);
         }
 
@@ -46,7 +47,7 @@ public class Taastrup2019Test {
 
         // Linje 10 bør være
         // 2015, 1, 10, 00.00, 00.00, 00.00, 00.00
-        OutputEkstrakt ekstrakt = kørsel.outputEkstrakt.get(0);
+        CsvEkstraktor ekstrakt = kørsel.csvEkstraktor.get(0);
         assertEquals("2015", ekstrakt.output.data.get(9)[0]);
         assertEquals("1", ekstrakt.output.data.get(9)[1]);
         assertEquals("10", ekstrakt.output.data.get(9)[2]);
@@ -60,31 +61,4 @@ public class Taastrup2019Test {
         System.out.printf("Det tog %.1f sek\n", (System.currentTimeMillis()-tid)/1000.0);
         Utils.sletMappe(tmpMappe);
     }
-
-
-    @Test
-    public void outputEkstrakt() {
-        OutputEkstrakt oe = new OutputEkstrakt("xx", "crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)");
-        assertEquals(oe.filKolonnerMap.get("crop.csv").get(0), "year");
-        assertEquals(oe.filKolonnerMap.get("crop_prod.csv").get(1), "Leaf AI");
-        new OutputEkstrakt("xx", "crop.csv (*)");
-        new OutputEkstrakt("xx", "crop.csv");
-        new OutputEkstrakt("crop.csv");
-    }
-
-    @Test
-    public void simpelErstatningVsRegex() throws IOException {
-        String scriptFil = "Setup_DTU_Taastrup.dai";
-        Path orgMappe = Paths.get("src/test/resources/Taastrup 2019/dtu_model");
-        String scriptIndholdOrg = new String(Files.readAllBytes(orgMappe.resolve(scriptFil)));
-
-        // sammenlign udkommet af simpel erstatning med regex erstatning
-        String simpelRes = Erstatning.erstat(scriptIndholdOrg,"(path *)", "(path \"/opt/daisy/sample\" \"/opt/daisy/lib\" \".\" \"./common\")");
-        String regExpRes = Erstatning.erstat(scriptIndholdOrg,"\\(path .+?\\)", "(path \"/opt/daisy/sample\" \"/opt/daisy/lib\" \".\" \"./common\")");
-        //System.out.println(regExpRes.substring(0,200));
-        //System.out.println(simpelRes.substring(0,200));
-
-        assertEquals(regExpRes,simpelRes);
-    }
-
 }

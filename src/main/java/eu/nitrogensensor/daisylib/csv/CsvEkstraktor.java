@@ -1,4 +1,4 @@
-package eu.nitrogensensor.daisylib;
+package eu.nitrogensensor.daisylib.csv;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -6,12 +6,12 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class OutputEkstrakt {
+public class CsvEkstraktor {
     public LinkedHashMap<String, ArrayList<String>> filKolonnerMap = new LinkedHashMap<String, ArrayList<String>>();
     public final LinkedHashMap<String, ArrayList<Integer>> filKolonneIndexMap = new LinkedHashMap<String, ArrayList<Integer>>();
-    public final Ouputfilindhold output = new Ouputfilindhold();
+    public final CsvFile output = new CsvFile();
 
-    public OutputEkstrakt(OutputEkstrakt org) {
+    public CsvEkstraktor(CsvEkstraktor org) {
         filKolonnerMap = (LinkedHashMap<String, ArrayList<String>>) org.filKolonnerMap.clone();
         output.filnavn = org.output.filnavn;
     }
@@ -30,7 +30,7 @@ public class OutputEkstrakt {
      *                kolonnerne (year    month   mday LAI) fra crop.csv og (year    month   mday, Crop AI Leaf AI Stem AI) fra crop_prod.csv.
      *                "crop.csv (*)" eller blot "crop.csv" giver hele indholdet af en fil
      */
-    public OutputEkstrakt(String skrivTilFilnavn, String indhold) {
+    public CsvEkstraktor(String skrivTilFilnavn, String indhold) {
         output.filnavn = skrivTilFilnavn;
 
         Matcher filnavnMatcher = Pattern.compile("[a-zA-Z_. ]+(?![^(]*\\))").matcher(indhold);
@@ -57,7 +57,7 @@ public class OutputEkstrakt {
     }
 
     // Trækker en bestemt fil ud
-    public OutputEkstrakt(String filnavn) {
+    public CsvEkstraktor(String filnavn) {
         this(filnavn, filnavn);
     }
 
@@ -79,12 +79,12 @@ public class OutputEkstrakt {
 
     private static final boolean FILPRÆFIX_PÅ_KOLONNER = false;
 
-    public void lavUdtræk(Map<String, Ouputfilindhold> output) {
-        OutputEkstrakt ekstrakt = this;
+    public void lavUdtræk(Map<String, CsvFile> output) {
+        CsvEkstraktor ekstrakt = this;
         // Opbyg liste over kolonner og enheder
         int antalRækker = -1;
         for (String filnavn : ekstrakt.filKolonnerMap.keySet()) {
-            Ouputfilindhold outputfil = output.get(filnavn);
+            CsvFile outputfil = output.get(filnavn);
             for (String kol : ekstrakt.filKolonnerMap.get(filnavn)) {
                 if (FILPRÆFIX_PÅ_KOLONNER)
                     ekstrakt.output.kolonnenavne.add(filnavn + ":" + kol);
@@ -109,7 +109,7 @@ public class OutputEkstrakt {
             String[] datalineE = new String[ekstrakt.output.kolonnenavne.size()];
             int kolE = 0;
             for (String filnavn : ekstrakt.filKolonnerMap.keySet()) {
-                Ouputfilindhold outputfil = output.get(filnavn);
+                CsvFile outputfil = output.get(filnavn);
                 for (int kol1 : ekstrakt.filKolonneIndexMap.get(filnavn)) {
                     // Tag højde for at nogle af de sidste kolonner i en Daisy CSV fil kan være tomme
                     datalineE[kolE] = outputfil.data.get(række).length <= kol1 ? "" : outputfil.data.get(række)[kol1];
@@ -121,9 +121,9 @@ public class OutputEkstrakt {
     }
 
     public static void main(String[] args) {
-        new OutputEkstrakt("xx", "crop.csv (year, month, mday, LAI), crop_prod.csv (year, month, mday, Crop AI, Leaf AI, Stem AI)");
-        new OutputEkstrakt("xx", "crop.csv (*)");
-        new OutputEkstrakt("xx", "crop.csv");
-        new OutputEkstrakt("crop.csv");
+        new CsvEkstraktor("xx", "crop.csv (year, month, mday, LAI), crop_prod.csv (year, month, mday, Crop AI, Leaf AI, Stem AI)");
+        new CsvEkstraktor("xx", "crop.csv (*)");
+        new CsvEkstraktor("xx", "crop.csv");
+        new CsvEkstraktor("crop.csv");
     }
 }

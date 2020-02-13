@@ -2,7 +2,7 @@ package eu.nitrogensensor.daisy;
 
 
 import eu.nitrogensensor.daisylib.DaisyModel;
-import eu.nitrogensensor.daisylib.OutputEkstrakt;
+import eu.nitrogensensor.daisylib.csv.CsvEkstraktor;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -38,7 +38,7 @@ public class DaisyMain
             "High_N_High_W",
     };
 
-    d.outputEkstrakt.add(new OutputEkstrakt("crop-leaf-stem-AI.csv", "crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)"));
+    d.csvEkstraktor.add(new CsvEkstraktor("crop-leaf-stem-AI.csv", "crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)"));
     long tid = System.currentTimeMillis();
 
     ExecutorService executorService = Executors.newWorkStealingPool();
@@ -63,11 +63,11 @@ public class DaisyMain
 
           kørsel.læsOutput(tmpMappe);
 
-          for (OutputEkstrakt ekstrakt1 : kørsel.outputEkstrakt) {
+          for (CsvEkstraktor ekstrakt1 : kørsel.csvEkstraktor) {
               ekstrakt1.lavUdtræk(kørsel.output);
           }
 
-          for (OutputEkstrakt ekstrakt : kørsel.outputEkstrakt) {
+          for (CsvEkstraktor ekstrakt : kørsel.csvEkstraktor) {
             // Skriv outputfil med ekstrakt
             Path fil = tmpMappe.resolve(ekstrakt.output.filnavn);
             String skilletegn = ", ";

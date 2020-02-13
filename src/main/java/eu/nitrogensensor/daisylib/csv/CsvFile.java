@@ -1,4 +1,4 @@
-package eu.nitrogensensor.daisylib;
+package eu.nitrogensensor.daisylib.csv;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -7,17 +7,17 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class Ouputfilindhold {
+public class CsvFile {
     public String filnavn;
     public String header;
     public ArrayList<String> kolonnenavne = new ArrayList<>();
     public ArrayList<String> enheder = new ArrayList<>();
     public ArrayList<String[]> data = new ArrayList<>();
 
-    public Ouputfilindhold() {
+    public CsvFile() {
     }
 
-    public Ouputfilindhold(Path tmpMappe, String filnavn) throws IOException {
+    public CsvFile(Path tmpMappe, String filnavn) throws IOException {
         this.filnavn = filnavn;
         String csv = new String(Files.readAllBytes(tmpMappe.resolve(filnavn)));
         String[] csvsplit = csv.split("--------------------");
