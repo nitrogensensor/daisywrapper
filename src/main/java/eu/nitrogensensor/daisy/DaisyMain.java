@@ -4,6 +4,7 @@ package eu.nitrogensensor.daisy;
 import eu.nitrogensensor.daisylib.DaisyModel;
 import eu.nitrogensensor.daisylib.DaisyModelExecution;
 import eu.nitrogensensor.daisylib.ResultExtractor;
+import eu.nitrogensensor.executionservice.DaisyModelRemoteExecution;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -37,24 +38,25 @@ public class DaisyMain
     };
     ArrayList<DaisyModel> daisyModels = new ArrayList<>();
     for (String program : programmer) {
-      DaisyModel kørsel = d.cloneToDirectory(Paths.get("daisy/run/tmp/out_" + program))
+      DaisyModel kørsel = d.clon()//.toDirectory(Paths.get("daisy/run/tmp/out_" + program))
               .setId(program)
               .replace("(run taastrup)", "(run Mark21 (column (\"" + program + "\")))");
       daisyModels.add(kørsel);
     }
 
-    long tid = System.currentTimeMillis();
-    //DaisyModelExecution.runSerial(daisyModels);
-    DaisyModelExecution.runParralel(daisyModels);
-    System.out.printf("Det tog %.1f sek\n", (System.currentTimeMillis()-tid)/1000.0);
-
     ResultExtractor re = new ResultExtractor();
     re.addCsvExtractor("crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)", "crop-leaf-stem-AI.csv");
     re.addFile("harvest.csv");
 
+    long tid = System.currentTimeMillis();
+    //DaisyModelExecution.runSerial(daisyModels);
+    //DaisyModelExecution.runParralel(daisyModels);
+    DaisyModelRemoteExecution.runSerial(daisyModels, re, Paths.get("daisy/run/remoteRes"));
+    System.out.printf("Det tog %.1f sek\n", (System.currentTimeMillis()-tid)/1000.0);
+
+
     for (DaisyModel kørsel : daisyModels) {
       re.extract(kørsel.directory, Paths.get("daisy/run/res_"+kørsel.getId()));
     }
-
   }
 }

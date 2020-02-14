@@ -275,7 +275,7 @@
   (manager Mark21-all)
   (weather Taastrup)
   (time 2014 2 1)
-  (stop 2018 8 20)
+  (stop 2019 8 31)
 (activate_output (after 2015 1 1 0))
 
 (log_time_columns year month mday hour minute second)

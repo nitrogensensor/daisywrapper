@@ -34,15 +34,12 @@ public class DaisyModel implements Cloneable {
         return id;
     }
 
-    /** Opretter en kopi af en kørsel og kopi af dets erstatninger
-     * @param newFolder*/
-    public DaisyModel cloneToDirectory(Path newFolder) throws IOException {
+    /** Opretter en kopi af en kørsel og kopi af dets erstatninger r*/
+    public DaisyModel clon() {
         try {
             DaisyModel kopi = (DaisyModel) this.clone();
             kopi.erstatninger = (ArrayList<Erstatning>) erstatninger.clone();
-            kopi.directory = newFolder;
             kopi.id = UUID.randomUUID().toString();
-            Utils.klonMappe(directory, kopi.directory);
             return kopi;
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
@@ -50,6 +47,13 @@ public class DaisyModel implements Cloneable {
         }
     }
 
+    /** Opretter en kopi af en kørsel og kopi af dets erstatninger
+     * @param newFolder*/
+    public DaisyModel toDirectory(Path newFolder) throws IOException {
+        Utils.klonMappe(directory, newFolder);
+        directory = newFolder;
+        return this;
+    }
     @Override
     public String toString() {
         return "Koersel{" +

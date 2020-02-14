@@ -12,7 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ResultExtractor {
-    HashSet<String> outputfilnavne = new HashSet<>();
+    public HashSet<String> outputfilnavne = new HashSet<>();
 
     public ArrayList<CsvEkstraktor> csvEkstraktors = new ArrayList<>();
     public ArrayList<String> kopiérFiler = new ArrayList<>();
