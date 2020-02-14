@@ -55,7 +55,7 @@ public class CsvFile {
     }
 
 
-    static void printRække(String skilletegn, ArrayList<String> række, BufferedWriter bufferedWriter) throws IOException {
+    static void printRække(String skilletegn, ArrayList<String> række, Appendable bufferedWriter) throws IOException {
         boolean førsteKolonne = true;
         for (String k : række) {
             if (!førsteKolonne) bufferedWriter.append(skilletegn);
@@ -65,7 +65,7 @@ public class CsvFile {
         bufferedWriter.append('\n');
     }
 
-    static void printRække(String skilletegn, String[] række, BufferedWriter bufferedWriter) throws IOException {
+    static void printRække(String skilletegn, String[] række, Appendable bufferedWriter) throws IOException {
         boolean førsteKolonne = true;
         for (String k : række) {
             if (!førsteKolonne) bufferedWriter.append(skilletegn);
@@ -78,12 +78,16 @@ public class CsvFile {
     public void skrivDatafil(Path fil, String skilletegn, String header) throws IOException {
         Files.deleteIfExists(fil);
         BufferedWriter bufferedWriter = Files.newBufferedWriter(fil);
+        skrivData(bufferedWriter, skilletegn, header);
+        bufferedWriter.close();
+    }
+
+    public void skrivData(Appendable bufferedWriter, String skilletegn, String header) throws IOException {
         bufferedWriter.append(header);
         printRække(skilletegn, kolonnenavne, bufferedWriter);
         printRække(skilletegn, enheder, bufferedWriter);
         for (String[] datarække : data) {
             printRække(skilletegn, datarække, bufferedWriter);
         }
-        bufferedWriter.close();
     }
 }

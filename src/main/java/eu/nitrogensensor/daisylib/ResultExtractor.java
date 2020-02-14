@@ -6,10 +6,7 @@ import eu.nitrogensensor.daisylib.csv.CsvFile;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 public class ResultExtractor {
     public HashSet<String> outputfilnavne = new HashSet<>();
@@ -60,6 +57,32 @@ public class ResultExtractor {
             String skilletegn = ", ";
             String header = "# Udtræk af "+ekstrakt.filKolonnerMap + "\n";
             ekstrakt.output.skrivDatafil(fil, skilletegn, header);
+        }
+
+    }
+
+    public void extract(Path fromDirectory, HashMap<String,String> fileContensMap) throws IOException {
+
+        for (String fn : kopiérFiler) {
+            fileContensMap.put(fn, new String(Files.readAllBytes(fromDirectory.resolve(fn))));
+        }
+
+        for (String filnavn : outputfilnavne) {
+            CsvFile csvFile = new CsvFile(fromDirectory, filnavn);
+            readOutput.put(filnavn, csvFile);
+        }
+
+        for (CsvEkstraktor ekstrakt1 : this.csvEkstraktors) {
+            ekstrakt1.lavUdtræk(readOutput);
+        }
+
+        // Generér HashMap med outputfiler med ekstrakt
+        for (CsvEkstraktor ekstrakt : this.csvEkstraktors) {
+            String skilletegn = ", ";
+            String header = "# Udtræk af "+ekstrakt.filKolonnerMap + "\n";
+            StringBuilder sb = new StringBuilder();
+            ekstrakt.output.skrivData(sb, skilletegn, header);
+            fileContensMap.put(ekstrakt.output.filnavn, sb.toString());
         }
 
     }

@@ -1,26 +1,35 @@
 package eu.nitrogensensor.executionservice;
 
+import com.google.gson.Gson;
 import eu.nitrogensensor.daisylib.DaisyModel;
 import eu.nitrogensensor.daisylib.ResultExtractor;
-import kong.unirest.HttpRequestWithBody;
 import kong.unirest.HttpResponse;
 import kong.unirest.MultipartBody;
+import kong.unirest.ObjectMapper;
 import kong.unirest.Unirest;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 public class DaisyModelRemoteExecution {
 
-    public static void runSerial(ArrayList<DaisyModel> daisyModels, ResultExtractor resultExtractor, Path result) throws IOException {
+    public static ArrayList<ExtractedContent> runSerial(ArrayList<DaisyModel> daisyModels, ResultExtractor resultExtractor, Path result) throws IOException {
+
+        Unirest.config().setObjectMapper(new ObjectMapper() {
+            private Gson gson = MyGsonPathConverter.buildGson();
+
+            @Override
+            public <T> T readValue(String value, Class<T> valueType) {
+                return gson.fromJson(value, valueType);
+            }
+
+            @Override
+            public String writeValue(Object value) {
+                return gson.toJson(value);
+            }
+        });
 
         Path dir = getDirectory(daisyModels);
         Server.start();
@@ -41,23 +50,29 @@ public class DaisyModelRemoteExecution {
         batch.oploadId = oploadRes.getBody();
         batch.resultExtractor = resultExtractor;
 
+        ArrayList<ExtractedContent> extractedContents = new ArrayList<>();
         int kørselsNr = 0;
         for (DaisyModel kørsel : daisyModels) {
             kørselsNr++;
 
-           // batch.kørsel = kørsel;
+            // Fjern irrelecante oplysninger fra det objekt der sendes over netværket
+            batch.kørsel = kørsel.clon();
+            batch.kørsel.directory = null;
+            batch.kørsel.setId(null);
 
-            HttpResponse<String> response = Unirest.post(Server.url + "/sim/")
+            HttpResponse<ExtractedContent> response = Unirest.post(Server.url + "/sim/")
                     .body(batch)
-                    .asString();
-            //System.exit(0);
+                    .asObject(ExtractedContent.class);
+            if (!response.isSuccess()) throw new IOException(response.getStatusText());
+            ExtractedContent extractedContent = response.getBody();
 
-            if (!response.isSuccess()) throw new IOException(response.getBody());
-            break;
+            extractedContent.id = kørsel.getId();
+
+            extractedContents.add(extractedContent);
         }
-
-        System.exit(0);
         Server.stop();
+
+        return extractedContents;
     }
 
 

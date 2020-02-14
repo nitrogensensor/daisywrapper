@@ -4,9 +4,13 @@ package eu.nitrogensensor.daisy;
 import eu.nitrogensensor.daisylib.DaisyModel;
 import eu.nitrogensensor.daisylib.DaisyModelExecution;
 import eu.nitrogensensor.daisylib.ResultExtractor;
+import eu.nitrogensensor.daisylib.Utils;
 import eu.nitrogensensor.executionservice.DaisyModelRemoteExecution;
+import eu.nitrogensensor.executionservice.ExtractedContent;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
@@ -51,12 +55,26 @@ public class DaisyMain
     long tid = System.currentTimeMillis();
     //DaisyModelExecution.runSerial(daisyModels);
     //DaisyModelExecution.runParralel(daisyModels);
-    DaisyModelRemoteExecution.runSerial(daisyModels, re, Paths.get("daisy/run/remoteRes"));
+    ArrayList<ExtractedContent> extractedContents = DaisyModelRemoteExecution.runSerial(daisyModels, re, Paths.get("daisy/run/remoteRes"));
     System.out.printf("Det tog %.1f sek\n", (System.currentTimeMillis()-tid)/1000.0);
 
+    for (ExtractedContent e : extractedContents) {
+      System.out.println(e);
+      Path dir = Paths.get("daisy/run/rres_" + e.id);
+      Utils.sletMappe(dir);
+      Files.createDirectories(dir);
+      for (String filnavn : e.fileContensMap.keySet()) {
+        String filIndhold = e.fileContensMap.get(filnavn);
+        //System.out.println("Skriver til "+dir.resolve(filnavn));
+        Files.write(dir.resolve(filnavn), filIndhold.getBytes());
+      }
+    }
 
+    /* Lokale kørsler
     for (DaisyModel kørsel : daisyModels) {
       re.extract(kørsel.directory, Paths.get("daisy/run/res_"+kørsel.getId()));
     }
+
+     */
   }
 }
