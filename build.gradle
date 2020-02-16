@@ -1,13 +1,16 @@
 apply plugin: 'java-library'
 
 dependencies {
-    implementation project(path: ':datamodel')
+    // Ikke nødvendig pt - og spærrede for nem implementering med Docker, så afhængigheden er pt fjernet
+    //implementation project(path: ':datamodel')
 
     // REST-server: Javalin - se
     compile 'io.javalin:javalin:3.7.0'
     compile "org.slf4j:slf4j-simple:1.7.28" // Nødvendig til javalin
-    // JSON-parser Jackson - men kan bedre lide gson, der er inkluderet:
-    //compile 'com.fasterxml.jackson.core:jackson-databind:2.10.1'
+    // JSON-parser Jackson
+    //implementation 'com.fasterxml.jackson.core:jackson-databind:2.10.1'
+    // Men kan bedre lide gson, der fylder en del mindre:
+    compile 'com.google.code.gson:gson:2.8.6'
 
     // REST-klient: Unirest
     implementation 'com.konghq:unirest-java:3.4.03'
@@ -17,7 +20,7 @@ dependencies {
     compile 'info.picocli:picocli:4.2.0'
 
 
-    // Afprøvnng
+    // Afprøvning
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 

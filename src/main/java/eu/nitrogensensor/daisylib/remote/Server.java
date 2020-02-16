@@ -59,8 +59,10 @@ public class Server {
     }
 
     private static Path upload = Paths.get("upload");
+
     private static void upload(Context ctx) throws IOException {
-            Path directory = Files.createTempDirectory(upload,"");
+        Files.createDirectories(upload);
+        Path directory = Files.createTempDirectory(upload,"");
             ctx.uploadedFiles("files").forEach(file -> {
                 try {
                     System.out.println("Server uplad "+file.getFilename());

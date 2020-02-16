@@ -33,7 +33,7 @@ public class DaisyRemoteExecution {
     }
 
     public static ArrayList<ExtractedContent> runSerial(ArrayList<DaisyModel> daisyModels, ResultExtractor resultExtractor, Path resultsDir) throws IOException {
-        Server.start();
+//        Server.start();
 
         Path inputDir = getDirectory(daisyModels);
 
@@ -81,7 +81,7 @@ public class DaisyRemoteExecution {
                 }
             }
         }
-        Server.stop();
+//        Server.stop();
 
         return extractedContents;
     }

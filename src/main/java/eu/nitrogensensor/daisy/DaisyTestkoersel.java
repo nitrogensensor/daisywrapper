@@ -49,10 +49,10 @@ public class DaisyTestkoersel
     re.addFile("harvest.csv");
 
     long tid = System.currentTimeMillis();
-    DaisyExecution.runSerial(daisyModels);
+    //DaisyExecution.runSerial(daisyModels);
     //DaisyExecution.runParralel(daisyModels);
 
-    //DaisyRemoteExecution.runSerial(daisyModels, re, Paths.get("daisy/run/remoteRes"));
+    DaisyRemoteExecution.runSerial(daisyModels, re, Paths.get("daisy/run/remoteRes"));
     System.out.printf("Det tog %.1f sek\n", (System.currentTimeMillis()-tid)/1000.0);
 
     /* Lokale kørsler
