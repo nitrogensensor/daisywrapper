@@ -26,7 +26,7 @@ public class Taastrup2019Test {
         kørsel.replace("(run taastrup)", "(run Mark21 (column (\"High_N_High_W\")))");
 
         Path daisyOutputmappe = Files.createTempDirectory("ns-daisy");
-        kørsel = kørsel.cloneToDirectory(daisyOutputmappe);
+        kørsel = kørsel.clon().toDirectory(daisyOutputmappe);
 
         kørsel.run();
         ResultExtractor re = new ResultExtractor();

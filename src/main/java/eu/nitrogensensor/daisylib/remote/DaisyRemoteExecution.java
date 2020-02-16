@@ -1,4 +1,4 @@
-package eu.nitrogensensor.executionservice;
+package eu.nitrogensensor.daisylib.remote;
 
 import com.google.gson.Gson;
 import eu.nitrogensensor.daisylib.DaisyModel;
@@ -12,10 +12,9 @@ import kong.unirest.Unirest;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 
-public class DaisyModelRemoteExecution {
+public class DaisyRemoteExecution {
 
     static {
         Unirest.config().setObjectMapper(new ObjectMapper() {
@@ -34,6 +33,7 @@ public class DaisyModelRemoteExecution {
     }
 
     public static ArrayList<ExtractedContent> runSerial(ArrayList<DaisyModel> daisyModels, ResultExtractor resultExtractor, Path resultsDir) throws IOException {
+        Server.start();
 
         Path inputDir = getDirectory(daisyModels);
 
@@ -81,6 +81,7 @@ public class DaisyModelRemoteExecution {
                 }
             }
         }
+        Server.stop();
 
         return extractedContents;
     }

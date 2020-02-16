@@ -12,7 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class DaisyModelExecution {
+public class DaisyExecution {
 
     public static void runSerial(ArrayList<DaisyModel> daisyModels) throws IOException {
         int kørselsNr = 0;

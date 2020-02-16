@@ -1,9 +1,7 @@
-package eu.nitrogensensor.executionservice;
+package eu.nitrogensensor.daisylib.remote;
 
 import eu.nitrogensensor.daisylib.DaisyModel;
 import eu.nitrogensensor.daisylib.ResultExtractor;
-
-import java.util.ArrayList;
 
 public class ExecutionBatch {
     public String oploadId;

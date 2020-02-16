@@ -1,4 +1,4 @@
-package eu.nitrogensensor.executionservice;
+package eu.nitrogensensor.daisylib.remote;
 
 import com.google.gson.Gson;
 import io.javalin.Javalin;

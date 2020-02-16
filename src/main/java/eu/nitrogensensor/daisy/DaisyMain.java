@@ -2,16 +2,11 @@ package eu.nitrogensensor.daisy;
 
 
 import eu.nitrogensensor.daisylib.DaisyModel;
-import eu.nitrogensensor.daisylib.DaisyModelExecution;
 import eu.nitrogensensor.daisylib.ResultExtractor;
-import eu.nitrogensensor.daisylib.Utils;
-import eu.nitrogensensor.executionservice.DaisyModelRemoteExecution;
-import eu.nitrogensensor.executionservice.ExtractedContent;
-import eu.nitrogensensor.executionservice.Server;
+import eu.nitrogensensor.daisylib.remote.DaisyRemoteExecution;
+import eu.nitrogensensor.daisylib.remote.Server;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
@@ -57,10 +52,8 @@ public class DaisyMain
     //DaisyModelExecution.runSerial(daisyModels);
     //DaisyModelExecution.runParralel(daisyModels);
 
-    Server.start();
-    DaisyModelRemoteExecution.runSerial(daisyModels, re, Paths.get("daisy/run/remoteRes"));
+    DaisyRemoteExecution.runSerial(daisyModels, re, Paths.get("daisy/run/remoteRes"));
     System.out.printf("Det tog %.1f sek\n", (System.currentTimeMillis()-tid)/1000.0);
-    Server.stop();
 
     /* Lokale kørsler
     for (DaisyModel kørsel : daisyModels) {
