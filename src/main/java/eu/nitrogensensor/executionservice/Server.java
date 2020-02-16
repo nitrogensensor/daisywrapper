@@ -9,12 +9,19 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.logging.Logger;
 
 public class Server {
     public static Javalin app;
     public static String url = "http://localhost:8080";
 
+    //System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tF %1$tT %4$s %2$s %5$s%6$s%n");
+    static { System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tT %4$s %2$s %5$s%6$s%n"); }
+    static Logger log = Logger.getGlobal();
+
+
     public static void main(String[] args) {
+        log.info("hej1");
         start();
         Klient.testkald();
         stop();

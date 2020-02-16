@@ -3,6 +3,7 @@ package eu.nitrogensensor.executionservice;
 import com.google.gson.Gson;
 import eu.nitrogensensor.daisylib.DaisyModel;
 import eu.nitrogensensor.daisylib.ResultExtractor;
+import eu.nitrogensensor.daisylib.Utils;
 import kong.unirest.HttpResponse;
 import kong.unirest.MultipartBody;
 import kong.unirest.ObjectMapper;
@@ -11,12 +12,12 @@ import kong.unirest.Unirest;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 public class DaisyModelRemoteExecution {
 
-    public static ArrayList<ExtractedContent> runSerial(ArrayList<DaisyModel> daisyModels, ResultExtractor resultExtractor, Path result) throws IOException {
-
+    static {
         Unirest.config().setObjectMapper(new ObjectMapper() {
             private Gson gson = MyGsonPathConverter.buildGson();
 
@@ -30,21 +31,22 @@ public class DaisyModelRemoteExecution {
                 return gson.toJson(value);
             }
         });
+    }
 
-        Path dir = getDirectory(daisyModels);
-        Server.start();
+    public static ArrayList<ExtractedContent> runSerial(ArrayList<DaisyModel> daisyModels, ResultExtractor resultExtractor, Path resultsDir) throws IOException {
+
+        Path inputDir = getDirectory(daisyModels);
 
 
         ArrayList<Path> filer = new ArrayList<Path>();
-        Files.walk(dir).filter(fraFil -> !Files.isDirectory(fraFil)).forEach(f -> filer.add(f));
+        Files.walk(inputDir).filter(fraFil -> !Files.isDirectory(fraFil)).forEach(f -> filer.add(f));
         System.out.println("filer="+filer);
 
         MultipartBody oploadReq = Unirest.post(Server.url + "/upload").multiPartContent();
-        for (Path fil : filer) oploadReq = oploadReq.field("files", Files.newInputStream(fil), dir.relativize(fil).toString());
+        for (Path fil : filer) oploadReq = oploadReq.field("files", Files.newInputStream(fil), inputDir.relativize(fil).toString());
         HttpResponse<String> oploadRes = oploadReq.asString();
 
         if (!oploadRes.isSuccess()) throw new IOException("Fik ikke oploaded filer: "+oploadRes.getBody());
-
 
         ExecutionBatch batch = new ExecutionBatch();
         batch.oploadId = oploadRes.getBody();
@@ -55,7 +57,7 @@ public class DaisyModelRemoteExecution {
         for (DaisyModel kørsel : daisyModels) {
             kørselsNr++;
 
-            // Fjern irrelecante oplysninger fra det objekt der sendes over netværket
+            // Fjern irrelecante oplysninger fra det objekt, der sendes over netværket
             batch.kørsel = kørsel.clon();
             batch.kørsel.directory = null;
             batch.kørsel.setId(null);
@@ -64,13 +66,21 @@ public class DaisyModelRemoteExecution {
                     .body(batch)
                     .asObject(ExtractedContent.class);
             if (!response.isSuccess()) throw new IOException(response.getStatusText());
+
             ExtractedContent extractedContent = response.getBody();
-
             extractedContent.id = kørsel.getId();
-
             extractedContents.add(extractedContent);
+            if (resultsDir!=null) {
+                Path resultDir = resultsDir.resolve(kørsel.getId());
+                Utils.sletMappe(resultDir);
+                Files.createDirectories(resultDir);
+                for (String filnavn : extractedContent.fileContensMap.keySet()) {
+                    String filIndhold = extractedContent.fileContensMap.get(filnavn);
+                    //System.out.println("Skriver til "+dir.resolve(filnavn));
+                    Files.write(resultDir.resolve(filnavn), filIndhold.getBytes());
+                }
+            }
         }
-        Server.stop();
 
         return extractedContents;
     }
