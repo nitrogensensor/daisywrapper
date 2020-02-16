@@ -2,19 +2,39 @@ apply plugin: 'java-library'
 
 dependencies {
     implementation project(path: ':datamodel')
-    
-    // Nødvendig for javalin
-    compile "org.slf4j:slf4j-simple:1.7.28"
+
+    // REST-server: Javalin - se
     compile 'io.javalin:javalin:3.7.0'
-    //kan bedre lide gson
+    compile "org.slf4j:slf4j-simple:1.7.28" // Nødvendig til javalin
+    // JSON-parser Jackson - men kan bedre lide gson, der er inkluderet:
     //compile 'com.fasterxml.jackson.core:jackson-databind:2.10.1'
 
-    //implementation 'com.mashape.unirest:unirest-java:1.4.9'
+    // REST-klient: Unirest
     implementation 'com.konghq:unirest-java:3.4.03'
+    //implementation 'com.mashape.unirest:unirest-java:1.4.9'
+
+    // Parsning af kommandolinjeparametre - se https://picocli.info/
+    compile 'info.picocli:picocli:4.2.0'
+
+
+    // Afprøvnng
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
+
 // Værdien kan være mellem 7 og 9. JDK 10+ fanges ikke af Android Studio
 sourceCompatibility = "9"
 compileJava.options.encoding = "UTF-8"
 
 
+// til at bygge artefaktet daisy/build/libs/daisy.jar
+jar {
+    // JAR-filen har en main-metode
+    manifest {
+        attributes "Main-Class": "eu.nitrogensensor.daisy.DaisyMain"
+    }
+
+    // Lav en 'fat JAR' hvor alle biblioteker er pakket med i JAR-filen
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
