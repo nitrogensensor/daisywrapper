@@ -23,8 +23,8 @@ public class Server {
     public static void main(String[] args) {
         log.info("hej1");
         start();
-        Testklient.testkald();
-        stop();
+        //Testklient.testkald();
+        //stop();
     }
 
     public static void stop() {
@@ -56,6 +56,7 @@ public class Server {
         app.get("/json", ctx -> ctx.result("Hello World"));
         app.post("/upload", ctx -> upload(ctx));
         app.post("/sim", ctx -> sim(ctx));
+        app.post("/uploadsim", ctx -> uploadsim(ctx));
     }
 
     private static Path uploadMappe = Paths.get("upload");
@@ -91,6 +92,21 @@ public class Server {
             batch.resultExtractor.extract(batch.kørsel.directory, extractedContent.fileContensMap);
             ctx.json(extractedContent);
     }
+
+
+    private static void uploadsim(Context ctx) throws IOException {
+        ExecutionBatch batch = JavalinJson.fromJson(ctx.formParam("batch"),ExecutionBatch.class);
+        batch.oploadId = upload(ctx);
+        //ExecutionBatch batch = ctx.bodyAsClass(ExecutionBatch.class);
+        batch.kørsel.directory =  uploadMappe.resolve(tjekSikkerSti(batch.oploadId));
+
+        System.out.println("Server ExecutionBatch "+batch.oploadId);
+        batch.kørsel.run();
+        ExtractedContent extractedContent = new ExtractedContent();
+        batch.resultExtractor.extract(batch.kørsel.directory, extractedContent.fileContensMap);
+        ctx.json(extractedContent);
+    }
+
 
     private static String tjekSikkerSti(String sti0) {
         String sti = sti0;
