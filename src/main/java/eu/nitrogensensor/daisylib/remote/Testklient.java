@@ -5,7 +5,7 @@ import kong.unirest.Unirest;
 
 import java.io.File;
 
-public class Klient {
+public class Testklient {
     public static void testkald() {
         String url = Server.url;
         HttpResponse response = Unirest.get(url).asString();

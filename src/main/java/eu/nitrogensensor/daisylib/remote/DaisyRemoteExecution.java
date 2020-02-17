@@ -33,16 +33,15 @@ public class DaisyRemoteExecution {
     }
 
     public static ArrayList<ExtractedContent> runSerial(ArrayList<DaisyModel> daisyModels, ResultExtractor resultExtractor, Path resultsDir) throws IOException {
-//        Server.start();
+        String url = "https://daisykoersel-6dl4uoo23q-lz.a.run.app"; // Server.url
 
         Path inputDir = getDirectory(daisyModels);
-
 
         ArrayList<Path> filer = new ArrayList<Path>();
         Files.walk(inputDir).filter(fraFil -> !Files.isDirectory(fraFil)).forEach(f -> filer.add(f));
         System.out.println("filer="+filer);
 
-        MultipartBody oploadReq = Unirest.post(Server.url + "/upload").multiPartContent();
+        MultipartBody oploadReq = Unirest.post(url + "/upload").multiPartContent();
         for (Path fil : filer) oploadReq = oploadReq.field("files", Files.newInputStream(fil), inputDir.relativize(fil).toString());
         HttpResponse<String> oploadRes = oploadReq.asString();
 
@@ -62,7 +61,7 @@ public class DaisyRemoteExecution {
             batch.kørsel.directory = null;
             batch.kørsel.setId(null);
 
-            HttpResponse<ExtractedContent> response = Unirest.post(Server.url + "/sim/")
+            HttpResponse<ExtractedContent> response = Unirest.post(url + "/sim/")
                     .body(batch)
                     .asObject(ExtractedContent.class);
             if (!response.isSuccess()) throw new IOException(response.getStatusText());

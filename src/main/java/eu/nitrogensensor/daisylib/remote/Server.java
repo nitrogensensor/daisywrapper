@@ -23,7 +23,7 @@ public class Server {
     public static void main(String[] args) {
         log.info("hej1");
         start();
-        Klient.testkald();
+        Testklient.testkald();
         stop();
     }
 
@@ -58,11 +58,11 @@ public class Server {
         app.post("/sim", ctx -> sim(ctx));
     }
 
-    private static Path upload = Paths.get("upload");
+    private static Path uploadMappe = Paths.get("upload");
 
-    private static void upload(Context ctx) throws IOException {
-        Files.createDirectories(upload);
-        Path directory = Files.createTempDirectory(upload,"");
+    private static String upload(Context ctx) throws IOException {
+        Files.createDirectories(uploadMappe);
+        Path directory = Files.createTempDirectory(uploadMappe,"");
             ctx.uploadedFiles("files").forEach(file -> {
                 try {
                     System.out.println("Server uplad "+file.getFilename());
@@ -73,8 +73,9 @@ public class Server {
                     e.printStackTrace();
                 }
             });
-            String batchId = upload.relativize(directory).toString();
-            ctx.html(batchId);
+        String batchId = uploadMappe.relativize(directory).toString();
+        ctx.html(batchId);
+        return batchId;
     }
 
     private static void sim(Context ctx) throws IOException {
@@ -82,7 +83,7 @@ public class Server {
             System.out.println("Server sim "+ctx.body());
             ExecutionBatch batch = JavalinJson.fromJson(ctx.body(),ExecutionBatch.class);
             //ExecutionBatch batch = ctx.bodyAsClass(ExecutionBatch.class);
-            batch.kørsel.directory =  upload.resolve(tjekSikkerSti(batch.oploadId));
+            batch.kørsel.directory =  uploadMappe.resolve(tjekSikkerSti(batch.oploadId));
 
             System.out.println("Server ExecutionBatch "+batch.oploadId);
             batch.kørsel.run();
