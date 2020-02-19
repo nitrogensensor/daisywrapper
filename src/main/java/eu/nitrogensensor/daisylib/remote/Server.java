@@ -1,6 +1,7 @@
 package eu.nitrogensensor.daisylib.remote;
 
 import com.google.gson.Gson;
+import eu.nitrogensensor.daisylib.Utils;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import io.javalin.plugin.json.JavalinJson;
@@ -105,6 +106,7 @@ public class Server {
         ExtractedContent extractedContent = new ExtractedContent();
         batch.resultExtractor.extract(batch.kørsel.directory, extractedContent.fileContensMap);
         ctx.json(extractedContent);
+        Utils.sletMappe(batch.kørsel.directory);  // ingenting caches for nu - ny opload hver gang :-|
     }
 
 

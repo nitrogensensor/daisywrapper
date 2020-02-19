@@ -32,10 +32,16 @@ public class DaisyTestkoersel
     };
     ArrayList<DaisyModel> daisyModels = new ArrayList<>();
     for (String program : programmer) {
-      DaisyModel kørsel = d.clon()//.toDirectory(Paths.get("daisy/run/tmp/out_" + program))
-              .setId(program)
-              .replace("(run taastrup)", "(run Mark21 (column (\"" + program + "\")))");
-      daisyModels.add(kørsel);
+
+      for (int n=0; n<4; n++) {
+
+        DaisyModel kørsel = d.clon()
+                .setId(program+ String.format("_%02d", n))
+                .replace("(run taastrup)", "(run Mark21 (column (\"" + program + "\")))");
+        daisyModels.add(kørsel
+                .toDirectory(Paths.get("daisy/run/remoteParTmp/" + kørsel.getId()))
+        );
+      }
     }
 
 
@@ -45,12 +51,19 @@ public class DaisyTestkoersel
 
     long tid = System.currentTimeMillis();
     // Lokale kørsler
+    // Det tog 88,8 sek at køre 16 kørsler serielt
     //DaisyExecution.runSerial(daisyModels, re, Paths.get("daisy/run/serRes"));
-    DaisyExecution.runParralel(daisyModels, re, Paths.get("daisy/run/parRes"));
+    // Det tog 21,4 sek at køre 16 kørsler parrallel (8 kerner)
+    //DaisyExecution.runParralel(daisyModels, re, Paths.get("daisy/run/parRes"));
 
+    // Det tog 90,0 sek at køre 16 kørsler mod lokal server serielt
+    // Det tog 121,3 sek at køre 16 kørsler mod Cloud Run serielt
+    //DaisyRemoteExecution.runSerial(daisyModels, re, Paths.get("daisy/run/remoteRes"));
 
-    //DaisyRemoteExecution.runSerial(daisyModels, re, Paths.get("daisy/run/remoteResHurra"));
-    System.out.printf("Det tog %.1f sek\n", (System.currentTimeMillis()-tid)/1000.0);
+    // Det tog 22,9 sek at køre 16 kørsler parallelt i Cloud Run
+    DaisyRemoteExecution.runParralel(daisyModels, re, Paths.get("daisy/run/remoteParRes"));
+
+    System.out.printf("Det tog %.1f sek at køre %d kørsler\n", (System.currentTimeMillis()-tid)/1000.0, daisyModels.size());
 
   }
 }
