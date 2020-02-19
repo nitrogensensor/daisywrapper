@@ -17,16 +17,10 @@ public class DaisyTestkoersel
     System.out.println("starter DaisyTestkoersel");
 
     DaisyModel d = new DaisyModel("daisy/src/test/resources/Taastrup 2019/dtu_model", "Setup_DTU_Taastrup.dai");
-    //System.out.println(d.getStarttime());
-    //dry_bulk_density = d.Input['defhorizon'][0]['dry_bulk_density'].getvalue()
-    //d.Input['defhorizon'][0]['dry_bulk_density'].setvalue(1.1*dry_bulk_density)
-    //d.save_as(r'C:\Program Files\Daisy 5.72\exercises\Exercise01_new.dai')
-    //DaisyModel.path_to_daisy_executable =  r'C:\Program Files\Daisy 5.72\bin\Daisy.exe'
-    //d.run();
 
-    d.replace("(stop *)", "(stop 2015 8 20)"); // for hurtigere kørsel
-    //d.erstat("(stop *)", "(stop 2019 8 31)"); // fuld kørsel
-    d.replace("(path *)", "(path \"/opt/daisy/sample\" \"/opt/daisy/lib\" \".\" \"./common\")");
+    //d.replace("(stop *)", "(stop 2015 8 20)"); // for hurtigere kørsel
+    d.replace("(stop *)", "(stop 2019 8 31)"); // fuld kørsel
+    //d.replace("(path *)", "(path \"/opt/daisy/sample\" \"/opt/daisy/lib\" \".\" \"./common\")");
     //d.run();
 
 
@@ -44,22 +38,19 @@ public class DaisyTestkoersel
       daisyModels.add(kørsel);
     }
 
+
     ResultExtractor re = new ResultExtractor();
     re.addCsvExtractor("crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)", "crop-leaf-stem-AI.csv");
     re.addFile("harvest.csv");
 
     long tid = System.currentTimeMillis();
-    //DaisyExecution.runSerial(daisyModels);
-    //DaisyExecution.runParralel(daisyModels);
+    // Lokale kørsler
+    //DaisyExecution.runSerial(daisyModels, re, Paths.get("daisy/run/serRes"));
+    DaisyExecution.runParralel(daisyModels, re, Paths.get("daisy/run/parRes"));
 
-    DaisyRemoteExecution.runSerial(daisyModels, re, Paths.get("daisy/run/remoteRes"));
+
+    //DaisyRemoteExecution.runSerial(daisyModels, re, Paths.get("daisy/run/remoteResHurra"));
     System.out.printf("Det tog %.1f sek\n", (System.currentTimeMillis()-tid)/1000.0);
 
-    /* Lokale kørsler
-    for (DaisyModel kørsel : daisyModels) {
-      re.extract(kørsel.directory, Paths.get("daisy/run/res_"+kørsel.getId()));
-    }
-
-     */
   }
 }

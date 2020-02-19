@@ -7,14 +7,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CsvEkstraktor {
+    public final String skrivTilFilnavn;
     public LinkedHashMap<String, ArrayList<String>> filKolonnerMap = new LinkedHashMap<String, ArrayList<String>>();
-    public final LinkedHashMap<String, ArrayList<Integer>> filKolonneIndexMap = new LinkedHashMap<String, ArrayList<Integer>>();
-    public final CsvFile output = new CsvFile();
-
-    public CsvEkstraktor(CsvEkstraktor org) {
-        filKolonnerMap = (LinkedHashMap<String, ArrayList<String>>) org.filKolonnerMap.clone();
-        output.filnavn = org.output.filnavn;
-    }
 
     @Override
     public String toString() {
@@ -31,7 +25,7 @@ public class CsvEkstraktor {
      * @param skrivTilFilnavn Hvilken fil ekstraktet skal skrives til
      */
     public CsvEkstraktor(String indhold, String skrivTilFilnavn) {
-        output.filnavn = skrivTilFilnavn;
+        this.skrivTilFilnavn = skrivTilFilnavn;
 
         Matcher filnavnMatcher = Pattern.compile("[a-zA-Z_. ]+(?![^(]*\\))").matcher(indhold);
 
@@ -79,24 +73,28 @@ public class CsvEkstraktor {
 
     private static final boolean FILPRÆFIX_PÅ_KOLONNER = false;
 
-    public void lavUdtræk(Map<String, CsvFile> output) {
+    public CsvFile lavUdtræk(Map<String, CsvFile> outputMap) {
         CsvEkstraktor ekstrakt = this;
+        CsvFile output = new CsvFile();
+        output.filnavn = skrivTilFilnavn;
+
         // Opbyg liste over kolonner og enheder
+        LinkedHashMap<String, ArrayList<Integer>> filKolonneIndexMap = new LinkedHashMap<String, ArrayList<Integer>>();
         int antalRækker = -1;
         for (String filnavn : ekstrakt.filKolonnerMap.keySet()) {
-            CsvFile outputfil = output.get(filnavn);
+            CsvFile outputfil = outputMap.get(filnavn);
             for (String kol : ekstrakt.filKolonnerMap.get(filnavn)) {
                 if (FILPRÆFIX_PÅ_KOLONNER)
-                    ekstrakt.output.kolonnenavne.add(filnavn + ":" + kol);
+                    output.kolonnenavne.add(filnavn + ":" + kol);
                 else
-                    ekstrakt.output.kolonnenavne.add(kol);
+                    output.kolonnenavne.add(kol);
 
                 int idx = outputfil.kolonnenavne.indexOf(kol);
-                if (ekstrakt.filKolonneIndexMap.get(filnavn) == null)
-                    ekstrakt.filKolonneIndexMap.put(filnavn, new ArrayList<>());
-                ekstrakt.filKolonneIndexMap.get(filnavn).add(idx);
+                if (filKolonneIndexMap.get(filnavn) == null)
+                    filKolonneIndexMap.put(filnavn, new ArrayList<>());
+                filKolonneIndexMap.get(filnavn).add(idx);
                 if (idx == -1) throw new IllegalArgumentException("Kolonne '" + kol + "' fandtes ikke i " + outputfil);
-                ekstrakt.output.enheder.add(outputfil.enheder.get(idx));
+                output.enheder.add(outputfil.enheder.get(idx));
 
                 if (antalRækker != -1 && antalRækker != outputfil.data.size())
                     throw new IllegalStateException("Forventede " + antalRækker + " datarækker i " + outputfil);
@@ -106,18 +104,19 @@ public class CsvEkstraktor {
 
         // Lav datarækket
         for (int række = 0; række < antalRækker; række++) {
-            String[] datalineE = new String[ekstrakt.output.kolonnenavne.size()];
+            String[] datalineE = new String[output.kolonnenavne.size()];
             int kolE = 0;
             for (String filnavn : ekstrakt.filKolonnerMap.keySet()) {
-                CsvFile outputfil = output.get(filnavn);
-                for (int kol1 : ekstrakt.filKolonneIndexMap.get(filnavn)) {
+                CsvFile outputfil = outputMap.get(filnavn);
+                for (int kol1 : filKolonneIndexMap.get(filnavn)) {
                     // Tag højde for at nogle af de sidste kolonner i en Daisy CSV fil kan være tomme
                     datalineE[kolE] = outputfil.data.get(række).length <= kol1 ? "" : outputfil.data.get(række)[kol1];
                     kolE++;
                 }
             }
-            ekstrakt.output.data.add(datalineE);
+            output.data.add(datalineE);
         }
+        return output;
     }
 
     public static void main(String[] args) {

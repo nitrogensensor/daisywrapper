@@ -52,7 +52,7 @@ public class Server {
         app.exception(Exception.class, (e, ctx) -> {
             e.printStackTrace();
         });
-        app.get("/", ctx -> ctx.result("Hello World"));
+        app.get("/", ctx -> ctx.contentType("text/html").result("<html><body>Du kan også spørge på <a href='json'>json</a>"));
         app.get("/json", ctx -> ctx.result("Hello World"));
         app.post("/upload", ctx -> upload(ctx));
         app.post("/sim", ctx -> sim(ctx));

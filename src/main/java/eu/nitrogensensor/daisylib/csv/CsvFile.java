@@ -19,7 +19,8 @@ public class CsvFile {
 
     public CsvFile(Path tmpMappe, String filnavn) throws IOException {
         this.filnavn = filnavn;
-        String csv = new String(Files.readAllBytes(tmpMappe.resolve(filnavn)));
+        Path fil = tmpMappe.resolve(filnavn);
+        String csv = new String(Files.readAllBytes(fil));
         String[] csvsplit = csv.split("--------------------");
         this.header = csvsplit[0].trim();
         String[] linjer = csvsplit[1].trim().split("\n");
@@ -28,16 +29,16 @@ public class CsvFile {
         this.enheder.addAll(Arrays.asList(linjer[1].split("\t")));
 
         if (this.kolonnenavne.size() < this.enheder.size()) { // crop.csv har 24 kolonner, men 21 enheder (de sidste 3 kolonner er uden enhed), derfor < og ikke !=
-            throw new IOException(filnavn + " har " + this.kolonnenavne.size() +" kolonner, men "+ this.enheder.size()+
-                    " enheder\nkol="+ this.kolonnenavne +"\nenh="+ this.enheder);
+            throw new IOException(fil + " har " + this.kolonnenavne.size() +" kolonner, men "+ this.enheder.size()+" enheder" +
+                    "\nkol="+ this.kolonnenavne +"\nenh="+ this.enheder);
         }
         this.data = new ArrayList<>(linjer.length);
         for (int n=2; n<linjer.length; n++) {
             String[] linje = linjer[n].split("\t");
             if (this.kolonnenavne.size() < linje.length || linje.length < this.enheder.size()) { // data altid mellem
-                throw new IOException(filnavn + " linje " + n +  " har " +linje.length +" kolonner, men "+
-                        this.kolonnenavne.size() + " kolonnenavne og "+
-                        this.enheder.size() +" enheder\nlin="+ Arrays.toString(linje) +" enheder\nkol="+ this.kolonnenavne +"\nenh="+ this.enheder);
+                throw new IOException(fil + " linje " + n +  " har " +linje.length +" kolonner, men "+
+                        this.kolonnenavne.size() + " kolonnenavne og " + this.enheder.size() +" enheder" +
+                        "\nlin="+ Arrays.toString(linje) +"\nkol="+ this.kolonnenavne +"\nenh="+ this.enheder);
             }
             this.data.add(linje);
         }
