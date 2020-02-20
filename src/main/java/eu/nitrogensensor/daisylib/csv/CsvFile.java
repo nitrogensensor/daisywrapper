@@ -14,7 +14,8 @@ public class CsvFile {
     public ArrayList<String> enheder = new ArrayList<>();
     public ArrayList<String[]> data = new ArrayList<>();
 
-    public CsvFile() {
+    // Konstruktør til CsvEkstraktor
+    CsvFile() {
     }
 
     public CsvFile(Path tmpMappe, String filnavn) throws IOException {
@@ -85,6 +86,7 @@ public class CsvFile {
 
     public void skrivData(Appendable bufferedWriter, String skilletegn, String header) throws IOException {
         bufferedWriter.append(header);
+        bufferedWriter.append("--------------------\n");
         printRække(skilletegn, kolonnenavne, bufferedWriter);
         printRække(skilletegn, enheder, bufferedWriter);
         for (String[] datarække : data) {

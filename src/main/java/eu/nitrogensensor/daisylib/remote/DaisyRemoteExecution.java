@@ -196,7 +196,7 @@ public class DaisyRemoteExecution {
         kørslerIgang.put(kørsel.getId(), "2 batch");
         ExecutionBatch batch = new ExecutionBatch();
         batch.resultExtractor = resultExtractor;
-        // Fjern irrelecante oplysninger fra det objekt, der sendes over netværket
+        // Fjern irrelevante oplysninger fra det objekt, der sendes over netværket
         batch.kørsel = kørsel.clon();
         batch.kørsel.directory = null;
         batch.kørsel.setId(null);

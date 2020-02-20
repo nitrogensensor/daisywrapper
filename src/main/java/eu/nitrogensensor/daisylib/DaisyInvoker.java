@@ -20,8 +20,9 @@ class DaisyInvoker {
 
         Process process = new ProcessBuilder(new File(prop.getProperty("daisy.executable.path")).getAbsolutePath(), inputFil)
                 .redirectInput(ProcessBuilder.Redirect.INHERIT)
-                .redirectOutput(ProcessBuilder.Redirect.DISCARD)
-                .redirectError(ProcessBuilder.Redirect.INHERIT)
+                .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+//                .redirectError(ProcessBuilder.Redirect.DISCARD)
+                .redirectError(ProcessBuilder.Redirect.to(mappe.resolve("daisyErr.log").toFile()))
 //                .inheritIO()
                 .directory(mappe.toFile())
                 .start();

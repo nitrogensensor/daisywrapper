@@ -52,7 +52,7 @@ public class ResultExtractor {
             CsvFile output = csvEkstraktor.lavUdtræk(readOutput);
             // Skriv outputfil med ekstrakt
             Path fil = toDirectory.resolve(output.filnavn);
-            String skilletegn = ", ";
+            String skilletegn = "\t";
             String header = "# Udtræk af "+csvEkstraktor.filKolonnerMap + "\n";
             output.skrivDatafil(fil, skilletegn, header);
         }

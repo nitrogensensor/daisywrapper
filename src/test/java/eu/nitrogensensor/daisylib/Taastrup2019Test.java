@@ -2,6 +2,7 @@ package eu.nitrogensensor.daisylib;
 
 
 import eu.nitrogensensor.daisylib.csv.CsvEkstraktor;
+import eu.nitrogensensor.daisylib.csv.CsvFile;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -31,25 +32,26 @@ public class Taastrup2019Test {
         kørsel.run();
         ResultExtractor re = new ResultExtractor();
         re.addCsvExtractor("crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)", "crop-leaf-stem-AI.csv");
-        re.addFile("harvest.csv");
+        re.addFile("crop.csv");
         Path ekstraktOutputmappe = Files.createTempDirectory("ns-daisy-ekstrakt");
         re.extract(daisyOutputmappe, ekstraktOutputmappe);
 
         // Linje 10 af "crop.csv" bør være
         // 2015    1       10      0       0       0       00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00
-        assertEquals("2015", re.readOutput.get("crop.csv").data.get(9)[0]);
-        assertEquals("1", re.readOutput.get("crop.csv").data.get(9)[1]);
-        assertEquals("10", re.readOutput.get("crop.csv").data.get(9)[2]);
-        assertEquals("0", re.readOutput.get("crop.csv").data.get(9)[3]);
+        CsvFile cropCsv = new CsvFile(ekstraktOutputmappe, "crop.csv");
+        assertEquals("2015", cropCsv.data.get(9)[0]);
+        assertEquals("1", cropCsv.data.get(9)[1]);
+        assertEquals("10", cropCsv.data.get(9)[2]);
+        assertEquals("0", cropCsv.data.get(9)[3]);
 
 
         // Linje 10 bør være
         // 2015, 1, 10, 00.00, 00.00, 00.00, 00.00
-        CsvEkstraktor ekstrakt = re.csvEkstraktors.get(0);
-        assertEquals("2015", ekstrakt.output.data.get(9)[0]);
-        assertEquals("1", ekstrakt.output.data.get(9)[1]);
-        assertEquals("10", ekstrakt.output.data.get(9)[2]);
-        assertEquals("00.00", ekstrakt.output.data.get(9)[3]);
+        CsvFile ekstrakt = new CsvFile(ekstraktOutputmappe, "crop-leaf-stem-AI.csv");
+        assertEquals("2015", ekstrakt.data.get(9)[0]);
+        assertEquals("1", ekstrakt.data.get(9)[1]);
+        assertEquals("10", ekstrakt.data.get(9)[2]);
+        assertEquals("00.00", ekstrakt.data.get(9)[3]);
 
 
         assertTrue(Files.exists(ekstraktOutputmappe.resolve("crop-leaf-stem-AI.csv")));
