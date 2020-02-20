@@ -49,7 +49,9 @@ public class DaisyRemoteExecution {
         ArrayList<Path> filer = new ArrayList<Path>();
         Files.walk(inputDir).filter(fraFil -> !Files.isDirectory(fraFil)).forEach(f -> filer.add(f));
         System.out.println("filer="+filer);
-        for (Path fil : filer) oploadReq = oploadReq.field("files", Files.newInputStream(fil), inputDir.relativize(fil).toString());
+        for (Path fil : filer) {
+            oploadReq = oploadReq.field("files", fil.toFile(), inputDir.relativize(fil).toString());
+        }
         return oploadReq;
     }
 
@@ -118,15 +120,19 @@ public class DaisyRemoteExecution {
         final ArrayList<ExtractedContent> extractedContents = new ArrayList<>();
 
         //ExecutorService executorService = Executors.newWorkStealingPool();
-        ExecutorService executorService = Executors.newFixedThreadPool(Math.max(daisyModels.size(),100)); // max 100 parrallel forespørgsler
+        ExecutorService executorService = Executors.newFixedThreadPool(Math.min(daisyModels.size(),200)); // max 100 parrallel forespørgsler
         AtomicReference<IOException> fejl = new AtomicReference<>(); // Hvis der opstår en exception skal den kastes videre
+        int kørselsNr = 0;
         for (DaisyModel kørsel : daisyModels) {
+            kørselsNr++;
+            final int kørselsNr_ = kørselsNr;
             Runnable runnable = () -> {
                 if (fejl.get() != null) return;
                 try {
                     ExtractedContent extractedContent = uploadSim(kørsel, resultExtractor, resultsDir);
                     extractedContents.add(extractedContent);
                 } catch (IOException e) {
+                    System.err.println("FEJL i "+kørselsNr_+" "+kørsel.getId());
                     e.printStackTrace();
                     if (fejl.get() != null) return;
                     fejl.set(e);
