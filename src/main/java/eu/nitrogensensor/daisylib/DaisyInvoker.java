@@ -19,7 +19,10 @@ class DaisyInvoker {
         System.out.println(new File(prop.getProperty("daisy.executable.path")).getAbsolutePath());
 
         Process process = new ProcessBuilder(new File(prop.getProperty("daisy.executable.path")).getAbsolutePath(), inputFil)
-                .inheritIO()
+                .redirectInput(ProcessBuilder.Redirect.INHERIT)
+                .redirectOutput(ProcessBuilder.Redirect.DISCARD)
+                .redirectError(ProcessBuilder.Redirect.INHERIT)
+//                .inheritIO()
                 .directory(mappe.toFile())
                 .start();
         try {
