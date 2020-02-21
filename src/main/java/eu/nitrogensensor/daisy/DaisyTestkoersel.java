@@ -61,8 +61,7 @@ public class DaisyTestkoersel
             (System.currentTimeMillis()-tid)/1000.0, (System.currentTimeMillis()-tid)/60000.0, daisyModels.size(), DaisyRemoteExecution.maxSamtidigeKørslerIgang);
 
 /*
------------- SMÅ KØRSLER ----------
-Lokale kørsler
+------------ SMÅ KØRSLER  ----------
 Det tog 88,8 sek at køre 16 kørsler serielt
 
 Det tog 18,1 sek (0,3 min) at køre 16 kørsler parrallel (8 kerner)
@@ -83,7 +82,7 @@ Det tog 63,0 sek (1,1 min) at køre 200 kørsler i Cloud Run - max 50 parralelt
 Det tog 56,7 sek (0,9 min) at køre 200 kørsler i Cloud Run - max 100 parralelt
 Det tog 59,1 sek (1,0 min) at køre 200 kørsler i Cloud Run - max 200 parralelt
 
-Det tog 345,6 sek (5,8 min) at køre 2000 kørsler i Cloud Run - max 100 parrallelle instanser
+Det tog 345,6 sek (5,8 min) at køre 2000 kørsler i Cloud Run
 
 
 
@@ -92,11 +91,11 @@ Det tog 79,1 sek (1,3 min) at køre 20 kørsler parrallelt (8 kerner)
 Det tog 144,2 sek for 40 kørsler parrallelt (8 kerner)
 
 
-Det tog 32,2 sek (0,5 min) at køre 20 kørsler i Cloud Run - 100 parrallelle instanser
-Det tog 52,6 sek (0,9 min) at køre 40 kørsler i Cloud Run - 100 parrallelle instanser
-Det tog 66,8 sek (1,1 min) at køre 100 kørsler i Cloud Run - 100 parrallelle instanser
-Det tog 131,3 sek (2,2 min) at køre 400 kørsler i Cloud Run - 400 parrallelle instanser
-Det tog 764,1 sek (12,7 min) at køre 4000 kørsler i Cloud Run - 400 parrallelle instanser
+Det tog 32,2 sek (0,5 min) at køre 20 kørsler i Cloud Run
+Det tog 52,6 sek (0,9 min) at køre 40 kørsler i Cloud Run
+Det tog 66,8 sek (1,1 min) at køre 100 kørsler i Cloud Run
+Det tog 131,3 sek (2,2 min) at køre 400 kørsler i Cloud Run
+Det tog 764,1 sek (12,7 min) at køre 4000 kørsler i Cloud Run
  */
   }
 }
