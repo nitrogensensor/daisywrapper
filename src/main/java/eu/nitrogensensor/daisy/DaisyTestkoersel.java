@@ -31,7 +31,7 @@ public class DaisyTestkoersel
     ArrayList<DaisyModel> daisyModels = new ArrayList<>();
     for (String program : programmer) {
 
-      for (int n=0; n<1000; n++) {
+      for (int n=0; n<1; n++) {
 
         DaisyModel kørsel = d.clon()
                 .setId(program+ String.format("_%02d", n))

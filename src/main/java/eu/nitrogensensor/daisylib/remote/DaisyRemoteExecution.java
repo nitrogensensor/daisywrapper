@@ -21,17 +21,18 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class DaisyRemoteExecution {
     private static final boolean FEJLFINDING = false;
-    private static Gson gson = MyGsonPathConverter.buildGson();
-    private static String url = "https://daisykoersel-6dl4uoo23q-lz.a.run.app";
 
     public static final int MAX_PARALLELITET = 400;
     public static final int MAX_KØRSELSTID = 1000*60*60; // 1 time
+
     private static ConcurrentHashMap<String, String> oploadsIgang = new ConcurrentHashMap<String,String>();
     private static ConcurrentHashMap<String, String> kørslerIgang = new ConcurrentHashMap<String,String>();
     public static int maxSamtidigeKørslerIgang;
 
+    private static Gson gson = MyGsonPathConverter.buildGson();
+    private static String url = "https://daisykoersel-6dl4uoo23q-lz.a.run.app";
     static {
-        // url = Server.url; // til lokal afprøvning
+        Server.start(); url = Server.url; // for at starte og bruge lokal server
         Unirest.config().setObjectMapper(new ObjectMapper() {
             @Override
             public <T> T readValue(String value, Class<T> valueType) {

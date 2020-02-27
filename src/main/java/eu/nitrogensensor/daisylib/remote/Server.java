@@ -6,13 +6,16 @@ import io.javalin.Javalin;
 import io.javalin.http.Context;
 import io.javalin.plugin.json.JavalinJson;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.logging.Logger;
 
 public class Server {
+    private static final boolean USIKKER_KØR = false;
     public static Javalin app;
     public static String url = "http://localhost:8080";
 
@@ -56,8 +59,35 @@ public class Server {
         app.get("/", ctx -> ctx.contentType("text/html").result("<html><body>Du kan også spørge på <a href='json'>json</a>"));
         app.get("/json", ctx -> ctx.result("Hello World"));
         app.post("/upload", ctx -> upload(ctx));
+        if (USIKKER_KØR) app.get("/koer", ctx -> kør(ctx, null));
         app.post("/sim", ctx -> sim(ctx));
         app.post("/uploadsim", ctx -> uploadsim(ctx));
+    }
+
+    private static String kør(Context ctx, String[] parms) throws IOException, InterruptedException {
+        if (!USIKKER_KØR) return "nej";
+            String k = ctx.queryParam("k");
+        if (parms==null && k!=null) {
+            parms = k.split(" ");
+        }
+        if (parms==null) {
+            ctx.contentType("text/html").result("<html><body><form action=koer method=get><input name=k type=text></form></html>");
+            return "";
+        }
+
+        log.info("koer "+ Arrays.toString(parms));
+        File f = new File("/tmp/koer.txt");
+        f.delete();
+        Process process = new ProcessBuilder(parms)
+                .redirectOutput(ProcessBuilder.Redirect.appendTo(f))
+                .redirectError(ProcessBuilder.Redirect.appendTo(f))
+                .redirectInput(ProcessBuilder.Redirect.INHERIT)
+                .start();
+        int returkode = process.waitFor();
+        process.destroy();
+        String res = new String(Files.readAllBytes(f.toPath())) + "\nreturkode: "+returkode;
+        if (ctx!=null) ctx.result(res);
+        return res;
     }
 
     private static Path uploadMappe = Paths.get("upload");
