@@ -9,7 +9,7 @@ import kong.unirest.MultipartBody;
 import kong.unirest.ObjectMapper;
 import kong.unirest.Unirest;
 
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -70,13 +70,11 @@ public class DaisyRemoteExecution {
     public static ArrayList<ExtractedContent> runSerial(ArrayList<DaisyModel> daisyModels, ResultExtractor resultExtractor, Path resultsDir) throws IOException {
         Path inputDir = getDirectory(daisyModels);
 
-        ArrayList<Path> filer = new ArrayList<Path>();
-        Files.walk(inputDir).filter(fraFil -> !Files.isDirectory(fraFil)).forEach(f -> filer.add(f));
-        if (FEJLFINDING) System.out.println("filer="+filer);
-
-        MultipartBody oploadReq = Unirest.post(url + "/upload").multiPartContent();
-        oploadReq = tilføjInputfilerTilRequest(oploadReq, inputDir);
-        HttpResponse<String> oploadRes = oploadReq.asString();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        Utils.zipMappe(inputDir.toString(), baos);
+        HttpResponse<String> oploadRes = Unirest.post(url+"/uploadZip")
+                .field("data",  new ByteArrayInputStream(baos.toByteArray()), "data.zip")
+                .asString();
 
         if (!oploadRes.isSuccess()) throw new IOException("Fik ikke oploaded filer: "+oploadRes.getBody());
 

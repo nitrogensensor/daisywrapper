@@ -64,7 +64,7 @@ public class TestFjernkoersel {
 
         ArrayList<DaisyModel> arrayList = new ArrayList<>();
         arrayList.add(kørsel);
-        arrayList.add(kørsel.clon());
+//        arrayList.add(kørsel.clon());
 
         ResultExtractor re = new ResultExtractor();
         re.addCsvExtractor("crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)", "crop-leaf-stem-AI.csv");
@@ -72,13 +72,21 @@ public class TestFjernkoersel {
 
         ArrayList<ExtractedContent> res = DaisyRemoteExecution.runSerial(arrayList, re, null);
         String cropCsv = res.get(0).fileContensMap.get("crop.csv");
-        String cropLaiCsv = res.get(1).fileContensMap.get("crop-leaf-stem-AI.csv");
+        String cropLaiCsv = res.get(0).fileContensMap.get("crop-leaf-stem-AI.csv");
         System.out.println(cropCsv);
         assertTrue(cropCsv.contains("Crop development and production"));
         System.out.println(cropLaiCsv);
         assertTrue(cropLaiCsv.split("2015")[1].startsWith(", 1, 1, 00.00, 00.00, 00.00, 00.00"));
 
         Utils.sletMappe(kørsel.directory);
+    }
+
+
+    @Test
+    public void serielFjernkørselUdeUdpakning() throws IOException {
+        Server.PAK_UD_VED_MODTAGELSEN = false; // ikke så pålideligt da testsne kører parrallelt
+        serielFjernkørsel();
+        Server.PAK_UD_VED_MODTAGELSEN = true;
     }
 
 }

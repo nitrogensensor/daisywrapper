@@ -55,6 +55,11 @@ public class Utils {
                 .forEach(File::delete);
     }
 
+/*
+        ArrayList<Path> filer = new ArrayList<Path>();
+        Files.walk(inputDir).filter(fraFil -> !Files.isDirectory(fraFil)).forEach(f -> filer.add(f));
+        if (FEJLFINDING) System.out.println("filer="+filer);
+ */
 
     // Kilde: https://stackoverflow.com/questions/15968883/how-to-zip-a-folder-itself-using-java/32052016#32052016
     public static void zipMappe(String inputMappe, OutputStream os) throws IOException {
@@ -80,6 +85,7 @@ public class Utils {
 
     // Kilde: https://mkyong.com/java/how-to-decompress-files-from-a-zip-file/
     public static void unzipMappe(InputStream inputStream, String outputMappe) throws IOException {
+        System.out.println("unzipMappe  " + outputMappe);
 
         byte[] buffer = new byte[1024];
 

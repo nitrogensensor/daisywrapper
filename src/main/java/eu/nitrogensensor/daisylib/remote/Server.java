@@ -15,13 +15,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class Server {
     private static final boolean USIKKER_KØR = false;
+    public static boolean PAK_UD_VED_MODTAGELSEN = true;
     public static Javalin app;
     public static String url;
 
@@ -109,38 +109,36 @@ public class Server {
 
     private static String upload(Context ctx) throws IOException {
         Files.createDirectories(uploadMappe);
-        Path directory = Files.createTempDirectory(uploadMappe,"");
+        Path denneUploadMappe = Files.createTempDirectory(uploadMappe,"");
             ctx.uploadedFiles("files").forEach(file -> {
                 try {
                     System.out.println("Server uplad "+file.getFilename());
-                    Path fil = directory.resolve(tjekSikkerSti(file.getFilename()));
+                    Path fil = denneUploadMappe.resolve(tjekSikkerSti(file.getFilename()));
                     Files.createDirectories(fil.getParent());
                     Files.copy(file.getContent(), fil);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             });
-        String batchId = uploadMappe.relativize(directory).toString();
+        String batchId = uploadMappe.relativize(denneUploadMappe).toString();
         ctx.html(batchId);
         return batchId;
     }
 
     private static String uploadZip(Context ctx) throws IOException {
         Files.createDirectories(uploadMappe);
-        Path dataMappe = Files.createTempDirectory(uploadMappe,"");
+        Path denneUploadMappe = Files.createTempDirectory(uploadMappe,"");
+        String batchId = uploadMappe.relativize(denneUploadMappe).toString();
         UploadedFile file = ctx.uploadedFile("data");
         System.out.println("Server upladZip "+file.getFilename());
         InputStream is = file.getContent();
-        if (!is.markSupported()) throw new RuntimeException("is skal kunne spoles tilbage");
-        is.mark(Integer.MAX_VALUE);
-        Utils.unzipMappe(is, "/tmp/xxx");
-        is.reset();
-        Utils.unzipMappe(is, "/tmp/xxx1");
-        is.reset();
-        Utils.unzipMappe(is, "/tmp/xxx2");
-        is.reset();
-        String batchId = uploadMappe.relativize(dataMappe).toString();
-        GemOgHentArbejdsfiler.gem(file.getContent(), batchId);
+        if (PAK_UD_VED_MODTAGELSEN) {
+            if (!is.markSupported()) throw new RuntimeException("is skal kunne spoles tilbage");
+            is.mark(Integer.MAX_VALUE);
+            Utils.unzipMappe(is, denneUploadMappe.toString());
+            is.reset();
+        }
+        GemOgHentArbejdsfiler.gem(is, batchId);
         ctx.html(batchId);
         return batchId;
     }
@@ -153,6 +151,18 @@ public class Server {
             else {
                 //ExecutionBatch batch = ctx.bodyAsClass(ExecutionBatch.class);
                 batch.kørsel.directory = uploadMappe.resolve(tjekSikkerSti(batch.oploadId));
+                if (Files.exists(batch.kørsel.directory) && batch.kørsel.directory.toFile().list().length>0) {
+                    log.fine("Denne instans har allerede batch "+batch.kørsel.directory+" med "
+                            + Files.list(batch.kørsel.directory).collect(Collectors.toList()));
+                } else {
+                    log.fine("Denne instans har ikke batch "+batch.kørsel.directory);
+
+                    Path fil = GemOgHentArbejdsfiler.hent(batch.oploadId);
+                    InputStream fis = Files.newInputStream(fil);
+                    Utils.unzipMappe(fis, batch.kørsel.directory.toString());
+                    fis.close();
+                    Files.delete(fil);
+                }
 
                 System.out.println("Server ExecutionBatch " + batch.oploadId);
                 batch.kørsel.run();
