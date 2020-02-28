@@ -20,8 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class Taastrup2019Test {
 
 
-    @Test
-    public void testLokalKørsel() throws IOException { // burde nok splittes op i stedet for at være jumbo-test. Tager 4 sekunder
+    public static DaisyModel lavTaastrupKørsel() throws IOException {
         String scriptFil = "Setup_DTU_Taastrup.dai";
         Path orgMappe = Paths.get("src/test/resources/Taastrup 2019/dtu_model");
         DaisyModel kørsel = new DaisyModel(orgMappe, scriptFil);
@@ -30,13 +29,20 @@ public class Taastrup2019Test {
 
         Path daisyOutputmappe = Files.createTempDirectory("ns-daisy");
         kørsel = kørsel.clon().toDirectory(daisyOutputmappe);
+        return kørsel;
+    }
+
+
+    @Test
+    public void testLokalKørsel() throws IOException { // burde nok splittes op i stedet for at være jumbo-test. Tager 4 sekunder
+        DaisyModel kørsel = lavTaastrupKørsel();
 
         kørsel.run();
         ResultExtractor re = new ResultExtractor();
         re.addCsvExtractor("crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)", "crop-leaf-stem-AI.csv");
         re.addFile("crop.csv");
         Path ekstraktOutputmappe = Files.createTempDirectory("ns-daisy-ekstrakt");
-        re.extract(daisyOutputmappe, ekstraktOutputmappe);
+        re.extract(kørsel.directory, ekstraktOutputmappe);
 
         // Linje 10 af "crop.csv" bør være
         // 2015    1       10      0       0       0       00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00
@@ -58,7 +64,7 @@ public class Taastrup2019Test {
 
         assertTrue(Files.exists(ekstraktOutputmappe.resolve("crop-leaf-stem-AI.csv")));
 
-        Utils.sletMappe(daisyOutputmappe);
+        Utils.sletMappe(kørsel.directory);
         Utils.sletMappe(ekstraktOutputmappe);
     }
 }

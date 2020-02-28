@@ -67,7 +67,7 @@ public class DaisyRemoteExecution {
     }
 
 
-    public static ArrayList<ExtractedContent> runSerial0(ArrayList<DaisyModel> daisyModels, ResultExtractor resultExtractor, Path resultsDir) throws IOException {
+    public static ArrayList<ExtractedContent> runSerial(ArrayList<DaisyModel> daisyModels, ResultExtractor resultExtractor, Path resultsDir) throws IOException {
         Path inputDir = getDirectory(daisyModels);
 
         ArrayList<Path> filer = new ArrayList<Path>();
@@ -112,16 +112,6 @@ public class DaisyRemoteExecution {
                     Files.write(resultDir.resolve(filnavn), filIndhold.getBytes());
                 }
             }
-        }
-        return extractedContents;
-    }
-
-
-    public static ArrayList<ExtractedContent> runSerial(ArrayList<DaisyModel> daisyModels, ResultExtractor resultExtractor, Path resultsDir) throws IOException {
-        ArrayList<ExtractedContent> extractedContents = new ArrayList<>();
-        for (DaisyModel kørsel : daisyModels) {
-            ExtractedContent extractedContent = uploadSim(kørsel, resultExtractor, resultsDir);
-            extractedContents.add(extractedContent);
         }
         return extractedContents;
     }

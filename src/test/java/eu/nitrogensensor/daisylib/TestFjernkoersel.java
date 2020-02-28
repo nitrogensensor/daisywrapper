@@ -24,25 +24,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class TestFjernkoersel {
 
     @BeforeAll
-    public static void opsæt() {
+    public static void startServer() {
         Server.start(12354);
     }
 
     @AfterAll
-    public static void luk() {
+    public static void lukServer() {
         Server.stop();
     }
 
     @Test
     public void testFjernkørsel() throws IOException {
-        String scriptFil = "Setup_DTU_Taastrup.dai";
-        Path orgMappe = Paths.get("src/test/resources/Taastrup 2019/dtu_model");
-        DaisyModel kørsel = new DaisyModel(orgMappe, scriptFil);
-        kørsel.replace("(stop *)", "(stop 2015 3 30)"); // for hurtigere kørsel
-        kørsel.replace("(run taastrup)", "(run Mark21 (column (\"High_N_High_W\")))");
-
-        Path daisyOutputmappe = Files.createTempDirectory("ns-daisy");
-        kørsel = kørsel.clon().toDirectory(daisyOutputmappe);
+        DaisyModel kørsel = Taastrup2019Test.lavTaastrupKørsel();
 
         ArrayList<DaisyModel> arrayList = new ArrayList<>();
         arrayList.add(kørsel);
@@ -61,6 +54,31 @@ public class TestFjernkoersel {
         System.out.println(cropLaiCsv);
         assertTrue(cropLaiCsv.split("2015")[1].startsWith(", 1, 1, 00.00, 00.00, 00.00, 00.00"));
 
-        Utils.sletMappe(daisyOutputmappe);
+        Utils.sletMappe(kørsel.directory);
     }
+
+
+    @Test
+    public void serielFjernkørsel() throws IOException {
+        DaisyModel kørsel = Taastrup2019Test.lavTaastrupKørsel();
+
+        ArrayList<DaisyModel> arrayList = new ArrayList<>();
+        arrayList.add(kørsel);
+        arrayList.add(kørsel.clon());
+
+        ResultExtractor re = new ResultExtractor();
+        re.addCsvExtractor("crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)", "crop-leaf-stem-AI.csv");
+        re.addFile("crop.csv");
+
+        ArrayList<ExtractedContent> res = DaisyRemoteExecution.runSerial(arrayList, re, null);
+        String cropCsv = res.get(0).fileContensMap.get("crop.csv");
+        String cropLaiCsv = res.get(1).fileContensMap.get("crop-leaf-stem-AI.csv");
+        System.out.println(cropCsv);
+        assertTrue(cropCsv.contains("Crop development and production"));
+        System.out.println(cropLaiCsv);
+        assertTrue(cropLaiCsv.split("2015")[1].startsWith(", 1, 1, 00.00, 00.00, 00.00, 00.00"));
+
+        Utils.sletMappe(kørsel.directory);
+    }
+
 }
