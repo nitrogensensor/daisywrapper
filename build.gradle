@@ -1,5 +1,9 @@
 apply plugin: 'java-library'
 
+// Værdien kan være mellem 7 og 9. JDK 10+ fanges ikke af Android Studio
+sourceCompatibility = "9"
+compileJava.options.encoding = "UTF-8"
+
 dependencies {
     // Ikke nødvendig pt - og spærrede for nem implementering med Docker, så afhængigheden er pt fjernet
     //implementation project(path: ':datamodel')
@@ -23,13 +27,16 @@ dependencies {
     compile 'com.google.cloud:google-cloud-storage:1.104.0'
 
     // Afprøvning
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile("org.junit.jupiter:junit-jupiter-api:5.6.0")
+    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.6.0")
+    //testRuntime("org.junit.platform:junit-platform-runner:1.6.0")
 }
 
-// Værdien kan være mellem 7 og 9. JDK 10+ fanges ikke af Android Studio
-sourceCompatibility = "9"
-compileJava.options.encoding = "UTF-8"
 
+test {
+    useJUnitPlatform()
+    maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+}
 
 // til at bygge artefaktet daisy/build/libs/daisy.jar
 jar {

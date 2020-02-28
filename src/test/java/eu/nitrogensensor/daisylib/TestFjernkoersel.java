@@ -5,9 +5,11 @@ import eu.nitrogensensor.daisylib.csv.CsvFile;
 import eu.nitrogensensor.daisylib.remote.DaisyRemoteExecution;
 import eu.nitrogensensor.daisylib.remote.ExtractedContent;
 import eu.nitrogensensor.daisylib.remote.Server;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,18 +17,18 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
+@Execution(ExecutionMode.CONCURRENT)
 public class TestFjernkoersel {
 
-    @BeforeClass
+    @BeforeAll
     public static void opsæt() {
         Server.start(12354);
     }
 
-    @AfterClass
+    @AfterAll
     public static void luk() {
         Server.stop();
     }
@@ -46,7 +48,6 @@ public class TestFjernkoersel {
         arrayList.add(kørsel);
         arrayList.add(kørsel.clon());
         arrayList.add(kørsel.clon());
-        arrayList.add(kørsel.clon());
 
         ResultExtractor re = new ResultExtractor();
         re.addCsvExtractor("crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)", "crop-leaf-stem-AI.csv");
@@ -54,7 +55,7 @@ public class TestFjernkoersel {
 
         ArrayList<ExtractedContent> res = DaisyRemoteExecution.runParralel(arrayList, re, null);
         String cropCsv = res.get(0).fileContensMap.get("crop.csv");
-        String cropLaiCsv = res.get(0).fileContensMap.get("crop-leaf-stem-AI.csv");
+        String cropLaiCsv = res.get(2).fileContensMap.get("crop-leaf-stem-AI.csv");
         System.out.println(cropCsv);
         assertTrue(cropCsv.contains("Crop development and production"));
         System.out.println(cropLaiCsv);

@@ -3,17 +3,20 @@ package eu.nitrogensensor.daisylib;
 
 import eu.nitrogensensor.daisylib.csv.CsvEkstraktor;
 import eu.nitrogensensor.daisylib.csv.CsvFile;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
+@Execution(ExecutionMode.CONCURRENT)
 public class Taastrup2019Test {
 
 
