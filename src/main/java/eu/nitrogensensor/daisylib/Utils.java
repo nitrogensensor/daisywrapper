@@ -1,10 +1,11 @@
 package eu.nitrogensensor.daisylib;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.net.URI;
+import java.nio.file.*;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -92,32 +93,46 @@ public class Utils {
         while (ze != null) {
             String fileName = ze.getName();
             File newFile = new File(outputMappe + File.separator + fileName);
-            System.out.println("file unzip : " + newFile.getAbsoluteFile());
-            new File(newFile.getParent()).mkdirs();
+            if (ze.isDirectory()) {
+                newFile.mkdirs();
+            } else {
+                System.out.println("file unzip : " + newFile.getAbsoluteFile());
+                new File(newFile.getParent()).mkdirs();
 
-            FileOutputStream fos = new FileOutputStream(newFile);
+                FileOutputStream fos = new FileOutputStream(newFile);
 
-            int len;
-            while ((len = zis.read(buffer)) > 0) {
-                fos.write(buffer, 0, len);
+                int len;
+                while ((len = zis.read(buffer)) > 0) {
+                    fos.write(buffer, 0, len);
+                }
+
+                fos.close();
             }
-
-            fos.close();
             ze = zis.getNextEntry();
         }
-
         zis.closeEntry();
         zis.close();
-
-        System.out.println("Done");
     }
 
     public static void main(String[] args) throws IOException {
         OutputStream os = Files.newOutputStream(Paths.get("slamkode.zip"));
         zipMappe("slamkode/src", os);
         os.close();
-
         unzipMappe(new FileInputStream("slamkode.zip"), "/tmp/");
-
     }
+
+
+    private static void skrivZip() throws IOException {
+        Map<String, String> env = new HashMap<>();
+        env.put("create", "true");
+
+        URI uri = URI.create("jar:file:/tmp/zipfstest.zip");
+        try (FileSystem zipfs = FileSystems.newFileSystem(uri, env)) {
+            Path externalTxtFile = Paths.get("README.md");
+            Path pathInZipfile = zipfs.getPath("README.md");
+            // Copy a file into the zip file
+            Files.copy(externalTxtFile, pathInZipfile, StandardCopyOption.REPLACE_EXISTING);
+        }
+    }
+
 }

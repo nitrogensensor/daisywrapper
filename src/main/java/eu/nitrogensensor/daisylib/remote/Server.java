@@ -2,16 +2,22 @@ package eu.nitrogensensor.daisylib.remote;
 
 import com.google.gson.Gson;
 import eu.nitrogensensor.daisylib.Utils;
+import eu.nitrogensensor.daisylib.remote.google_cloud_storage.GemOgHentArbejdsfiler;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
+import io.javalin.http.UploadedFile;
 import io.javalin.plugin.json.JavalinJson;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Server {
@@ -22,10 +28,13 @@ public class Server {
     //System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tF %1$tT %4$s %2$s %5$s%6$s%n");
     static { System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tT %4$s %2$s %5$s%6$s%n"); }
     static Logger log = Logger.getGlobal();
+    static { log.setLevel( Level.ALL ); log.getParent().getHandlers()[0].setLevel(Level.ALL); } // vis alt log
 
 
     public static void main(String[] args) {
-        log.info("hej1");
+        log.info("hej1 med log.info");
+        log.fine("hej1 med log.fine");
+        log.warning("hej1 med log.warning");
         start();
         //Testklient.testkald();
         //stop();
@@ -51,14 +60,16 @@ public class Server {
         app = Javalin.create().start(Integer.parseInt(port));
         app.before(ctx -> {
             // runs before all requests
-            System.out.println("Server "+ctx.method()+" på " +ctx.url());
+            log.fine("Server "+ctx.method()+" på " +ctx.url());
         });
         app.exception(Exception.class, (e, ctx) -> {
+            log.warning(e.toString());
             e.printStackTrace();
         });
         app.get("/", ctx -> ctx.contentType("text/html").result("<html><body>Du kan også spørge på <a href='json'>json</a>"));
         app.get("/json", ctx -> ctx.result("Hello World"));
         app.post("/upload", ctx -> upload(ctx));
+        app.post("/uploadZip", ctx -> uploadZip(ctx));
         if (USIKKER_KØR) app.get("/koer", ctx -> kør(ctx, null));
         app.post("/sim", ctx -> sim(ctx));
         app.post("/uploadsim", ctx -> uploadsim(ctx));
@@ -110,18 +121,41 @@ public class Server {
         return batchId;
     }
 
+    private static String uploadZip(Context ctx) throws IOException {
+        Files.createDirectories(uploadMappe);
+        Path dataMappe = Files.createTempDirectory(uploadMappe,"");
+        UploadedFile file = ctx.uploadedFile("data");
+        System.out.println("Server upladZip "+file.getFilename());
+        InputStream is = file.getContent();
+        if (!is.markSupported()) throw new RuntimeException("is skal kunne spoles tilbage");
+        is.mark(Integer.MAX_VALUE);
+        Utils.unzipMappe(is, "/tmp/xxx");
+        is.reset();
+        Utils.unzipMappe(is, "/tmp/xxx1");
+        is.reset();
+        Utils.unzipMappe(is, "/tmp/xxx2");
+        is.reset();
+        String batchId = uploadMappe.relativize(dataMappe).toString();
+        GemOgHentArbejdsfiler.gem(file.getContent(), batchId);
+        ctx.html(batchId);
+        return batchId;
+    }
+
     private static void sim(Context ctx) throws IOException {
             System.out.println("Server sim "+ctx.url());
             System.out.println("Server sim "+ctx.body());
             ExecutionBatch batch = JavalinJson.fromJson(ctx.body(),ExecutionBatch.class);
-            //ExecutionBatch batch = ctx.bodyAsClass(ExecutionBatch.class);
-            batch.kørsel.directory =  uploadMappe.resolve(tjekSikkerSti(batch.oploadId));
+            if (batch==null) log.fine("Ingen batch fra "+ctx.body());
+            else {
+                //ExecutionBatch batch = ctx.bodyAsClass(ExecutionBatch.class);
+                batch.kørsel.directory = uploadMappe.resolve(tjekSikkerSti(batch.oploadId));
 
-            System.out.println("Server ExecutionBatch "+batch.oploadId);
-            batch.kørsel.run();
-            ExtractedContent extractedContent = new ExtractedContent();
-            batch.resultExtractor.extract(batch.kørsel.directory, extractedContent.fileContensMap);
-            ctx.json(extractedContent);
+                System.out.println("Server ExecutionBatch " + batch.oploadId);
+                batch.kørsel.run();
+                ExtractedContent extractedContent = new ExtractedContent();
+                batch.resultExtractor.extract(batch.kørsel.directory, extractedContent.fileContensMap);
+                ctx.json(extractedContent);
+            }
     }
 
 

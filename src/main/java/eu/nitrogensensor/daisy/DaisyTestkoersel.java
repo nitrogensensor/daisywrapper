@@ -17,7 +17,7 @@ public class DaisyTestkoersel
 
     DaisyModel d = new DaisyModel("daisy/src/test/resources/Taastrup 2019/dtu_model", "Setup_DTU_Taastrup.dai");
 
-    //d.replace("(stop *)", "(stop 2015 8 20)"); // for hurtigere kørsel
+    d.replace("(stop *)", "(stop 2015 8 20)"); // for hurtigere kørsel
     //d.replace("(path *)", "(path \"/opt/daisy/sample\" \"/opt/daisy/lib\" \".\" \"./common\")");
     //d.run();
 

@@ -15,11 +15,11 @@ public class Testklient {
 
         System.out.println("sim:"+Unirest.post(url+"/sim").asString().getBody());
 
-        response = Unirest.post(url+"/upload")
-                .field("files", new File("/home/j/xxx"))
-                .field("files", new File("/home/j/x.jpg"))
+        response = Unirest.post(url+"/uploadZip")
+                .field("data", new File("/home/j/Hent/src.zip"))
                 .asString();
         System.out.println(response.getBody());
+        Server.stop();
     }
 
     public static void main(String[] args) {

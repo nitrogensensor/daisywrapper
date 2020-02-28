@@ -2,23 +2,23 @@ package eu.nitrogensensor.daisylib.remote.google_cloud_storage;
 
 import com.google.api.gax.paging.Page;
 import com.google.auth.oauth2.GoogleCredentials;
-import com.google.cloud.storage.*;
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.Bucket;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
 import com.google.common.collect.Lists;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URI;
-import java.nio.file.*;
-import java.nio.file.spi.FileSystemProvider;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Stream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+import java.io.InputStream;
+import java.nio.file.Paths;
 
-public class GemOgHent {
-    static Storage getStorage() throws IOException {
+public class GemOgHentArbejdsfiler {
+    private static Storage storage;
+    private static Bucket bucket;
+
+    static  {
 
         try {
             String jsonPath = "/home/j/Projekter/NitrogenSensor/gitlab/nitrogensensor/daisy/daisykørsel-arbejdsfiler.json";
@@ -26,13 +26,13 @@ public class GemOgHent {
             // Otherwise credentials are read from the GOOGLE_APPLICATION_CREDENTIALS environment variable.
             GoogleCredentials credentials = GoogleCredentials.fromStream(new FileInputStream(jsonPath))
                     .createScoped(Lists.newArrayList("https://www.googleapis.com/auth/cloud-platform"));
-            Storage storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
-            return storage;
-        } catch (FileNotFoundException e) {
+            storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
+        } catch (IOException e) {
+            // hvis vi ikke kører på Jacobs PC så kører vi nok oppe i Cloud Run ;-)
+            System.out.println("Dette er ikke Jacobs PC: "+e);
+            storage = StorageOptions.getDefaultInstance().getService();
         }
-        Storage storage = StorageOptions.getDefaultInstance().getService();
-        return storage;
-
+        bucket = storage.get("daisykoersel-arbejdsfiler");
     }
 
 
@@ -40,20 +40,18 @@ public class GemOgHent {
     public static void main(String... args) throws Exception {
 
         // Instantiates a client
-        Storage storage = getStorage();
         Page<Bucket> buckets = storage.list();
         for (Bucket bucket : buckets.iterateAll()) {
             System.out.println(bucket.toString());
         }
 
-        Bucket bucket = storage.get("daisykoersel-arbejdsfiler");
 
         for (Blob b : bucket.list(Storage.BlobListOption.currentDirectory()).iterateAll()) {
             System.out.println(b.toString());
         }
 
         Blob b = bucket.get("README.md");
-        b.downloadTo(Paths.get("/tmp/xxx"));
+        b.downloadTo(Paths.get("/tmp/xxx.txt"));
 
 
         System.out.printf("Bucket %s created.%n", bucket.getName());
@@ -72,30 +70,9 @@ public class GemOgHent {
         Bucket bucket = storage.create(BucketInfo.of(bucketName));
 
          */
-
-        skrivZip();
     }
 
-    private static void skrivZip() throws IOException {
-        Map<String, String> env = new HashMap<>();
-// Create the zip file if it doesn't exist
-        env.put("create", "true");
-
-        URI uri = URI.create("jar:file:/tmp/zipfstest.zip");
-
-        try (FileSystem zipfs = FileSystems.newFileSystem(uri, env)) {
-            Path externalTxtFile = Paths.get("README.md");
-            Path pathInZipfile = zipfs.getPath("README.md");
-            // Copy a file into the zip file
-            Files.copy(externalTxtFile, pathInZipfile, StandardCopyOption.REPLACE_EXISTING);
-        }
-
-        try (FileSystem zipfs = FileSystems.newFileSystem(uri, env)) {
-            Path externalTxtFile = Paths.get("README.md");
-            Path pathInZipfile = zipfs.getPath("README.md");
-            // Copy a file into the zip file
-            Files.copy(externalTxtFile, pathInZipfile, StandardCopyOption.REPLACE_EXISTING);
-        }
-
+    public static void gem(InputStream content, String batchId) {
+        bucket.create(batchId, content);
     }
 }
