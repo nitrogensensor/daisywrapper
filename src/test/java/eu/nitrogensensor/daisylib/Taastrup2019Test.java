@@ -18,12 +18,11 @@ public class Taastrup2019Test {
 
 
     @Test
-    public void testEnFuldKørsel() throws IOException { // burde nok splittes op i stedet for at være jumbo-test. Tager 4 sekunder
+    public void testLokalKørsel() throws IOException { // burde nok splittes op i stedet for at være jumbo-test. Tager 4 sekunder
         String scriptFil = "Setup_DTU_Taastrup.dai";
         Path orgMappe = Paths.get("src/test/resources/Taastrup 2019/dtu_model");
         DaisyModel kørsel = new DaisyModel(orgMappe, scriptFil);
-        kørsel.replace("(stop *)", "(stop 2015 4 30)"); // for hurtigere kørsel
-        kørsel.replace("(path *)", "(path \"/opt/daisy/sample\" \"/opt/daisy/lib\" \".\" \"./common\")");
+        kørsel.replace("(stop *)", "(stop 2015 3 30)"); // for hurtigere kørsel
         kørsel.replace("(run taastrup)", "(run Mark21 (column (\"High_N_High_W\")))");
 
         Path daisyOutputmappe = Files.createTempDirectory("ns-daisy");

@@ -23,7 +23,7 @@ import java.util.logging.Logger;
 public class Server {
     private static final boolean USIKKER_KØR = false;
     public static Javalin app;
-    public static String url = "http://localhost:8080";
+    public static String url;
 
     //System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tF %1$tT %4$s %2$s %5$s%6$s%n");
     static { System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tT %4$s %2$s %5$s%6$s%n"); }
@@ -46,18 +46,22 @@ public class Server {
     }
 
     public static void start() {
+        String port = System.getenv("PORT");
+        if (port == null) {
+            port = "8080";
+        }
+        start(Integer.parseInt(port));
+    }
+
+    public static void start(int port) {
         if (app!=null) return;
 
         Gson gson = MyGsonPathConverter.buildGson();
         JavalinJson.setFromJsonMapper(gson::fromJson);
         JavalinJson.setToJsonMapper(gson::toJson);
 
-        String port = System.getenv("PORT");
-        if (port == null) {
-            port = "8080";
-        }
-
-        app = Javalin.create().start(Integer.parseInt(port));
+        url = "http://localhost:"+port;
+        app = Javalin.create().start(port);
         app.before(ctx -> {
             // runs before all requests
             log.fine("Server "+ctx.method()+" på " +ctx.url());

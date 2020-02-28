@@ -32,7 +32,7 @@ public class DaisyRemoteExecution {
     private static Gson gson = MyGsonPathConverter.buildGson();
     private static String url = "https://daisykoersel-6dl4uoo23q-lz.a.run.app";
     static {
-        Server.start(); url = Server.url; // for at starte og bruge lokal server
+        if (Server.url==null) Server.start(); url = Server.url; // for at starte og bruge lokal server
         Unirest.config().setObjectMapper(new ObjectMapper() {
             @Override
             public <T> T readValue(String value, Class<T> valueType) {
