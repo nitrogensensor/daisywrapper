@@ -81,12 +81,12 @@ public class TestFjernkoersel {
         Utils.sletMappe(kørsel.directory);
     }
 
-
+/*
     @Test
     public void serielFjernkørselUdeUdpakning() throws IOException {
         Server.PAK_UD_VED_MODTAGELSEN = false; // ikke så pålideligt da testsne kører parrallelt
-        serielFjernkørsel();
+        serielFjernkø_rsel();
         Server.PAK_UD_VED_MODTAGELSEN = true;
     }
-
+*/
 }

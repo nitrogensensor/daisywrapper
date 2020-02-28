@@ -73,7 +73,7 @@ public class Server {
         app.get("/", ctx -> ctx.contentType("text/html").result("<html><body>Du kan også spørge på <a href='json'>json</a>"));
         app.get("/json", ctx -> ctx.result("Hello World"));
         app.post("/upload", ctx -> upload(ctx));
-        app.post("/uploadZip", ctx -> uploadZip(ctx));
+        app.post("/uploadZip", ctx -> upload(ctx));
         if (USIKKER_KØR) app.get("/koer", ctx -> kør(ctx, null));
         app.post("/sim", ctx -> sim(ctx));
         app.post("/uploadsim", ctx -> uploadsim(ctx));
@@ -109,36 +109,36 @@ public class Server {
 
     private static String upload(Context ctx) throws IOException {
         Files.createDirectories(uploadMappe);
-        Path denneUploadMappe = Files.createTempDirectory(uploadMappe,"");
-            ctx.uploadedFiles("files").forEach(file -> {
-                try {
-                    System.out.println("Server uplad "+file.getFilename());
-                    Path fil = denneUploadMappe.resolve(tjekSikkerSti(file.getFilename()));
-                    Files.createDirectories(fil.getParent());
-                    Files.copy(file.getContent(), fil);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
-        String batchId = uploadMappe.relativize(denneUploadMappe).toString();
-        ctx.html(batchId);
-        return batchId;
-    }
 
-    private static String uploadZip(Context ctx) throws IOException {
-        Files.createDirectories(uploadMappe);
         Path denneUploadMappe = Files.createTempDirectory(uploadMappe,"");
         String batchId = uploadMappe.relativize(denneUploadMappe).toString();
-        UploadedFile file = ctx.uploadedFile("data");
-        System.out.println("Server upladZip "+file.getFilename());
-        InputStream is = file.getContent();
-        if (PAK_UD_VED_MODTAGELSEN) {
-            if (!is.markSupported()) throw new RuntimeException("is skal kunne spoles tilbage");
-            is.mark(Integer.MAX_VALUE);
-            Utils.unzipMappe(is, denneUploadMappe.toString());
-            is.reset();
+
+/*
+        ctx.uploadedFiles("filer").forEach(file -> {
+            try {
+                System.out.println("Server uplad "+file.getFilename());
+                Path fil = denneUploadMappe.resolve(tjekSikkerSti(file.getFilename()));
+                Files.createDirectories(fil.getParent());
+                Files.copy(file.getContent(), fil);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+*/
+        UploadedFile file = ctx.uploadedFile("zipfil");
+        if (file!=null) {
+            System.out.println("Server upladZip " + file.getFilename());
+            InputStream is = file.getContent();
+            if (PAK_UD_VED_MODTAGELSEN) {
+                if (!is.markSupported()) throw new RuntimeException("is skal kunne spoles tilbage");
+                is.mark(Integer.MAX_VALUE);
+                Utils.unzipMappe(is, denneUploadMappe.toString());
+                is.reset();
+            }
+            GemOgHentArbejdsfiler.gem(is, batchId);
         }
-        GemOgHentArbejdsfiler.gem(is, batchId);
+
+
         ctx.html(batchId);
         return batchId;
     }

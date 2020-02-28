@@ -56,67 +56,61 @@ public class DaisyRemoteExecution {
         return directory;
     }
 
+
+    private static String visStatus() {
+        HashMap<String, Integer> keyCountMap = new HashMap<String, Integer>();
+        for(String v : new ArrayList<>(kørslerIgang.values()))
+        {
+            Integer i = keyCountMap.get(v);
+            keyCountMap.put(v, i==null? 1 : i+1);
+        }
+        maxSamtidigeKørslerIgang = Math.max(maxSamtidigeKørslerIgang, kørslerIgang.size());
+
+        return String.format("%tT Der er %2d oploads og %2d kørsler i gang: "+keyCountMap,new Date(), oploadsIgang.size(), kørslerIgang.size());
+    }
+/*
     public static MultipartBody tilføjInputfilerTilRequest(MultipartBody oploadReq, Path inputDir) throws IOException {
         ArrayList<Path> filer = new ArrayList<Path>();
         Files.walk(inputDir).filter(fraFil -> !Files.isDirectory(fraFil)).forEach(f -> filer.add(f));
         if (FEJLFINDING) System.out.println("filer="+filer);
         for (Path fil : filer) {
-            oploadReq = oploadReq.field("files", fil.toFile(), inputDir.relativize(fil).toString());
+            oploadReq = oploadReq.field("filer", fil.toFile(), inputDir.relativize(fil).toString());
         }
         return oploadReq;
     }
+*/
 
-
-    public static ArrayList<ExtractedContent> runSerial(ArrayList<DaisyModel> daisyModels, ResultExtractor resultExtractor, Path resultsDir) throws IOException {
-        Path inputDir = getDirectory(daisyModels);
-
+    private static String __oploadZip(Path inputDir) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         Utils.zipMappe(inputDir.toString(), baos);
         HttpResponse<String> oploadRes = Unirest.post(url+"/uploadZip")
-                .field("data",  new ByteArrayInputStream(baos.toByteArray()), "data.zip")
+                .field("zipfil",  new ByteArrayInputStream(baos.toByteArray()), "zipfil.zip")
                 .asString();
 
         if (!oploadRes.isSuccess()) throw new IOException("Fik ikke oploaded filer: "+oploadRes.getBody());
+        String batchId = oploadRes.getBody();
+        return  batchId;
+    }
 
-        ExecutionBatch batch = new ExecutionBatch();
-        batch.oploadId = oploadRes.getBody();
-        batch.resultExtractor = resultExtractor;
 
-        ArrayList<ExtractedContent> extractedContents = new ArrayList<>();
-        int kørselsNr = 0;
-        for (DaisyModel kørsel : daisyModels) {
-            kørselsNr++;
-
-            // Fjern irrelecante oplysninger fra det objekt, der sendes over netværket
-            batch.kørsel = kørsel.clon();
-            batch.kørsel.directory = null;
-            batch.kørsel.setId(null);
-
-            HttpResponse<ExtractedContent> response = Unirest.post(url + "/sim/")
-                    .body(batch)
-                    .asObject(ExtractedContent.class);
-            if (!response.isSuccess()) throw new IOException(response.getStatusText());
-
-            ExtractedContent extractedContent = response.getBody();
-            extractedContent.id = kørsel.getId();
-            extractedContents.add(extractedContent);
-            if (resultsDir!=null) {
-                Path resultDir = resultsDir.resolve(kørsel.getId());
-                Utils.sletMappe(resultDir);
-                Files.createDirectories(resultDir);
-                if (FEJLFINDING) System.out.println("Skriver "+extractedContent.fileContensMap.keySet()+" til " +resultDir);
-                for (String filnavn : extractedContent.fileContensMap.keySet()) {
-                    String filIndhold = extractedContent.fileContensMap.get(filnavn);
-                    Files.write(resultDir.resolve(filnavn), filIndhold.getBytes());
-                }
+    private static void __skriv(DaisyModel kørsel, ExtractedContent extractedContent, Path resultsDir) throws IOException {
+        if (resultsDir != null) {
+            Path resultDir = resultsDir.resolve(kørsel.getId());
+            Utils.sletMappe(resultDir);
+            Files.createDirectories(resultDir);
+            if (FEJLFINDING) System.out.println("Skriver " + extractedContent.fileContensMap.keySet() + " til " + resultDir);
+            for (String filnavn : extractedContent.fileContensMap.keySet()) {
+                String filIndhold = extractedContent.fileContensMap.get(filnavn);
+                Files.write(resultDir.resolve(filnavn), filIndhold.getBytes());
             }
         }
-        return extractedContents;
     }
 
 
     public static ArrayList<ExtractedContent> runParralel(ArrayList<DaisyModel> daisyModels, ResultExtractor resultExtractor, Path resultsDir) throws IOException {
         final ArrayList<ExtractedContent> extractedContents = new ArrayList<>();
+        Path inputDir = getDirectory(daisyModels);
+        String oploadId = __oploadZip(inputDir);
 
         //ExecutorService executorService = Executors.newWorkStealingPool();
         ExecutorService executorService = Executors.newFixedThreadPool(Math.min(daisyModels.size(),MAX_PARALLELITET)); // max 100 parrallel forespørgsler
@@ -135,7 +129,33 @@ public class DaisyRemoteExecution {
             Runnable runnable = () -> {
                 if (fejl.get() != null) return;
                 try {
-                    ExtractedContent extractedContent = uploadSim(kørsel, resultExtractor, resultsDir);
+                    kørslerIgang.put(kørsel.getId(), "0 starter");
+
+                    // Fjern irrelecante oplysninger fra det objekt, der sendes over netværket
+                    ExecutionBatch batch = new ExecutionBatch();
+                    batch.resultExtractor = resultExtractor;
+                    batch.oploadId = oploadId;
+                    batch.kørsel = kørsel.clon();
+                    batch.kørsel.directory = null;
+                    batch.kørsel.setId(null);
+
+                    HttpResponse<ExtractedContent> response = Unirest.post(url + "/sim/").body(batch).asObject(ExtractedContent.class);
+                    if (!response.isSuccess()) throw new IOException(response.getStatusText());
+
+                    kørslerIgang.put(kørsel.getId(), "4 modtag");
+                    if (!response.isSuccess()) {
+                        System.err.println("Kald for "+ kørsel.getId()+" fejlede: "+response.getHeaders());
+                        System.err.println("Kald fejlede1: "+response.getStatus() +response.getStatusText());
+                        System.err.println("Kald fejlede2: "+response);
+                        throw new IOException(response.getStatusText());
+                    }
+
+                    ExtractedContent extractedContent1 = response.getBody();
+                    extractedContent1.id = kørsel.getId();
+                    kørslerIgang.put(kørsel.getId(), "5 skriv");
+                    __skriv(kørsel, extractedContent1, resultsDir);
+                    kørslerIgang.remove(kørsel.getId());
+                    ExtractedContent extractedContent = extractedContent1;
                     extractedContents.add(extractedContent);
                 } catch (IOException e) {
                     System.err.println("FEJL i "+kørselsNr_+" "+kørsel.getId());
@@ -151,8 +171,6 @@ public class DaisyRemoteExecution {
             System.out.println(visStatus());
             try { Thread.sleep(1000); } catch (Exception e) { };
         }
-
-
         executorService.shutdown();
         try {
             executorService.awaitTermination(MAX_KØRSELSTID, TimeUnit.MILLISECONDS);
@@ -164,66 +182,31 @@ public class DaisyRemoteExecution {
         return extractedContents;
     }
 
-    private static String visStatus() {
-        HashMap<String, Integer> keyCountMap = new HashMap<String, Integer>();
-        for(String v : new ArrayList<>(kørslerIgang.values()))
-        {
-            Integer i = keyCountMap.get(v);
-            keyCountMap.put(v, i==null? 1 : i+1);
-        }
-        maxSamtidigeKørslerIgang = Math.max(maxSamtidigeKørslerIgang, kørslerIgang.size());
+    public static ArrayList<ExtractedContent> runSerial(ArrayList<DaisyModel> daisyModels, ResultExtractor resultExtractor, Path resultsDir) throws IOException {
+        Path inputDir = getDirectory(daisyModels);
+        String oploadId = __oploadZip(inputDir);
+        ArrayList<ExtractedContent> extractedContents = new ArrayList<>();
+        int kørselsNr = 0;
+        for (DaisyModel kørsel : daisyModels) {
+            kørselsNr++;
 
-        return String.format("%tT Der er %2d oploads og %2d kørsler i gang: "+keyCountMap,new Date(), oploadsIgang.size(), kørslerIgang.size());
+            // Fjern irrelecante oplysninger fra det objekt, der sendes over netværket
+            ExecutionBatch batch = new ExecutionBatch();
+            batch.resultExtractor = resultExtractor;
+            batch.oploadId = oploadId;
+            batch.kørsel = kørsel.clon();
+            batch.kørsel.directory = null;
+            batch.kørsel.setId(null);
+
+            HttpResponse<ExtractedContent> response = Unirest.post(url + "/sim/").body(batch).asObject(ExtractedContent.class);
+            if (!response.isSuccess()) throw new IOException(response.getStatusText());
+
+            ExtractedContent extractedContent = response.getBody();
+            extractedContent.id = kørsel.getId();
+            extractedContents.add(extractedContent);
+            __skriv(kørsel, extractedContent, resultsDir);
+        }
+        return extractedContents;
     }
 
-    public static ExtractedContent uploadSim(DaisyModel kørsel, ResultExtractor resultExtractor, Path resultsDir) throws IOException {
-        kørslerIgang.put(kørsel.getId(), "0 starter");
-        MultipartBody oploadReq = Unirest.post(url + "/uploadsim").multiPartContent();
-        kørslerIgang.put(kørsel.getId(), "1 tilf filer");
-        oploadReq = tilføjInputfilerTilRequest(oploadReq, kørsel.directory);
-
-        kørslerIgang.put(kørsel.getId(), "2 batch");
-        ExecutionBatch batch = new ExecutionBatch();
-        batch.resultExtractor = resultExtractor;
-        // Fjern irrelevante oplysninger fra det objekt, der sendes over netværket
-        batch.kørsel = kørsel.clon();
-        batch.kørsel.directory = null;
-        batch.kørsel.setId(null);
-        oploadReq.field("batch", gson.toJson(batch));
-        kørslerIgang.put(kørsel.getId(), "3 opload/sim");
-        oploadReq.uploadMonitor((field, fileName, bytesWritten, totalBytes) -> {
-            String nøgle = kørsel.getId()+" "+field+" "+fileName;
-            if (bytesWritten < totalBytes) {
-                boolean nyt = oploadsIgang.put(nøgle, nøgle)==null;
-                if (FEJLFINDING) if (nyt) System.out.println(kørsel.getId() + " " + field + " " + fileName + " " + bytesWritten + "/" + totalBytes);
-            } else {
-                oploadsIgang.remove(nøgle);
-                if (FEJLFINDING) System.out.println(kørsel.getId() + " " + field + " " + fileName + " færdig " + oploadsIgang.size()+" oploads i gang");
-            }
-        });
-        HttpResponse<ExtractedContent> response = oploadReq.asObject(ExtractedContent.class);
-        kørslerIgang.put(kørsel.getId(), "4 modtag");
-        if (!response.isSuccess()) {
-            System.err.println("Kald for "+kørsel.getId()+" fejlede: "+response.getHeaders());
-            System.err.println("Kald fejlede1: "+response.getStatus() +response.getStatusText());
-            System.err.println("Kald fejlede2: "+response);
-            throw new IOException(response.getStatusText());
-        }
-
-        ExtractedContent extractedContent = response.getBody();
-        extractedContent.id = kørsel.getId();
-        kørslerIgang.put(kørsel.getId(), "5 skriv");
-        if (resultsDir!=null) {
-            Path resultDir = resultsDir.resolve(kørsel.getId());
-            Utils.sletMappe(resultDir);
-            Files.createDirectories(resultDir);
-            if (FEJLFINDING) System.out.println("Skriver "+extractedContent.fileContensMap.keySet()+" i "+resultDir);
-            for (String filnavn : extractedContent.fileContensMap.keySet()) {
-                String filIndhold = extractedContent.fileContensMap.get(filnavn);
-                Files.write(resultDir.resolve(filnavn), filIndhold.getBytes());
-            }
-        }
-        kørslerIgang.remove(kørsel.getId());
-        return extractedContent;
-    }
 }
