@@ -68,17 +68,6 @@ public class DaisyRemoteExecution {
 
         return String.format("%tT Der er %2d oploads og %2d kørsler i gang: "+keyCountMap,new Date(), oploadsIgang.size(), kørslerIgang.size());
     }
-/*
-    public static MultipartBody tilføjInputfilerTilRequest(MultipartBody oploadReq, Path inputDir) throws IOException {
-        ArrayList<Path> filer = new ArrayList<Path>();
-        Files.walk(inputDir).filter(fraFil -> !Files.isDirectory(fraFil)).forEach(f -> filer.add(f));
-        if (FEJLFINDING) System.out.println("filer="+filer);
-        for (Path fil : filer) {
-            oploadReq = oploadReq.field("filer", fil.toFile(), inputDir.relativize(fil).toString());
-        }
-        return oploadReq;
-    }
-*/
 
     private static String __oploadZip(Path inputDir) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -127,8 +116,8 @@ public class DaisyRemoteExecution {
 
             final int kørselsNr_ = kørselsNr;
             Runnable runnable = () -> {
-                if (fejl.get() != null) return;
                 try {
+                    if (fejl.get() != null) return;
                     kørslerIgang.put(kørsel.getId(), "0 starter");
 
                     // Fjern irrelecante oplysninger fra det objekt, der sendes over netværket
@@ -154,7 +143,6 @@ public class DaisyRemoteExecution {
                     extractedContent1.id = kørsel.getId();
                     kørslerIgang.put(kørsel.getId(), "5 skriv");
                     __skriv(kørsel, extractedContent1, resultsDir);
-                    kørslerIgang.remove(kørsel.getId());
                     ExtractedContent extractedContent = extractedContent1;
                     extractedContents.add(extractedContent);
                 } catch (IOException e) {
@@ -162,6 +150,8 @@ public class DaisyRemoteExecution {
                     e.printStackTrace();
                     if (fejl.get() != null) return;
                     fejl.set(e);
+                } finally {
+                    kørslerIgang.remove(kørsel.getId());
                 }
             };
             executorService.submit(runnable); // parallelt

@@ -72,11 +72,9 @@ public class Server {
         });
         app.get("/", ctx -> ctx.contentType("text/html").result("<html><body>Du kan også spørge på <a href='json'>json</a>"));
         app.get("/json", ctx -> ctx.result("Hello World"));
-        app.post("/upload", ctx -> upload(ctx));
         app.post("/uploadZip", ctx -> upload(ctx));
         if (USIKKER_KØR) app.get("/koer", ctx -> kør(ctx, null));
         app.post("/sim", ctx -> sim(ctx));
-        app.post("/uploadsim", ctx -> uploadsim(ctx));
     }
 
     private static String kør(Context ctx, String[] parms) throws IOException, InterruptedException {
@@ -113,18 +111,7 @@ public class Server {
         Path denneUploadMappe = Files.createTempDirectory(uploadMappe,"");
         String batchId = uploadMappe.relativize(denneUploadMappe).toString();
 
-/*
-        ctx.uploadedFiles("filer").forEach(file -> {
-            try {
-                System.out.println("Server uplad "+file.getFilename());
-                Path fil = denneUploadMappe.resolve(tjekSikkerSti(file.getFilename()));
-                Files.createDirectories(fil.getParent());
-                Files.copy(file.getContent(), fil);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-*/
+
         UploadedFile file = ctx.uploadedFile("zipfil");
         if (file!=null) {
             System.out.println("Server upladZip " + file.getFilename());
@@ -141,6 +128,15 @@ public class Server {
 
         ctx.html(batchId);
         return batchId;
+    }
+
+
+    private static String tjekSikkerSti(String sti0) {
+        String sti = sti0;
+        if (sti.startsWith("/")) sti = sti.substring(1); // fjern / i starten
+        sti.replace("..", "");
+        if (!sti.equals(sti0)) new IllegalArgumentException("Usikker sti "+sti0+" lavet om til "+sti).printStackTrace();
+        return sti;
     }
 
     private static void sim(Context ctx) throws IOException {
@@ -173,26 +169,32 @@ public class Server {
     }
 
 
-    private static void uploadsim(Context ctx) throws IOException {
-        ExecutionBatch batch = JavalinJson.fromJson(ctx.formParam("batch"),ExecutionBatch.class);
-        batch.oploadId = upload(ctx);
-        //ExecutionBatch batch = ctx.bodyAsClass(ExecutionBatch.class);
-        batch.kørsel.directory =  uploadMappe.resolve(tjekSikkerSti(batch.oploadId));
-
-        System.out.println("Server ExecutionBatch "+batch.oploadId);
-        batch.kørsel.run();
-        ExtractedContent extractedContent = new ExtractedContent();
-        batch.resultExtractor.extract(batch.kørsel.directory, extractedContent.fileContensMap);
-        ctx.json(extractedContent);
-        Utils.sletMappe(batch.kørsel.directory);  // ingenting caches for nu - ny opload hver gang :-|
-    }
-
-
-    private static String tjekSikkerSti(String sti0) {
-        String sti = sti0;
-        if (sti.startsWith("/")) sti = sti.substring(1); // fjern / i starten
-        sti.replace("..", "");
-        if (!sti.equals(sti0)) new IllegalArgumentException("Usikker sti "+sti0+" lavet om til "+sti).printStackTrace();
-        return sti;
-    }
 }
+
+
+
+
+/*
+      Sende enkeltfiler fra klient:
+    public static MultipartBody tilføjInputfilerTilRequest(MultipartBody oploadReq, Path inputDir) throws IOException {
+        ArrayList<Path> filer = new ArrayList<Path>();
+        Files.walk(inputDir).filter(fraFil -> !Files.isDirectory(fraFil)).forEach(f -> filer.add(f));
+        if (FEJLFINDING) System.out.println("filer="+filer);
+        for (Path fil : filer) {
+            oploadReq = oploadReq.field("filer", fil.toFile(), inputDir.relativize(fil).toString());
+        }
+        return oploadReq;
+    }
+
+    Modtage enkeltfiler på serveren
+        ctx.uploadedFiles("filer").forEach(file -> {
+            try {
+                System.out.println("Server uplad "+file.getFilename());
+                Path fil = denneUploadMappe.resolve(tjekSikkerSti(file.getFilename()));
+                Files.createDirectories(fil.getParent());
+                Files.copy(file.getContent(), fil);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+*/
