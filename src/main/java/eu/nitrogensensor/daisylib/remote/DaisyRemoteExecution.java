@@ -99,6 +99,7 @@ public class DaisyRemoteExecution {
     public static ArrayList<ExtractedContent> runParralel(ArrayList<DaisyModel> daisyModels, ResultExtractor resultExtractor, Path resultsDir) throws IOException {
         final ArrayList<ExtractedContent> extractedContents = new ArrayList<>();
         Path inputDir = getDirectory(daisyModels);
+        resultExtractor.tjekResultatIkkeAlleredeFindes(inputDir);
         String oploadId = __oploadZip(inputDir);
 
         //ExecutorService executorService = Executors.newWorkStealingPool();
@@ -174,6 +175,7 @@ public class DaisyRemoteExecution {
 
     public static ArrayList<ExtractedContent> runSerial(ArrayList<DaisyModel> daisyModels, ResultExtractor resultExtractor, Path resultsDir) throws IOException {
         Path inputDir = getDirectory(daisyModels);
+        resultExtractor.tjekResultatIkkeAlleredeFindes(inputDir);
         String oploadId = __oploadZip(inputDir);
         ArrayList<ExtractedContent> extractedContents = new ArrayList<>();
         int kørselsNr = 0;

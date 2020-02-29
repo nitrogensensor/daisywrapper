@@ -80,4 +80,27 @@ public class ResultExtractor {
         }
 
     }
+
+    /**
+     * Tjekker at der ikke findes nogen af outputfilerne i inputmappe.
+     * Da vi bruger links i stedet for at kopiere filerne fysisk når vi kloner en mappe kan det
+     * lede til inkonsistenser hvor flere Daisy-kørsler via hvert sit link skriver ned i den samme outputfil.
+     * @param inputDir inputmappen
+     * @throws IOException Hvis nogen af outputfilerne findes i inputmappe
+     */
+    public void tjekResultatIkkeAlleredeFindes(Path inputDir) throws IOException {
+        for (String f : kopiérFiler) _tjekFindesIkke(inputDir, f);
+        for (CsvEkstraktor csv : csvEkstraktors) {
+            _tjekFindesIkke(inputDir, csv.skrivTilFilnavn);
+            for (String f : csv.filKolonnerMap.keySet()) _tjekFindesIkke(inputDir, f);
+        }
+    }
+
+
+    private void _tjekFindesIkke(Path inputDir, String f) throws IOException {
+        if (inputDir.resolve(f).toFile().exists()) {
+            throw new IOException("Outputfil "+f+" findes allede i inputmappe: "+inputDir+". Det kan lede til inkonsistenser i output og skal derfor undgås.");
+        }
+    }
+
 }

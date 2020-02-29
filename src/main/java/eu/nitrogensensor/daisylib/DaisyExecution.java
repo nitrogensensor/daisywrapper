@@ -36,6 +36,7 @@ public class DaisyExecution {
         int kørselsNr = 0;
         for (DaisyModel kørsel : daisyModels) {
             kørselsNr++;
+            if (re != null) re.tjekResultatIkkeAlleredeFindes(kørsel.directory);
             kørsel.run();
             if (re != null) re.extract(kørsel.directory, resultsDir.resolve(kørsel.getId()));
         }
@@ -51,6 +52,7 @@ public class DaisyExecution {
         int kørselsNr = 0;
         for (DaisyModel kørsel : daisyModels) {
             kørselsNr++;
+            if (re != null) re.tjekResultatIkkeAlleredeFindes(kørsel.directory);
             System.out.println(visStatus() + " kørsel "+kørselsNr+" af "+daisyModels.size()+ " startes.");
             final int kørselsNr_ = kørselsNr;
             Runnable runnable = () -> {

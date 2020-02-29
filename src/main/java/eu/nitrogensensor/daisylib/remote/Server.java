@@ -159,12 +159,17 @@ public class Server {
                     fis.close();
                     Files.delete(fil);
                 }
-
                 System.out.println("Server ExecutionBatch " + batch.oploadId);
+
+                // Vi skal have det over i en anden midlertidig mappe, ellers kan det være vi får knas med at
+                // evt andre samtidige kørsler skriver i de samme outputfiler
+                batch.kørsel.toDirectory(Files.createTempDirectory("kørsel_"+batch.kørsel.getId()));
+                batch.resultExtractor.tjekResultatIkkeAlleredeFindes(batch.kørsel.directory); // burde egentlig ikke være nødvendigt, da det også tjekkes af klienten, men man kan ikke stole på klienter...
                 batch.kørsel.run();
                 ExtractedContent extractedContent = new ExtractedContent();
                 batch.resultExtractor.extract(batch.kørsel.directory, extractedContent.fileContensMap);
                 ctx.json(extractedContent);
+                Utils.sletMappe(batch.kørsel.directory); // ryd op
             }
     }
 
