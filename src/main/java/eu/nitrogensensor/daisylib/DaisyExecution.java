@@ -63,11 +63,12 @@ public class DaisyExecution {
                     kørsel.run();
                     kørslerIgang.put(kørsel.getId(), "5 skriver");
                     if (re != null) re.extract(kørsel.directory, resultsDir.resolve(kørsel.getId()));
-                    kørslerIgang.remove(kørsel.getId());
                 } catch (IOException e) {
                     e.printStackTrace();
                     if (fejl.get() != null) return;
                     fejl.set(e);
+                } finally {
+                    kørslerIgang.remove(kørsel.getId());
                 }
             };
             executorService.submit(runnable); // parallelt

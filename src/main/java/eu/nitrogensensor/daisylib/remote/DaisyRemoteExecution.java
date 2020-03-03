@@ -13,16 +13,13 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class DaisyRemoteExecution {
     private static final boolean FEJLFINDING = false;
 
-    public static final int MAX_PARALLELITET = 400;
+    public static int MAX_PARALLELITET = 500;
     public static final int MAX_KØRSELSTID = 1000*60*60; // 1 time
 
     private static ConcurrentHashMap<String, String> oploadsIgang = new ConcurrentHashMap<String,String>();
@@ -32,7 +29,7 @@ public class DaisyRemoteExecution {
     private static Gson gson = MyGsonPathConverter.buildGson();
     private static String url = "https://daisykoersel-6dl4uoo23q-lz.a.run.app";
     static {
-        if (Server.url==null) Server.start(); url = Server.url; // for at starte og bruge lokal server
+        //if (Server.url==null) Server.start(); url = Server.url; MAX_PARALLELITET=8; // for at starte og bruge lokal server
         Unirest.config().setObjectMapper(new ObjectMapper() {
             @Override
             public <T> T readValue(String value, Class<T> valueType) {
@@ -72,12 +69,14 @@ public class DaisyRemoteExecution {
     private static String __oploadZip(Path inputDir) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         Utils.zipMappe(inputDir.toString(), baos);
+        System.out.println("Oploader "+inputDir+".zip på "+baos.size()/1000.0 + " kb");
         HttpResponse<String> oploadRes = Unirest.post(url+"/uploadZip")
                 .field("zipfil",  new ByteArrayInputStream(baos.toByteArray()), "zipfil.zip")
                 .asString();
 
         if (!oploadRes.isSuccess()) throw new IOException("Fik ikke oploaded filer: "+oploadRes.getBody());
         String batchId = oploadRes.getBody();
+        System.out.println("Fik oploadet "+inputDir+".zip og fik batch ID "+batchId);
         return  batchId;
     }
 
@@ -100,26 +99,29 @@ public class DaisyRemoteExecution {
         final ArrayList<ExtractedContent> extractedContents = new ArrayList<>();
         Path inputDir = getDirectory(daisyModels);
         resultExtractor.tjekResultatIkkeAlleredeFindes(inputDir);
-        String oploadId = __oploadZip(inputDir);
+
+        String oploadId = __oploadZip(inputDir); // HER OPLOADES!!!!!
 
         //ExecutorService executorService = Executors.newWorkStealingPool();
-        ExecutorService executorService = Executors.newFixedThreadPool(Math.min(daisyModels.size(),MAX_PARALLELITET)); // max 100 parrallel forespørgsler
+        int antalKørsler = daisyModels.size();
+        int parallelitet = Math.max(5, Math.min(MAX_PARALLELITET, antalKørsler/4)); // minimum 4 kørsler per instans - men mindst 5 instanser
+        System.out.println("parallelitet: "+parallelitet);
+
+        ExecutorService executorService = Executors.newFixedThreadPool(Math.min(daisyModels.size(),parallelitet)); // max 100 parrallel forespørgsler
         AtomicReference<IOException> fejl = new AtomicReference<>(); // Hvis der opstår en exception skal den kastes videre
         int kørselsNr = 0;
         for (DaisyModel kørsel : daisyModels) {
             kørselsNr++;
             // Klodset og sikkkert nytteløst forsøg på at håndtere at båndbredden til opload fra en enkelt maskine er begrænset
-            if (kørselsNr>20) try { Thread.sleep(50); } catch (Exception e) {}
-            if (oploadsIgang.size()>20) try { Thread.sleep(100); } catch (Exception e) {}
-            if (oploadsIgang.size()>40) try { Thread.sleep(200); } catch (Exception e) {}
-            if (oploadsIgang.size()>60) try { Thread.sleep(4000); } catch (Exception e) {}
-            System.out.println(visStatus() + " kørsel "+kørselsNr+" af "+daisyModels.size()+ " startes.");
+            if (kørslerIgang.size()>100) try { Thread.sleep(50); } catch (Exception e) {}
+            System.out.println(visStatus() + " kørsel "+kørselsNr+" af "+daisyModels.size()+ " sættes i kø.");
 
             final int kørselsNr_ = kørselsNr;
             Runnable runnable = () -> {
                 try {
                     if (fejl.get() != null) return;
                     kørslerIgang.put(kørsel.getId(), "0 starter");
+                    System.out.println(visStatus() + " kørsel "+kørselsNr_+" 0 starter.");
 
                     // Fjern irrelecante oplysninger fra det objekt, der sendes over netværket
                     ExecutionBatch batch = new ExecutionBatch();
@@ -133,6 +135,7 @@ public class DaisyRemoteExecution {
                     if (!response.isSuccess()) throw new IOException(response.getStatusText());
 
                     kørslerIgang.put(kørsel.getId(), "4 modtag");
+                    //System.out.println(visStatus() + " kørsel "+kørselsNr_+" 4 modtag.");
                     if (!response.isSuccess()) {
                         System.err.println("Kald for "+ kørsel.getId()+" fejlede: "+response.getHeaders());
                         System.err.println("Kald fejlede1: "+response.getStatus() +response.getStatusText());
@@ -153,6 +156,7 @@ public class DaisyRemoteExecution {
                     fejl.set(e);
                 } finally {
                     kørslerIgang.remove(kørsel.getId());
+                    synchronized (kørslerIgang) { kørslerIgang.notifyAll(); }
                 }
             };
             executorService.submit(runnable); // parallelt
@@ -160,7 +164,7 @@ public class DaisyRemoteExecution {
         }
         while (kørslerIgang.size()>0) {
             System.out.println(visStatus());
-            try { Thread.sleep(1000); } catch (Exception e) { };
+            synchronized (kørslerIgang) { try { kørslerIgang.wait(5000); } catch (Exception e) { }};
         }
         executorService.shutdown();
         try {
@@ -201,4 +205,12 @@ public class DaisyRemoteExecution {
         return extractedContents;
     }
 
+    public static String getKørselstype() {
+        if (maxSamtidigeKørslerIgang==0) return "Lokalt";
+        if (url.contains("localhost")) return "Lokal server";
+        if (url.contains("run.app")) return "Cloud Run";
+
+        System.out.println("Ukendt kørselsetype for "+url);
+        return url;
+    }
 }

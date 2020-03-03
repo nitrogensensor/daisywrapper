@@ -7,7 +7,9 @@ import eu.nitrogensensor.daisylib.ResultExtractor;
 import eu.nitrogensensor.daisylib.remote.DaisyRemoteExecution;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 
 public class DaisyTestkoersel
@@ -31,14 +33,13 @@ public class DaisyTestkoersel
     ArrayList<DaisyModel> daisyModels = new ArrayList<>();
     for (String program : programmer) {
 
-      for (int n=0; n<1; n++) {
+      for (int n=0; n<20; n++) {
 
         DaisyModel kørsel = d.clon()
                 .setId(program+ String.format("_%02d", n))
                 .replace("(run taastrup)", "(run Mark21 (column (\"" + program + "\")))");
-        daisyModels.add(kørsel
-                .toDirectory(Paths.get("/tmp/daisy/run/remoteParTmp/" + kørsel.getId()))
-        );
+//        kørsel = kørsel.toDirectory(Paths.get("/tmp/daisy/run/remoteParTmp/" + kørsel.getId()));
+        daisyModels.add(kørsel);
       }
     }
 
@@ -50,15 +51,30 @@ public class DaisyTestkoersel
     long tid = System.currentTimeMillis();
     //DaisyExecution.runSerial(daisyModels, re, Paths.get("daisy/run/serRes"));
     //DaisyExecution.runParralel(daisyModels, re, Paths.get("daisy/run/parRes"));
-    System.out.printf("Det tog %.1f sek (eller %.1f min) at køre %d kørsler parrallelt (%d kerner)\n",
-            (System.currentTimeMillis()-tid)/1000.0, (System.currentTimeMillis()-tid)/60000.0, daisyModels.size(), Runtime.getRuntime().availableProcessors());
-
 
     //DaisyRemoteExecution.runSerial(daisyModels, re, Paths.get("daisy/run/remoteRes"));
     DaisyRemoteExecution.runParralel(daisyModels, re, Paths.get("/tmp/daisy/run/remoteParRes"));
 
-    System.out.printf("Det tog %.1f sek (%.1f min) at køre %d kørsler i Cloud Run - %d parrallelle instanser\n",
-            (System.currentTimeMillis()-tid)/1000.0, (System.currentTimeMillis()-tid)/60000.0, daisyModels.size(), DaisyRemoteExecution.maxSamtidigeKørslerIgang);
+
+    
+    double dt = (System.currentTimeMillis() - tid)/1000.0;
+
+    System.out.printf("Det tog %.1f sek (%.1f min) at køre %d kørsler ", dt, dt/60, daisyModels.size());
+
+    if (DaisyRemoteExecution.maxSamtidigeKørslerIgang==0)
+      System.out.printf("parrallelt (%d kerner)\n", Runtime.getRuntime().availableProcessors());
+    else
+      System.out.printf("i Cloud Run - op til %d parrallelle instanser\n", DaisyRemoteExecution.maxSamtidigeKørslerIgang);
+
+    String kørselstype = DaisyRemoteExecution.getKørselstype();
+
+
+    String linje = "\n"+daisyModels.size()+", "+DaisyRemoteExecution.maxSamtidigeKørslerIgang+", "+dt+
+            ", "+String.format("%1$tT-%1$tD", System.currentTimeMillis())+ ", "+kørselstype+
+            "";
+    // kørsler,       samtidig,                           tid,              dato, type
+    // Antal kørsler, Samtidige Kørsler I gang Cloud Run, kørselstid (sek), dato, type
+    Files.write(Paths.get("daisy/DaisyTestkoersel_performancelog.csv"), linje.getBytes(), StandardOpenOption.APPEND);
 
 /*
 ------------ SMÅ KØRSLER  ----------
@@ -68,6 +84,7 @@ Det tog 18,1 sek (0,3 min) at køre 16 kørsler parrallel (8 kerner)
 Det tog 21,4 sek at køre 16 kørsler parrallel (8 kerner)
 Det tog 759,7 sek at køre 200 kørsler parrallel (8 kerner)
 Det tog 90,0 sek at køre 16 kørsler mod lokal server serielt
+
 Det tog 121,3 sek at køre 16 kørsler mod Cloud Run serielt
 
 Det tog 22,9 sek at køre 16 kørsler parallelt i Cloud Run  (onsdag aften)
