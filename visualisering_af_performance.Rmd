@@ -1,0 +1,23 @@
+---
+title: "Performance af Cloud Run"
+output: html_notebook
+---
+
+
+```{r}
+#log <- read_csv("/home/j/Projekter/NitrogenSensor/gitlab/nitrogensensor/daisy/DaisyTestkoersel_performancelog.csv")
+log <- read_csv("DaisyTestkoersel_performancelog.csv")
+```
+
+
+Her ses hvordan lokal kørsel skalerer lineært med antallet af kørsler - imens Cloud Run er svagt stigende i tid.
+Lokal kørsel er på Jacobs PC - en relativt stærk bærbar med 8 kerner.
+ 
+X-aksen er antal kørsler, y-aksen er tid i sekunder.
+
+```{r}
+##log <- read_csv("Projekter/NitrogenSensor/gitlab/nitrogensensor/daisy/DaisyTestkoersel_performancelog.csv")
+ggplot(data = log, aes(x=kørsler, y=tid, group=log$type, color=type)) + geom_line() + geom_point() + ggtitle("Daisysimulering for Taastrup marken")
+```
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).

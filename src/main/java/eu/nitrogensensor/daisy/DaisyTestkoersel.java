@@ -77,6 +77,15 @@ public class DaisyTestkoersel
     Files.write(Paths.get("daisy/DaisyTestkoersel_performancelog.csv"), linje.getBytes(), StandardOpenOption.APPEND);
 
 /*
+Omkostninger - se
+https://console.cloud.google.com/billing/001D80-C08B53-EF01A2/reports/tabular
+
+https://console.cloud.google.com/billing/001D80-C08B53-EF01A2/reports;chartType=STACKED_BAR;timeRange=LAST_30_DAYS;credits=CREDIT_TYPE_UNSPECIFIED,PROMOTION,LATE_USAGE
+
+Diskussion:
+https://docs.google.com/document/d/1wE8PxmOEjDXV9Yk09N7i6b03eRthuXBb8QsmMzb4KQk/edit#heading=h.ehdb0srat7nu
+
+
 ------------ SMÅ KØRSLER  ----------
 Det tog 88,8 sek at køre 16 kørsler serielt
 
