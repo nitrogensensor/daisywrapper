@@ -18,8 +18,8 @@ public class EkstraktTest {
     @Test
     public void outputEkstrakt() {
         CsvEkstraktor oe = new CsvEkstraktor("crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)", "xx");
-        assertEquals(oe.filKolonnerMap.get("crop.csv").get(0), "year");
-        assertEquals(oe.filKolonnerMap.get("crop_prod.csv").get(1), "Leaf AI");
+        assertEquals("year", oe.filKolonnerMap.get("crop.csv").get(0));
+        assertEquals("Leaf AI", oe.filKolonnerMap.get("crop_prod.csv").get(1));
         new CsvEkstraktor("crop.csv (*)", "xx");
         new CsvEkstraktor("crop.csv", "xx");
         new CsvEkstraktor("crop.csv");
