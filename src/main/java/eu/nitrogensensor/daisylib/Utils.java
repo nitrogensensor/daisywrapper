@@ -141,9 +141,21 @@ public class Utils {
         }
     }
 
-    public static void execFg(String shellkommando, Path parent) throws IOException, InterruptedException {
+    public static int execFg(String shellkommando, Path parent) throws IOException, InterruptedException {
         System.out.println("execFg: "+shellkommando );
         int ret = new ProcessBuilder(shellkommando.split(" ")).directory(parent.toFile()).inheritIO().start().waitFor();
         System.out.println("execFg retværdi: "+ret );
+        return ret;
+    }
+
+    private static Path rodmappe;
+    public static Path rod() {
+        if (rodmappe==null) try {
+            rodmappe = Paths.get("../tmp/../nitrogensensor").toRealPath();
+            System.out.println("rodmappe = " + rodmappe);
+            rodmappe = Paths.get(".");
+        } catch (Exception e) { e.printStackTrace(); }
+        return rodmappe;
+
     }
 }
