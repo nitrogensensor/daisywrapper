@@ -141,4 +141,9 @@ public class Utils {
         }
     }
 
+    public static void execFg(String shellkommando, Path parent) throws IOException, InterruptedException {
+        System.out.println("execFg: "+shellkommando );
+        int ret = new ProcessBuilder(shellkommando.split(" ")).directory(parent.toFile()).inheritIO().start().waitFor();
+        System.out.println("execFg retværdi: "+ret );
+    }
 }
