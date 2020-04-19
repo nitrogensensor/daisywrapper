@@ -50,7 +50,7 @@ public class DaisyModel implements Cloneable {
     /** Opretter en kopi af en kørsel og kopi af dets erstatninger
      * @param newFolder*/
     public DaisyModel toDirectory(Path newFolder) throws IOException {
-        Utils.klonMappe(directory, newFolder);
+        Utils.klonMappeViaLinks(directory, newFolder);
         directory = newFolder;
         return this;
     }
