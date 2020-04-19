@@ -50,7 +50,7 @@ public class DaisyModel implements Cloneable {
     /** Opretter en kopi af en kørsel og kopi af dets erstatninger
      * @param newFolder*/
     public DaisyModel toDirectory(Path newFolder) throws IOException {
-        Utils.klonMappe(directory, newFolder);
+        Utils.klonMappeViaLinks(directory, newFolder);
         directory = newFolder;
         return this;
     }
@@ -64,10 +64,14 @@ public class DaisyModel implements Cloneable {
 
 
     public DaisyModel replace(String søgestreng, String erstatning) {
-        erstatninger.add(new Erstatning(søgestreng, erstatning));
-        return this;
+        return replace(søgestreng, erstatning, true);
     }
 
+
+    public DaisyModel replace(String søgestreng, String erstatning, boolean præcisÉnGang) {
+        erstatninger.add(new Erstatning(søgestreng, erstatning, præcisÉnGang));
+        return this;
+    }
 
     public DaisyModel run() throws IOException {
         DaisyInvoker daisyInvoke = new DaisyInvoker();

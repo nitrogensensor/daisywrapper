@@ -19,7 +19,7 @@ public class Utils {
      * @param fraMappe Mappen, der skal kopieres
      * @param tilMappe Destination. Indhold i mappen overskrives hvis det allerede findes
      */
-    public static void klonMappe(Path fraMappe, Path tilMappe) throws IOException {
+    public static void klonMappeViaLinks(Path fraMappe, Path tilMappe) throws IOException {
         final Path fra = fraMappe.toAbsolutePath(); // Fuld sti
         sletMappe(tilMappe);
 
@@ -44,6 +44,27 @@ public class Utils {
             }
         });
         if (fejl.get()!=null) throw fejl.get();
+    }
+
+    /**
+     * Kloner en mappe rekursivt - en kopi af mappestrukturen laves, og fyldes med kopier af filerne i den oprindelige mappe
+     *
+     * @param fraMappe Mappen, der skal kopieres
+     * @param tilMappe Destination. Indhold i mappen overskrives hvis det allerede findes
+     */
+    public static void klonMappeKopérAlt(Path fraMappe, Path tilMappe) throws IOException {
+        sletMappe(tilMappe);
+        try (Stream<Path> stream = Files.walk(fraMappe)) {
+            stream.forEach(fra -> {
+                try {
+                    Path til = tilMappe.resolve(fraMappe.relativize(fra));
+                    Files.createDirectories(til.getParent());
+                    Files.copy(fra, til);
+                } catch (Exception e) {
+                    throw new RuntimeException(e.getMessage(), e);
+                }
+            });
+        }
     }
 
     public static void sletMappe(Path tilMappe) throws IOException {
@@ -152,8 +173,9 @@ public class Utils {
     public static Path rod() {
         if (rodmappe==null) try {
             rodmappe = Paths.get("../tmp/../nitrogensensor").toRealPath();
-            System.out.println("rodmappe = " + rodmappe);
+            System.out.println("'../tmp/../nitrogensensor'.toAbsolutePath() = " + rodmappe.toAbsolutePath());
             rodmappe = Paths.get(".");
+            System.out.println("'.'toAbsolutePath() = " + rodmappe.toAbsolutePath());
         } catch (Exception e) { e.printStackTrace(); }
         return rodmappe;
 

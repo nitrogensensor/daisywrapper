@@ -1,8 +1,5 @@
 package eu.nitrogensensor.daisylib;
 
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,14 +12,16 @@ class Erstatning {
 
     private final String søgestreng;
     private final String erstatning;
+    private boolean præcisÉnGang;
 
-    public Erstatning(String søgestreng, String erstatning) {
+    public Erstatning(String søgestreng, String erstatning, boolean præcisÉnGang) {
         this.søgestreng = søgestreng;
         this.erstatning = erstatning;
+        this.præcisÉnGang = præcisÉnGang;
     }
 
     public String erstat(String scriptIndhold) {
-        return erstat(scriptIndhold, søgestreng, erstatning);
+        return erstat(scriptIndhold, søgestreng, erstatning, præcisÉnGang);
     }
 
     /**
@@ -43,13 +42,16 @@ class Erstatning {
         return -1; // tegn ikke fundet udenfor parenteser
     }
 
-    public static String erstat(String scriptIndhold, String søgestreng, String erstatning) {
+    public static String erstat(String scriptIndhold, String søgestreng, String erstatning, boolean præcisÉnGang) {
         // Prøv først super simpel erstatning
         int pos = scriptIndhold.indexOf(søgestreng);
         if (pos!=-1) {
             String res = scriptIndhold.replace(søgestreng, erstatning); // burde egnelig kun erstatte første forekomst
             return res;
         }
+
+        // $$tekst$$ skal ikke bruges som regexp
+        if (søgestreng.startsWith("$$") && søgestreng.endsWith("$$") && !præcisÉnGang) return  scriptIndhold;
 
         // Simpel erstatning af f.eks. "(path *)"
         if (søgestreng.startsWith("(") && søgestreng.endsWith("*)"))
@@ -69,17 +71,21 @@ class Erstatning {
 
 
         // Regex-erstatning - f.eks. "\\(path .+?\\)"
-        // Undgå replaceAll, da det kan være det erstattede indhold bliver erstattet igen
-        //String scriptIndholdNy = scriptIndhold.replaceFirst(regexp, erstatning);
-        //String scriptIndholdNy = matcher.replaceFirst(erstatning);
         Matcher matcher = Pattern.compile(søgestreng, Pattern.DOTALL).matcher(scriptIndhold);
         if (matcher.find()) {
-            StringBuilder sb = new StringBuilder();
-            matcher.appendReplacement(sb, erstatning);
-            matcher.appendTail(sb);
-            return sb.toString();
+            if (!præcisÉnGang) {
+                String scriptIndhold2 = matcher.replaceAll(erstatning);
+                return scriptIndhold2;
+            } else {
+                // Undgå replaceAll, da det kan være det erstattede indhold bliver erstattet igen
+                StringBuilder sb = new StringBuilder();
+                matcher.appendReplacement(sb, erstatning);
+                matcher.appendTail(sb);
+                return sb.toString();
+            }
         }
 
+        if (!præcisÉnGang) return søgestreng; // ingen krav om match
         throw new IllegalArgumentException("Søgestreng ikke fundet: "+søgestreng);
     }
 }
