@@ -180,4 +180,9 @@ public class Utils {
         return rodmappe;
 
     }
+
+    public static Stream<Path> fileWalk(Path grunddata) throws IOException {
+        if (!Files.exists(grunddata)) return Stream.<Path>empty();
+        return Files.walk(grunddata);
+    }
 }

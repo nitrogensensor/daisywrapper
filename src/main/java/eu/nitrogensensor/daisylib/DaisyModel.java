@@ -82,7 +82,7 @@ public class DaisyModel implements Cloneable {
             Path scriptfilITmp = Files.createTempFile(directory, "replaced", scriptFil);
             Files.write(scriptfilITmp, scriptIndhold.getBytes());
             daisyInvoke.invokeDaisy(directory, directory.relativize(scriptfilITmp).toString());
-            Files.delete(scriptfilITmp);
+            //Files.delete(scriptfilITmp);
         } else {
             daisyInvoke.invokeDaisy(directory, scriptFil);
         }

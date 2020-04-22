@@ -44,7 +44,7 @@ public class DaisyRemoteExecution {
         Unirest.config().socketTimeout(MAX_KØRSELSTID);
     }
 
-    private static Path getDirectory(ArrayList<DaisyModel> daisyModels) {
+    private static Path getDirectory(Collection<DaisyModel> daisyModels) {
         Path directory = null;
         for (DaisyModel kørsel : daisyModels) {
             if (directory==null) directory = kørsel.directory;
@@ -95,7 +95,7 @@ public class DaisyRemoteExecution {
     }
 
 
-    public static ArrayList<ExtractedContent> runParralel(ArrayList<DaisyModel> daisyModels, ResultExtractor resultExtractor, Path resultsDir) throws IOException {
+    public static ArrayList<ExtractedContent> runParralel(Collection<DaisyModel> daisyModels, ResultExtractor resultExtractor, Path resultsDir) throws IOException {
         final ArrayList<ExtractedContent> extractedContents = new ArrayList<>();
         Path inputDir = getDirectory(daisyModels);
         resultExtractor.tjekResultatIkkeAlleredeFindes(inputDir);
@@ -177,7 +177,7 @@ public class DaisyRemoteExecution {
         return extractedContents;
     }
 
-    public static ArrayList<ExtractedContent> runSerial(ArrayList<DaisyModel> daisyModels, ResultExtractor resultExtractor, Path resultsDir) throws IOException {
+    public static ArrayList<ExtractedContent> runSerial(Collection<DaisyModel> daisyModels, ResultExtractor resultExtractor, Path resultsDir) throws IOException {
         Path inputDir = getDirectory(daisyModels);
         resultExtractor.tjekResultatIkkeAlleredeFindes(inputDir);
         String oploadId = __oploadZip(inputDir);

@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.*;
@@ -28,11 +29,11 @@ public class DaisyExecution {
     }
 
 
-    public static void runSerial(ArrayList<DaisyModel> daisyModels) throws IOException {
+    public static void runSerial(Collection<DaisyModel> daisyModels) throws IOException {
         runSerial(daisyModels, null, null);
     }
 
-    public static void runSerial(ArrayList<DaisyModel> daisyModels, ResultExtractor re, Path resultsDir) throws IOException {
+    public static void runSerial(Collection<DaisyModel> daisyModels, ResultExtractor re, Path resultsDir) throws IOException {
         int kørselsNr = 0;
         for (DaisyModel kørsel : daisyModels) {
             kørselsNr++;
@@ -42,13 +43,14 @@ public class DaisyExecution {
         }
     }
 
-    public static void runParralel(ArrayList<DaisyModel> daisyModels) throws IOException {
+    public static void runParralel(Collection<DaisyModel> daisyModels) throws IOException {
         runParralel(daisyModels, null, null);
     }
 
-    public static void runParralel(ArrayList<DaisyModel> daisyModels, ResultExtractor re, Path resultsDir) throws IOException {
-        ForkJoinPool executorService = (ForkJoinPool) Executors.newWorkStealingPool();
+
+    public static void runParralel(Collection<DaisyModel> daisyModels, ResultExtractor re, Path resultsDir) throws IOException {
         AtomicReference<IOException> fejl = new AtomicReference<>(); // Hvis der opstår en exception skal den kastes videre
+        ForkJoinPool executorService = (ForkJoinPool) Executors.newWorkStealingPool(); // LOKAL variabel - kan ikke genbruges da vi kalder shutdown() længere nede
         int kørselsNr = 0;
         for (DaisyModel kørsel : daisyModels) {
             kørselsNr++;
