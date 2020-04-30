@@ -32,8 +32,8 @@ public class EkstraktTest {
         String scriptIndholdOrg = new String(Files.readAllBytes(orgMappe.resolve(scriptFil)));
 
         // sammenlign udkommet af simpel erstatning med regex erstatning
-        String simpelRes = Erstatning.erstat(scriptIndholdOrg,"(path *)", "(path \"/opt/daisy/sample\" \"/opt/daisy/lib\" \".\" \"./common\")", præcisÉnGang);
-        String regExpRes = Erstatning.erstat(scriptIndholdOrg,"\\(path .+?\\)", "(path \"/opt/daisy/sample\" \"/opt/daisy/lib\" \".\" \"./common\")", præcisÉnGang);
+        String simpelRes = Erstatning.erstat(scriptIndholdOrg,"(path *)", "(path \"/opt/daisy/sample\" \"/opt/daisy/lib\" \".\" \"./common\")", true);
+        String regExpRes = Erstatning.erstat(scriptIndholdOrg,"\\(path .+?\\)", "(path \"/opt/daisy/sample\" \"/opt/daisy/lib\" \".\" \"./common\")", true);
         //System.out.println(regExpRes.substring(0,200));
         //System.out.println(simpelRes.substring(0,200));
 
