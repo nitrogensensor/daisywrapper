@@ -80,7 +80,7 @@ public class DaisyModel implements Cloneable {
             String scriptIndhold = new String(Files.readAllBytes(directory.resolve(scriptFil)));
             for (Erstatning e : erstatninger) scriptIndhold = e.erstat(scriptIndhold);
             // Path scriptfilMedErstatninger = Files.createTempFile(directory, "replaced", scriptFil); // skal være læsbar for alle!!!
-            Path scriptfilMedErstatninger = directory.resolve("replaced_" + id + scriptFil);
+            Path scriptfilMedErstatninger = directory.resolve("replaced_" + id +"_"+ scriptFil);
             while (Files.exists(scriptfilMedErstatninger)) {
                 new IllegalStateException(scriptfilMedErstatninger+" fandtes allerede - finder et unikt ID").printStackTrace();
                 id = Integer.toString((int) (Math.random()*Integer.MAX_VALUE), Character.MAX_RADIX);
