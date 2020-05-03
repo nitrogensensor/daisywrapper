@@ -26,7 +26,9 @@ public class ExecutionCache {
             Path cachetResMappe = cacheplacering.resolve(md5);
             if (Files.exists(cachetResMappe)) {
                 System.out.println(dm + " var cachet i "+cachetResMappe);
-                Utils.klonMappeViaLinks(cachetResMappe, dm.directory);
+                Utils.sletMappe(dm.directory);
+                Files.createSymbolicLink( dm.directory, cachetResMappe.toAbsolutePath() );
+                //Utils.klonMappeViaLinks(cachetResMappe, dm.directory);
                 ikkeCachet.remove(dm);
             }
         }
