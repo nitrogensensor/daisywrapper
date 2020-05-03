@@ -1,7 +1,6 @@
 package eu.nitrogensensor.daisylib;
 
 
-import eu.nitrogensensor.daisylib.csv.CsvEkstraktor;
 import eu.nitrogensensor.daisylib.csv.CsvFile;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
@@ -28,7 +27,7 @@ public class Taastrup2019Test {
         kørsel.replace("(run taastrup)", "(run Mark21 (column (\"High_N_High_W\")))");
 
         Path daisyOutputmappe = Files.createTempDirectory("ns-daisy");
-        kørsel = kørsel.clon().toDirectory(daisyOutputmappe);
+        kørsel = kørsel.clon().copyToDirectory(daisyOutputmappe);
         return kørsel;
     }
 

@@ -163,7 +163,7 @@ public class Server {
 
                 // Vi skal have det over i en anden midlertidig mappe, ellers kan det være vi får knas med at
                 // evt andre samtidige kørsler skriver i de samme outputfiler
-                batch.kørsel.toDirectory(Files.createTempDirectory("kørsel_"+batch.kørsel.getId()));
+                batch.kørsel.copyToDirectory(Files.createTempDirectory("kørsel_"+batch.kørsel.getId()));
                 batch.resultExtractor.tjekResultatIkkeAlleredeFindes(batch.kørsel.directory); // burde egentlig ikke være nødvendigt, da det også tjekkes af klienten, men man kan ikke stole på klienter...
                 batch.kørsel.run();
                 ExtractedContent extractedContent = new ExtractedContent();

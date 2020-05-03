@@ -13,6 +13,16 @@ public class DaisyModel implements Cloneable {
     private ArrayList<Erstatning> erstatninger = new ArrayList<>();
     private String id;
 
+    /**
+     * Giver en unik streng, der beskriver de erstatninger der sker i mappen under kørsel
+     * @return
+     */
+    public String unikStreng() {
+        StringBuilder sb = new StringBuilder(erstatninger.size()*100);
+        for (Erstatning erstatning : erstatninger) sb.append(erstatning.unikStreng());
+        return sb.toString();
+    }
+
     public DaisyModel(String directory, String daisyInputfile) throws IOException {
         this(Paths.get(directory), daisyInputfile);
     }
@@ -49,7 +59,7 @@ public class DaisyModel implements Cloneable {
 
     /** Opretter en kopi af en kørsel og kopi af dets erstatninger
      * @param newFolder*/
-    public DaisyModel toDirectory(Path newFolder) throws IOException {
+    public DaisyModel copyToDirectory(Path newFolder) throws IOException {
         Utils.klonMappeViaLinks(directory, newFolder);
         directory = newFolder;
         return this;

@@ -3,6 +3,8 @@ package eu.nitrogensensor.daisylib;
 import java.io.*;
 import java.net.URI;
 import java.nio.file.*;
+import java.security.MessageDigest;
+import java.util.Base64;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -100,7 +102,26 @@ public class Utils {
                         }
                     });
         }
+    }
 
+
+    public static String md5sumMappe(Path mappe, String... ekstraData) throws Exception {
+        MessageDigest md5 = MessageDigest.getInstance("MD5");
+        for (String ekstra : ekstraData) md5.update(ekstra.getBytes());
+        Files.walk(mappe).filter(path -> !Files.isDirectory(path))
+                    .forEach(path -> {
+                        try {
+                            md5.update(mappe.relativize(path).toString().getBytes());
+                            md5.update(Files.readAllBytes(path));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+
+        byte[] digest = md5.digest();
+        String indkodet = Base64.getUrlEncoder().encodeToString(digest);
+        if (!indkodet.endsWith("==")) throw new IllegalStateException("Troede altid at de endte med ==, men her er en uden?!?? "+indkodet);
+        return indkodet.substring(0, indkodet.length()-2);
     }
 
 
@@ -141,7 +162,8 @@ public class Utils {
         zis.close();
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
+        System.out.println("md5sumMappe(\"slamkode/src\") = " + md5sumMappe(Paths.get("slamkode/src")));
         OutputStream os = Files.newOutputStream(Paths.get("slamkode.zip"));
         zipMappe("slamkode/src", os);
         os.close();

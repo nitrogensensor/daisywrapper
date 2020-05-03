@@ -8,11 +8,17 @@ import java.util.regex.Pattern;
  * Søgestrengene kan være simple søgeudtryk eller regex
  */
 class Erstatning {
-
-
     private final String søgestreng;
     private final String erstatning;
     private boolean præcisÉnGang;
+
+    /**
+     * Giver en unik streng, der beskriver erstatningen
+     * @return
+     */
+    public String unikStreng() {
+        return søgestreng + erstatning + præcisÉnGang;
+    }
 
     public Erstatning(String søgestreng, String erstatning, boolean præcisÉnGang) {
         this.søgestreng = søgestreng;
