@@ -79,10 +79,15 @@ public class DaisyModel implements Cloneable {
         if (erstatninger.size()>0) {
             String scriptIndhold = new String(Files.readAllBytes(directory.resolve(scriptFil)));
             for (Erstatning e : erstatninger) scriptIndhold = e.erstat(scriptIndhold);
-            Path scriptfilITmp = Files.createTempFile(directory, "replaced", scriptFil);
-            Files.write(scriptfilITmp, scriptIndhold.getBytes());
-            daisyInvoke.invokeDaisy(directory, directory.relativize(scriptfilITmp).toString());
-            //Files.delete(scriptfilITmp);
+            // Path scriptfilMedErstatninger = Files.createTempFile(directory, "replaced", scriptFil); // skal være læsbar for alle!!!
+            Path scriptfilMedErstatninger = directory.resolve("replaced_" + id + scriptFil);
+            while (Files.exists(scriptfilMedErstatninger)) {
+                new IllegalStateException(scriptfilMedErstatninger+" fandtes allerede - finder et unikt ID").printStackTrace();
+                id = Integer.toString((int) (Math.random()*Integer.MAX_VALUE), Character.MAX_RADIX);
+            }
+            Files.write(scriptfilMedErstatninger, scriptIndhold.getBytes());
+            daisyInvoke.invokeDaisy(directory, directory.relativize(scriptfilMedErstatninger).toString());
+            //Files.delete(scriptfilMedErstatninger);
         } else {
             daisyInvoke.invokeDaisy(directory, scriptFil);
         }
