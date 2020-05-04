@@ -43,7 +43,7 @@ public class ExecutionCache {
             if (md5==null) throw new IllegalArgumentException(dm + " var ikke registreret - det skal den være, FØR en kørsel, for ellers kan jeg ikke lave md5");
             Path cachetResMappe = cacheplacering.resolve(md5);
             if (!Files.exists(cachetResMappe)) {
-                System.out.println(dm + " bliver cachet i "+cachetResMappe);
+                System.out.println(dm + " er nu blevet cachet i "+cachetResMappe);
                 Utils.klonMappeKopérAlt(dm.directory, cachetResMappe);
             }
         }
