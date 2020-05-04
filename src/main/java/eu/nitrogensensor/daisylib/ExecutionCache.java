@@ -25,11 +25,13 @@ public class ExecutionCache {
             if (md5==null) daisyModelMd5Map.put(dm, md5 = Utils.md5sumMappe(dm.directory, dm.unikStreng()));
             Path cachetResMappe = cacheplacering.resolve(md5);
             if (Files.exists(cachetResMappe)) {
-                System.out.println(dm + " var cachet i "+cachetResMappe);
+                System.out.println(dm + " var allerede cachet i "+cachetResMappe);
                 Utils.sletMappe(dm.directory);
                 Files.createSymbolicLink( dm.directory, cachetResMappe.toAbsolutePath() );
                 //Utils.klonMappeViaLinks(cachetResMappe, dm.directory);
                 ikkeCachet.remove(dm);
+            } else {
+                System.out.println(dm + " er ikke cachet - vil blive gemt i "+cachetResMappe);
             }
         }
         return ikkeCachet;
