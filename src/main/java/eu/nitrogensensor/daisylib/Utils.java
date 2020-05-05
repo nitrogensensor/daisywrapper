@@ -168,13 +168,20 @@ public class Utils {
     }
 
     private static Path rodmappe;
-    public static Path rod() {
+    /** Giver relativ sti hen til der, hvor hvor roden af projektet er tjekket ud og kildekoden kan findes */
+    public static Path projektRodMappe() {
         if (rodmappe==null) try {
-            rodmappe = Paths.get(".");
-            System.out.println("'.'toAbsolutePath() = " + rodmappe.toAbsolutePath());
+            rodmappe = Paths.get("");
+            // Kompensér for at user.dir peger til en UNDERMAPPE pga https://github.com/gradle/gradle/issues/5187
+            if (!Files.exists(rodmappe.resolve("gradlew"))) { // denne fil ligger kun i roden af projektet :-)
+                rodmappe = rodmappe.resolve("..");
+                System.out.println("Vi startede i en UNDERMAPPE - kompenserer for det!");
+                //Files.createSymbolicLink(Paths.get("../tmp"), Paths.get("../tmp"));
+                if (!Files.exists(rodmappe.resolve("gradlew"))) throw new IllegalStateException("Rodmappen var heller ikke "+rodmappe.toAbsolutePath());
+            }
+            System.out.println("rodmappe.toAbsolutePath() = " + rodmappe.toAbsolutePath());
         } catch (Exception e) { e.printStackTrace(); }
         return rodmappe;
-
     }
 
     public static Stream<Path> fileWalk(Path grunddata) throws IOException {
