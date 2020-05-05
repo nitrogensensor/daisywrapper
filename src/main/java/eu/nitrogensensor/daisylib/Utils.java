@@ -170,8 +170,6 @@ public class Utils {
     private static Path rodmappe;
     public static Path rod() {
         if (rodmappe==null) try {
-            rodmappe = Paths.get("../tmp/../nitrogensensor").toRealPath();
-            System.out.println("'../tmp/../nitrogensensor'.toAbsolutePath() = " + rodmappe.toAbsolutePath());
             rodmappe = Paths.get(".");
             System.out.println("'.'toAbsolutePath() = " + rodmappe.toAbsolutePath());
         } catch (Exception e) { e.printStackTrace(); }
