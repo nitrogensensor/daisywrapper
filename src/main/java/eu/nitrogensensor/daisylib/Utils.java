@@ -102,30 +102,6 @@ public class Utils {
     }
 
 
-    public static String md5sumMappe(Path mappe, String... ekstraData) throws Exception {
-        MessageDigest md5 = MessageDigest.getInstance("MD5");
-        System.out.println("md5.update(" + Arrays.toString(ekstraData));
-        for (String ekstra : ekstraData) md5.update(ekstra.getBytes());
-        Files.walk(mappe).filter(path -> !Files.isDirectory(path))
-                    .forEach(path -> {
-                        try {
-                            System.out.println("md5.update(" + mappe.relativize(path));
-                            md5.update(mappe.relativize(path).toString().getBytes());
-                            md5.update(Files.readAllBytes(path));
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    });
-
-        byte[] digest = md5.digest();
-        String indkodet = Base64.getUrlEncoder().encodeToString(digest);
-        if (!indkodet.endsWith("==")) throw new IllegalStateException("Troede altid at de endte med ==, men her er en uden?!?? "+indkodet);
-        indkodet = indkodet.substring(0, indkodet.length()-2);
-        System.out.println("md5.digest() giver " + indkodet);
-        return indkodet;
-    }
-
-
     // Kilde: https://mkyong.com/java/how-to-decompress-files-from-a-zip-file/
     public static void unzipMappe(InputStream inputStream, String outputMappe) throws IOException {
         System.out.println("unzipMappe  " + outputMappe);
@@ -164,7 +140,6 @@ public class Utils {
     }
 
     public static void main(String[] args) throws Exception {
-        System.out.println("md5sumMappe(\"slamkode/src\") = " + md5sumMappe(Paths.get("slamkode/src")));
         OutputStream os = Files.newOutputStream(Paths.get("slamkode.zip"));
         zipMappe("slamkode/src", os);
         os.close();
