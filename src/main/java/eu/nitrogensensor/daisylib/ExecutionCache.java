@@ -14,8 +14,9 @@ public class ExecutionCache {
     private final Path cacheplacering;
     private final HashMap<DaisyModel, String> daisyModelMd5Map = new HashMap<>();
 
-    public ExecutionCache(String cachemappe) throws IOException {
-        this.cacheplacering = Paths.get(System.getenv("PWD"), cachemappe); // Hmm, ved ikke om det virker på Windows?
+    public ExecutionCache(Path cacheplacering) throws IOException {
+        this.cacheplacering = cacheplacering;
+        //this.cacheplacering = Paths.get(System.getenv("PWD"), cachemappe); // Hmm, ved ikke om det virker på Windows?
         Files.createDirectories(cacheplacering);
     }
 
