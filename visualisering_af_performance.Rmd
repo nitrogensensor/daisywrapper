@@ -5,14 +5,17 @@ output: html_notebook
 
 
 ```{r}
+for (p in c("ggplot2", "readr")) if (!require(p, character.only=TRUE, quietly=TRUE)) install.packages(p)
+
 #log <- read_csv("/home/j/Projekter/NitrogenSensor/gitlab/nitrogensensor/daisy/DaisyTestkoersel_performancelog.csv")
 log <- read_csv("DaisyTestkoersel_performancelog.csv")
+log
 ```
 
 
 Her ses hvordan lokal kørsel skalerer lineært med antallet af kørsler - imens Cloud Run er svagt stigende i tid.
 Lokal kørsel er på Jacobs PC - en relativt stærk bærbar med 8 kerner.
- 
+
 X-aksen er antal kørsler, y-aksen er tid i sekunder.
 
 ```{r}
