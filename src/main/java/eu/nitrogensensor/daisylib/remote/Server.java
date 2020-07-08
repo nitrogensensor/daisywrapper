@@ -1,6 +1,7 @@
 package eu.nitrogensensor.daisylib.remote;
 
 import com.google.gson.Gson;
+import eu.nitrogensensor.daisylib.ExecutionCache;
 import eu.nitrogensensor.daisylib.Utils;
 import eu.nitrogensensor.daisylib.remote.google_cloud_storage.GemOgHentArbejdsfiler;
 import io.javalin.Javalin;
@@ -166,15 +167,23 @@ public class Server {
                 }
                 System.out.println("Server ExecutionBatch " + batch.oploadId);
 
-                // Vi skal have det over i en anden midlertidig mappe, ellers kan det være vi får knas med at
-                // evt andre samtidige kørsler skriver i de samme outputfiler
-                batch.kørsel.copyToDirectory(Files.createTempDirectory("kørsel_"+batch.kørsel.getId()));
-                batch.resultExtractor.tjekResultatIkkeAlleredeFindes(batch.kørsel.directory); // burde egentlig ikke være nødvendigt, da det også tjekkes af klienten, men man kan ikke stole på klienter...
-                batch.kørsel.run();
+                ExecutionCache executionCache = new ExecutionCache(Paths.get("../tmp/daisy-execution-cache/"));
+
+                // Benyt en eksekveringscachen - bemærk at batch.kørsel peger DIREKTE ned i cachen, så det er vigtigt at cachede kørselsmapper ikke ændres
+                boolean varCachet = executionCache.udfyldFraCache(batch.kørsel);
+                if (!varCachet) {
+                    // Vi skal have det over i en anden midlertidig mappe, ellers kan det være vi får knas med at
+                    // evt andre samtidige kørsler skriver i de samme outputfiler
+                    batch.kørsel.copyToDirectory(Files.createTempDirectory("kørsel_"+batch.kørsel.getId()));
+                    batch.resultExtractor.tjekResultatIkkeAlleredeFindes(batch.kørsel.directory); // burde egentlig ikke være nødvendigt, da det også tjekkes af klienten, men man kan ikke stole på klienter...
+                    batch.kørsel.run();
+                    executionCache.gemICache(batch.kørsel);
+                }
+
                 ExtractedContent extractedContent = new ExtractedContent();
                 batch.resultExtractor.extract(batch.kørsel.directory, extractedContent.fileContensMap);
                 ctx.json(extractedContent);
-                Utils.sletMappe(batch.kørsel.directory); // ryd op
+                if (!varCachet) Utils.sletMappe(batch.kørsel.directory); // ryd op - men KUN hvis det ikke kommer fra cachen!
             }
     }
 

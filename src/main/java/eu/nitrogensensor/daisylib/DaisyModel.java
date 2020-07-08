@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 public class DaisyModel implements Cloneable {
@@ -14,11 +16,11 @@ public class DaisyModel implements Cloneable {
     private String id;
 
     /**
-     * Giver en unik streng, der beskriver de erstatninger der sker i mappen under kørsel
-     * @return
+     * @return en unik streng, der beskriver hvilken scriptFil der er tale om, samt alle de erstatninger der sker i scriptfilen inden kørslen
      */
     public String unikStreng() {
-        StringBuilder sb = new StringBuilder(erstatninger.size()*100);
+        StringBuilder sb = new StringBuilder(erstatninger.size()*100 + scriptFil.length());
+        sb.append(scriptFil); // navnet på scriptfilen
         for (Erstatning erstatning : erstatninger) sb.append(erstatning.unikStreng());
         return sb.toString();
     }
@@ -66,7 +68,7 @@ public class DaisyModel implements Cloneable {
     }
     @Override
     public String toString() {
-        return "Koersel{" +
+        return "DaisyModel{" +
                 "orgMappe=" + directory +
                 ", scriptFil='" + scriptFil + '\'' +
                 '}';
@@ -102,5 +104,50 @@ public class DaisyModel implements Cloneable {
             daisyInvoke.invokeDaisy(directory, scriptFil);
         }
         return this;
+    }
+
+    /**
+     * Finder en unik md5-sum for den jomfruelige kørsel som helhed (mappen, scriptfilen og erstatningerne).
+     * Summen ændrer sig afhængig af mappens indhold, de erstatninger der sker i mappen under kørsel, samt hvilken scriptFil der køres.
+     * Metoden er kun nyttig hvis den kaldes FØR kørslen af Daisy faktisk sker - efter kørslen er mappen 'forurenet' med logfiler med tidsstempler i og vil derfor altid afvige fra summen i en jombruelig kørsel
+     * @return En unik streng for den samlede (jomfruelige) kørsel
+     */
+    public String md5sum() throws IOException {
+        String unikStreng = this.unikStreng();
+        String md5sum = md5sumMappe(this.directory, unikStreng);
+        return md5sum;
+    }
+
+    private static String md5sumMappe(Path mappe, String... ekstraData) throws IOException {
+        try {
+            MessageDigest md5 = MessageDigest.getInstance("MD5");
+
+            //System.out.println("md5.update(" + Arrays.toString(ekstraData));
+            for (String ekstra : ekstraData) md5.update(ekstra.getBytes());
+            Files.walk(mappe).filter(path -> !Files.isDirectory(path))
+                    .forEach(path -> {
+                        try {
+                            //System.out.println("md5.update(" + mappe.relativize(path));
+                            md5.update(mappe.relativize(path).toString().getBytes());
+                            md5.update(Files.readAllBytes(path));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+
+            byte[] digest = md5.digest();
+            String indkodet = Base64.getUrlEncoder().encodeToString(digest);
+            if (!indkodet.endsWith("==")) throw new IllegalStateException("Troede altid at de endte med ==, men her er en uden?!?? "+indkodet);
+            indkodet = indkodet.substring(0, indkodet.length()-2);
+            //System.out.println("md5.digest() giver " + indkodet);
+            return indkodet;
+        } catch (NoSuchAlgorithmException e) { // burde ikke ske
+            e.printStackTrace();
+            throw new IOException(e);
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        System.out.println("md5sumMappe(\"slamkode/src\") = " + md5sumMappe(Paths.get("slamkode/src")));
     }
 }

@@ -35,6 +35,6 @@ class DaisyInvoker {
         process.destroy();
 
         if(exitValue != 0)
-            throw new RuntimeException("Something went wrong during execution of the Daisy script.");
+            throw new RuntimeException("Something went wrong during execution of the Daisy script. mappe="+mappe+" inputFil="+inputFil);
     }
 }

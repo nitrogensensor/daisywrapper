@@ -46,6 +46,7 @@ public class TestFjernkoersel {
         re.addCsvExtractor("crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)", "crop-leaf-stem-AI.csv");
         re.addFile("crop.csv");
 
+        DaisyRemoteExecution.setRemoteEndpointUrl(Server.url);
         ArrayList<ExtractedContent> res = DaisyRemoteExecution.runParralel(arrayList, re, null);
         String cropCsv = res.get(0).fileContensMap.get("crop.csv");
         String cropLaiCsv = res.get(2).fileContensMap.get("crop-leaf-stem-AI.csv");
@@ -70,6 +71,7 @@ public class TestFjernkoersel {
         re.addCsvExtractor("crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)", "crop-leaf-stem-AI.csv");
         re.addFile("crop.csv");
 
+        DaisyRemoteExecution.setRemoteEndpointUrl(Server.url);
         ArrayList<ExtractedContent> res = DaisyRemoteExecution.runSerial(arrayList, re, null);
         String cropCsv = res.get(0).fileContensMap.get("crop.csv");
         String cropLaiCsv = res.get(0).fileContensMap.get("crop-leaf-stem-AI.csv");

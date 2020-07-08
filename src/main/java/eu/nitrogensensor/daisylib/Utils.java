@@ -73,6 +73,7 @@ public class Utils {
                 .sorted(Comparator.reverseOrder())
                 .map(Path::toFile)
                 .forEach(File::delete);
+        if (Files.exists(tilMappe)) Files.delete(tilMappe); // nødvendig?
     }
 
 /*
