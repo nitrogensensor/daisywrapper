@@ -16,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -47,9 +48,9 @@ public class TestFjernkoersel {
         re.addFile("crop.csv");
 
         DaisyRemoteExecution.setRemoteEndpointUrl(Server.url);
-        ArrayList<ExtractedContent> res = DaisyRemoteExecution.runParralel(arrayList, re, null);
-        String cropCsv = res.get(0).fileContensMap.get("crop.csv");
-        String cropLaiCsv = res.get(2).fileContensMap.get("crop-leaf-stem-AI.csv");
+        Map<String, ExtractedContent> res = DaisyRemoteExecution.runParralel(arrayList, re);
+        String cropCsv = res.get(kørsel.getId()).fileContensMap.get("crop.csv");
+        String cropLaiCsv = res.get(kørsel.getId()).fileContensMap.get("crop-leaf-stem-AI.csv");
         System.out.println(cropCsv);
         assertTrue(cropCsv.contains("Crop development and production"));
         System.out.println(cropLaiCsv);

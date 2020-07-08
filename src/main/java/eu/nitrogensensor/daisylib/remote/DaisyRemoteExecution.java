@@ -91,24 +91,36 @@ public class DaisyRemoteExecution {
     }
 
 
-    private static void __skriv(DaisyModel kørsel, ExtractedContent extractedContent, Path resultsDir) throws IOException {
-        if (resultsDir != null) {
-            Path resultDir = resultsDir.resolve(kørsel.getId());
-            Utils.sletMappe(resultDir);
-            Files.createDirectories(resultDir);
-            if (FEJLFINDING) System.out.println("Skriver " + extractedContent.fileContensMap.keySet() + " til " + resultDir);
-            for (String filnavn : extractedContent.fileContensMap.keySet()) {
-                String filIndhold = extractedContent.fileContensMap.get(filnavn);
-                Path fil = resultDir.resolve(filnavn);
-                Files.createDirectories(fil.getParent());
-                Files.write(fil, filIndhold.getBytes());
-            }
+    private static void __skriv(ExtractedContent extractedContent, Path resultsDir) throws IOException {
+        Path resultDir = resultsDir.resolve(extractedContent.id);
+        Utils.sletMappe(resultDir);
+        Files.createDirectories(resultDir);
+        if (FEJLFINDING) System.out.println("Skriver " + extractedContent.fileContensMap.keySet() + " til " + resultDir);
+        for (String filnavn : extractedContent.fileContensMap.keySet()) {
+            String filIndhold = extractedContent.fileContensMap.get(filnavn);
+            Path fil = resultDir.resolve(filnavn);
+            Files.createDirectories(fil.getParent());
+            Files.write(fil, filIndhold.getBytes());
         }
     }
 
+    public static void writeResults(Map<String, ExtractedContent> extractedContents, Path resultsDir) throws IOException {
+        for (ExtractedContent extractedContent : extractedContents.values()) {
+            __skriv(extractedContent, resultsDir);
+        }
+    }
 
-    public static ArrayList<ExtractedContent> runParralel(Collection<DaisyModel> daisyModels, ResultExtractor resultExtractor, Path resultsDir) throws IOException {
-        final ArrayList<ExtractedContent> extractedContents = new ArrayList<>();
+    public static Map<String, ExtractedContent> runParralel(Collection<DaisyModel> daisyModels, ResultExtractor resultExtractor, Path resultsDir) throws IOException {
+        Map<String, ExtractedContent> extractedContents = runParralel(daisyModels, resultExtractor);
+        if (resultsDir != null) {
+            writeResults(extractedContents, resultsDir);
+        }
+        return extractedContents;
+    }
+
+
+    public static Map<String, ExtractedContent> runParralel(Collection<DaisyModel> daisyModels, ResultExtractor resultExtractor) throws IOException {
+        final Map<String, ExtractedContent> extractedContents = new ConcurrentHashMap<>();
         Path inputDir = getDirectory(daisyModels);
         resultExtractor.tjekResultatIkkeAlleredeFindes(inputDir);
 
@@ -119,12 +131,12 @@ public class DaisyRemoteExecution {
         int parallelitet = Math.max(5, Math.min(MAX_PARALLELITET, antalKørsler/4)); // minimum 4 kørsler per instans - men mindst 5 instanser
         System.out.println("parallelitet: "+parallelitet);
 
-        ExecutorService executorService = Executors.newFixedThreadPool(Math.min(daisyModels.size(),parallelitet)); // max 100 parrallel forespørgsler
+        ExecutorService executorService = Executors.newFixedThreadPool(Math.min(daisyModels.size(),parallelitet)); // max 100 parallele forespørgsler
         AtomicReference<IOException> fejl = new AtomicReference<>(); // Hvis der opstår en exception skal den kastes videre
         int kørselsNr = 0;
         for (DaisyModel kørsel : daisyModels) {
             kørselsNr++;
-            // Klodset og sikkkert nytteløst forsøg på at håndtere at båndbredden til opload fra en enkelt maskine er begrænset
+            // Klodset og sikkkert nytteløst forsøg på at håndtere at båndbredden til endpointet sikkert er begrænset
             if (kørslerIgang.size()>100) try { Thread.sleep(50); } catch (Exception e) {}
             System.out.println(visStatus() + " kørsel "+kørselsNr+" af "+daisyModels.size()+ " sættes i kø.");
 
@@ -144,8 +156,6 @@ public class DaisyRemoteExecution {
                     batch.kørsel.setId(null);
 
                     HttpResponse<ExtractedContent> response = Unirest.post(remoteEndpointUrl + "/sim/").body(batch).asObject(ExtractedContent.class);
-                    if (!response.isSuccess()) throw new IOException(response.getStatusText());
-
                     kørslerIgang.put(kørsel.getId(), "4 modtag");
                     //System.out.println(visStatus() + " kørsel "+kørselsNr_+" 4 modtag.");
                     if (!response.isSuccess()) {
@@ -155,12 +165,9 @@ public class DaisyRemoteExecution {
                         throw new IOException(response.getStatusText());
                     }
 
-                    ExtractedContent extractedContent1 = response.getBody();
-                    extractedContent1.id = kørsel.getId();
-                    kørslerIgang.put(kørsel.getId(), "5 skriv");
-                    __skriv(kørsel, extractedContent1, resultsDir);
-                    ExtractedContent extractedContent = extractedContent1;
-                    extractedContents.add(extractedContent);
+                    ExtractedContent extractedContent = response.getBody();
+                    extractedContent.id = kørsel.getId();
+                    extractedContents.put(kørsel.getId(), extractedContent);
                 } catch (IOException e) {
                     System.err.println("FEJL i "+kørselsNr_+" "+kørsel.getId());
                     e.printStackTrace();
@@ -212,7 +219,7 @@ public class DaisyRemoteExecution {
             ExtractedContent extractedContent = response.getBody();
             extractedContent.id = kørsel.getId();
             extractedContents.add(extractedContent);
-            __skriv(kørsel, extractedContent, resultsDir);
+            if (resultsDir!=null) __skriv(extractedContent, resultsDir);
         }
         return extractedContents;
     }

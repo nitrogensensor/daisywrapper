@@ -9,7 +9,9 @@ import picocli.CommandLine;
 
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 @CommandLine.Command(name = "daisy", mixinStandardHelpOptions = true, version = "daisykørsel 0.9", showDefaultValues = true,
@@ -31,8 +33,8 @@ public class DaisyMain implements Callable
   @CommandLine.Option(names = {"-of", "--outputfil"}, description = "remote: Hvilke outputfiler skal gemmes", defaultValue = "daisy.log")
   List<String> outputfiler;
 
-  //@CommandLine.Option(names = {"-oc", "--outputcsv"}, description = "remote: Hvilke outputfiler skal gemmes", defaultValue = "daisy.log")
-  //List<String> outputcsv;
+  @CommandLine.Option(names = {"-oc", "--clean-csv"}, description = "normaliser CSV-filer (fjerner header og enheder)", defaultValue = "false")
+  boolean cleanCsvOutput;
 
 //  @CommandLine.Option(names = {"-p", "--daisy-executable-path"}, description = "Til lokal kørsel: Sti til Daisy executable", defaultValue = "/opt/daisy/bin/daisy")
 //  private String stiTilDaisy;
@@ -64,10 +66,26 @@ public class DaisyMain implements Callable
           for (String outputfil : outputfiler) re.addFile(outputfil);
 
           if (remoteEndpointUrl !=null) DaisyRemoteExecution.setRemoteEndpointUrl(remoteEndpointUrl);
-          ArrayList<ExtractedContent> res = DaisyRemoteExecution.runParralel(daisyModels, re, Paths.get(outputdirectory));
+          Map<String, ExtractedContent> res = DaisyRemoteExecution.runParralel(daisyModels, re);
+          if (cleanCsvOutput) for (ExtractedContent ec : res.values()) cleanCsv(ec.fileContensMap);
+          DaisyRemoteExecution.writeResults(res, Paths.get(outputdirectory));
           System.out.println("res = " + res);
       }
       else throw new Exception("Ukendt kommando: "+kommando);
       return null;
   }
+
+    private void cleanCsv(HashMap<String, String> fileContensMap) {
+        for (Map.Entry<String, String> fil : fileContensMap.entrySet()) {
+            if (!fil.getKey().endsWith(".csv")) continue;
+            String csv = fil.getValue();
+            String[] csvsplit = csv.split("--------------------\n");
+            if (csvsplit.length<2) continue;
+            String rest = csvsplit[1];
+            int n1 = rest.indexOf('\n');
+            int n2 = rest.indexOf('\n', n1+1);
+            csv = rest.substring(0, n1) + rest.substring(n2);
+            fil.setValue(csv);
+        }
+    }
 }
