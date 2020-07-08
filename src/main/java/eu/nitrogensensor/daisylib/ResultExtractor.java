@@ -3,10 +3,12 @@ package eu.nitrogensensor.daisylib;
 import eu.nitrogensensor.daisylib.csv.CsvEkstraktor;
 import eu.nitrogensensor.daisylib.csv.CsvFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Stream;
 
 public class ResultExtractor {
     public HashSet<String> outputfilnavne = new HashSet<>();
@@ -39,7 +41,9 @@ public class ResultExtractor {
         Files.createDirectories(toDirectory);
 
         for (String fn : kopiérFiler) {
-            Files.copy(fromDirectory.resolve(fn), toDirectory.resolve(fn));
+            Path fil = fromDirectory.resolve(fn);
+            if (!Files.isDirectory(fil)) Files.copy(fromDirectory.resolve(fn), toDirectory.resolve(fn));
+            else throw new IOException("Mapper er endnu ikke understøttet i kopiérFiler: "+kopiérFiler);
         }
 
         Map<String, CsvFile> readOutput = new LinkedHashMap<String, CsvFile>();
@@ -61,7 +65,19 @@ public class ResultExtractor {
     public void extract(Path fromDirectory, HashMap<String,String> fileContensMap) throws IOException {
 
         for (String fn : kopiérFiler) {
-            fileContensMap.put(fn, new String(Files.readAllBytes(fromDirectory.resolve(fn))));
+            Path fil = fromDirectory.resolve(fn);
+            if (!Files.isDirectory(fil)) fileContensMap.put(fn, new String(Files.readAllBytes(fil)));
+            else try (Stream<Path> stream = Files.walk(fil)) {
+                stream.forEach(fra -> {
+                    if (!Files.isDirectory(fra)) try {
+                        Path til = fromDirectory.relativize(fra);
+                        fileContensMap.put(til.toString(), new String(Files.readAllBytes(fra)));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        throw new RuntimeException(e.getMessage(), e);
+                    }
+                });
+            }
         }
 
         Map<String, CsvFile> readOutput = new LinkedHashMap<String, CsvFile>();
@@ -98,7 +114,8 @@ public class ResultExtractor {
 
 
     private void _tjekFindesIkke(Path inputDir, String f) throws IOException {
-        if (inputDir.resolve(f).toFile().exists()) {
+        File fil = inputDir.resolve(f).toFile();
+        if (fil.exists() && !fil.isDirectory()) {
             throw new IOException("Outputfil "+f+" findes allede i inputmappe: "+inputDir+". Det kan lede til inkonsistenser i output og skal derfor undgås.");
         }
     }

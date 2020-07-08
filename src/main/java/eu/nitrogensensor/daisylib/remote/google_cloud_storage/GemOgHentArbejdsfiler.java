@@ -22,7 +22,7 @@ public class GemOgHentArbejdsfiler {
     static  {
 
         try {
-            String jsonPath = "/home/j/Projekter/NitrogenSensor/gitlab/nitrogensensor/daisy/daisykørsel-arbejdsfiler.json";
+            String jsonPath = "/home/j/Projekter/NitrogenSensor/gitlab/nitrogensensor/daisy/daisykørsel-arbejdsfiler-serviceAccountCredentials.json";
             // You can specify a credential file by providing a path to GoogleCredentials.
             // Otherwise credentials are read from the GOOGLE_APPLICATION_CREDENTIALS environment variable.
             GoogleCredentials credentials = GoogleCredentials.fromStream(new FileInputStream(jsonPath))
@@ -30,7 +30,7 @@ public class GemOgHentArbejdsfiler {
             storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
         } catch (IOException e) {
             // hvis vi ikke kører på Jacobs PC, så kører vi nok på en server, f.eks. nitrogen.saluton.dk eller oppe i Cloud Run ;-)
-            System.out.println("Dette er ikke Jacobs PC: "+e);
+            System.out.println("Dette er IKKE Jacobs PC, så vi er på nitrogen.saluton.dk eller Cloud Run: "+e);
             storage = StorageOptions.getDefaultInstance().getService();
         }
         bucket = storage.get("daisykoersel-arbejdsfiler");

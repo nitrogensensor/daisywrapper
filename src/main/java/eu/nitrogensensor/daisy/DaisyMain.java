@@ -22,17 +22,23 @@ public class DaisyMain implements Callable
   @CommandLine.Option(names = {"-d", "--directory"}, description = "Hvor mappen med Daisy-filerne er", defaultValue = ".")
   String dir;
 
-  @CommandLine.Parameters(index = "1", description = "Daisyfiler")
+  @CommandLine.Parameters(index = "1..", description = "Daisyfiler")
   List<String> daisyfiler;
 
   @CommandLine.Option(names = {"-o", "--outputdirectory"}, description = "Hvor skal resultatet skrives til", defaultValue = ".")
   String outputdirectory;
 
+  @CommandLine.Option(names = {"-of", "--outputfil"}, description = "remote: Hvilke outputfiler skal gemmes", defaultValue = "daisy.log")
+  List<String> outputfiler;
+
+  //@CommandLine.Option(names = {"-oc", "--outputcsv"}, description = "remote: Hvilke outputfiler skal gemmes", defaultValue = "daisy.log")
+  //List<String> outputcsv;
+
 //  @CommandLine.Option(names = {"-p", "--daisy-executable-path"}, description = "Til lokal kørsel: Sti til Daisy executable", defaultValue = "/opt/daisy/bin/daisy")
 //  private String stiTilDaisy;
 
   @CommandLine.Option(names = {"-u", "--remote-endpoint-url"},
-          description = "Remote: URL til endpoint på server hvor Daisy-kørslerne udføres",
+          description = "remote: URL til endpoint på serveren, der udfører Daisy-kørslerne",
           defaultValue = "http://nitrogen.saluton.dk:3210")
   private String remoteEndpointUrl;
 
@@ -49,10 +55,13 @@ public class DaisyMain implements Callable
       else if ("remote".equals(kommando)) {
           ArrayList<DaisyModel> daisyModels = new ArrayList<>();
           for (String daisyfil : daisyfiler) {
-              daisyModels.add(new DaisyModel( dir, daisyfil));
+              DaisyModel dm = new DaisyModel(dir, daisyfil);
+              if (daisyfil.endsWith(".dai")) daisyfil = daisyfil.substring(0, daisyfil.length()-4);
+              dm.setId(daisyfil);
+              daisyModels.add(dm);
           }
           ResultExtractor re = new ResultExtractor();
-          re.addFile("daisy.log");
+          for (String outputfil : outputfiler) re.addFile(outputfil);
 
           if (remoteEndpointUrl !=null) DaisyRemoteExecution.setRemoteEndpointUrl(remoteEndpointUrl);
           ArrayList<ExtractedContent> res = DaisyRemoteExecution.runParralel(daisyModels, re, Paths.get(outputdirectory));

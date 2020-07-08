@@ -32,9 +32,11 @@ public class Server {
 
 
     public static void main(String[] args) {
+        /*
         log.info("hej1 med log.info");
         log.fine("hej1 med log.fine");
         log.warning("hej1 med log.warning");
+         */
         start();
         //Testklient.testkald();
         //stop();
@@ -73,14 +75,14 @@ public class Server {
             log.warning(e.toString());
             e.printStackTrace();
         });
-        app.get("/", ctx -> ctx.contentType("text/html").result("<html><body>Du kan også spørge på <a href='json'>json</a>"));
+        app.get("/", ctx -> ctx.contentType("text/html").result("<html><body>Endpoints er skjulte. Du kan evt spoerge på <a href='json'>json</a>"));
         app.get("/json", ctx -> ctx.result("Hello World"));
         app.post("/uploadZip", ctx -> upload(ctx));
-        if (USIKKER_KØR) app.get("/koer", ctx -> kør(ctx, null));
+        if (USIKKER_KØR) app.get("/koer", ctx -> kørKommando(ctx, null));
         app.post("/sim", ctx -> sim(ctx));
     }
 
-    private static String kør(Context ctx, String[] parms) throws IOException, InterruptedException {
+    private static String kørKommando(Context ctx, String[] parms) throws IOException, InterruptedException {
         if (!USIKKER_KØR) return "nej";
             String k = ctx.queryParam("k");
         if (parms==null && k!=null) {
