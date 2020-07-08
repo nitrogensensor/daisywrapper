@@ -22,7 +22,7 @@ public class DaisyMain implements Callable
   @CommandLine.Option(names = {"-d", "--directory"}, description = "Hvor mappen med Daisy-filerne er", defaultValue = ".")
   String dir;
 
-  @CommandLine.Parameters(description = "Daisyfiler", arity = "1..1000")
+  @CommandLine.Parameters(index = "1", description = "Daisyfiler")
   List<String> daisyfiler;
 
   @CommandLine.Option(names = {"-o", "--outputdirectory"}, description = "Hvor skal resultatet skrives til", defaultValue = ".")
@@ -32,7 +32,8 @@ public class DaisyMain implements Callable
 //  private String stiTilDaisy;
 
   @CommandLine.Option(names = {"-u", "--remote-endpoint-url"},
-          description = "Remote: URL til endpoint på server hvor Daisy-kørslerne udføres", defaultValue = "https://daisykoersel-6dl4uoo23q-lz.a.run.app")
+          description = "Remote: URL til endpoint på server hvor Daisy-kørslerne udføres",
+          defaultValue = "http://nitrogen.saluton.dk:3210")
   private String remoteEndpointUrl;
 
   public static void main(String[] args)  {

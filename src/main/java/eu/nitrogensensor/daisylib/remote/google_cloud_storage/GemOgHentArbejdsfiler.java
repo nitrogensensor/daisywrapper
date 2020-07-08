@@ -29,7 +29,7 @@ public class GemOgHentArbejdsfiler {
                     .createScoped(Lists.newArrayList("https://www.googleapis.com/auth/cloud-platform"));
             storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
         } catch (IOException e) {
-            // hvis vi ikke kører på Jacobs PC så kører vi nok oppe i Cloud Run ;-)
+            // hvis vi ikke kører på Jacobs PC, så kører vi nok på en server, f.eks. nitrogen.saluton.dk eller oppe i Cloud Run ;-)
             System.out.println("Dette er ikke Jacobs PC: "+e);
             storage = StorageOptions.getDefaultInstance().getService();
         }

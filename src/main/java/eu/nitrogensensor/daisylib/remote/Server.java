@@ -47,7 +47,7 @@ public class Server {
 
     public static void start() {
         String port = System.getenv("PORT");
-        if (port == null) port = "8080";
+        if (port == null) port = "3210";
         start(Integer.parseInt(port));
     }
 
