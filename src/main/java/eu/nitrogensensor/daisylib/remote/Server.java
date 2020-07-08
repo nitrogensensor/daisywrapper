@@ -47,9 +47,7 @@ public class Server {
 
     public static void start() {
         String port = System.getenv("PORT");
-        if (port == null) {
-            port = "8080";
-        }
+        if (port == null) port = "8080";
         start(Integer.parseInt(port));
     }
 
@@ -62,9 +60,14 @@ public class Server {
 
         url = "http://localhost:"+port;
         app = Javalin.create().start(port);
+        /*
         app.before(ctx -> {
             // runs before all requests
             log.fine("Server "+ctx.method()+" på " +ctx.url());
+        });
+         */
+        app.after(ctx -> {
+            log.fine("Server "+ctx.method()+" på " +ctx.url()+" gav "+ctx.res.getStatus());
         });
         app.exception(Exception.class, (e, ctx) -> {
             log.warning(e.toString());
@@ -110,7 +113,7 @@ public class Server {
 
         Path denneUploadMappe = Files.createTempDirectory(uploadMappe,"");
         String batchId = uploadMappe.relativize(denneUploadMappe).toString();
-
+        System.out.println("upload får batchId = " + batchId);
 
         UploadedFile file = ctx.uploadedFile("zipfil");
         if (file!=null) {

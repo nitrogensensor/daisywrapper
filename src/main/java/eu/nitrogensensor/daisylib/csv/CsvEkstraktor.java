@@ -71,8 +71,6 @@ public class CsvEkstraktor {
         return kolonner;
     }
 
-    private static final boolean FILPRÆFIX_PÅ_KOLONNER = false;
-
     public CsvFile lavUdtræk(Map<String, CsvFile> outputMap) {
         CsvEkstraktor ekstrakt = this;
         CsvFile output = new CsvFile();
@@ -84,10 +82,7 @@ public class CsvEkstraktor {
         for (String filnavn : ekstrakt.filKolonnerMap.keySet()) {
             CsvFile outputfil = outputMap.get(filnavn);
             for (String kol : ekstrakt.filKolonnerMap.get(filnavn)) {
-                if (FILPRÆFIX_PÅ_KOLONNER)
-                    output.kolonnenavne.add(filnavn + ":" + kol);
-                else
-                    output.kolonnenavne.add(kol);
+                output.kolonnenavne.add(kol);
 
                 int idx = outputfil.kolonnenavne.indexOf(kol);
                 if (filKolonneIndexMap.get(filnavn) == null)

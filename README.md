@@ -4,22 +4,13 @@
 ## Lokal kommandolinjetest uden for Docker
 
 Fra overmappen
-./gradlew jar; java -jar daisy/build/libs/daisy.jar testkørsel
-
-./gradlew jar; java -jar daisy/build/libs/daisy.jar server
-
-
-../gradlew jar
-
-Test lokalt
-java -jar build/libs/daisy.jar testklient
-java -jar build/libs/daisy.jar server
-
-java -cp build/libs/daisy.jar eu.nitrogensensor.daisy.DaisyMain
-
-
-java -jar build/libs/daisy.jar server
+cd ..
+./gradlew jar; 
+java -jar daisy/build/libs/daisy.jar testkørsel
+java -jar daisy/build/libs/daisy.jar server
+java -jar daisy/build/libs/daisy.jar remote -u http://localhost:8080 -d /home/j/Hent/mads replaced_Sim_4_RefSim.dai -o xxx
 Åbn http://localhost:8080
+
 
 ## Lokal test i Docker
 Tjek Dockerfile
