@@ -5,7 +5,6 @@ import eu.nitrogensensor.daisylib.DaisyModel;
 import eu.nitrogensensor.daisylib.ResultExtractor;
 import eu.nitrogensensor.daisylib.Utils;
 import kong.unirest.HttpResponse;
-import kong.unirest.MultipartBody;
 import kong.unirest.ObjectMapper;
 import kong.unirest.Unirest;
 
@@ -27,9 +26,18 @@ public class DaisyRemoteExecution {
     public static int maxSamtidigeKørslerIgang;
 
     private static Gson gson = MyGsonPathConverter.buildGson();
-    private static String url = "https://daisykoersel-6dl4uoo23q-lz.a.run.app";
+    private static String remoteEndpointUrl = "https://daisykoersel-6dl4uoo23q-lz.a.run.app";
+
+    public static void setRemoteEndpointUrl(String url) {
+        while (url.endsWith("/")) url.substring(0, url.length()-1); // fjern afsluttende /-streger
+        remoteEndpointUrl = url;
+    }
+
     static {
         //if (Server.url==null) Server.start(); url = Server.url; MAX_PARALLELITET=8; // for at starte og bruge lokal server
+        String remoteEndpointUrl1 = System.getenv("DAISY_REMOTE_URL");
+        if (remoteEndpointUrl1!=null) remoteEndpointUrl = remoteEndpointUrl1;
+
         Unirest.config().setObjectMapper(new ObjectMapper() {
             @Override
             public <T> T readValue(String value, Class<T> valueType) {
@@ -69,12 +77,13 @@ public class DaisyRemoteExecution {
     private static String __oploadZip(Path inputDir) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         Utils.zipMappe(inputDir.toString(), baos);
-        System.out.println("Oploader "+inputDir+".zip på "+baos.size()/1000.0 + " kb");
-        HttpResponse<String> oploadRes = Unirest.post(url+"/uploadZip")
+        String url = remoteEndpointUrl +"/uploadZip";
+        System.out.println("Oploader "+inputDir+".zip på "+baos.size()/1000.0 + " kb til "+url);
+        HttpResponse<String> oploadRes = Unirest.post(url)
                 .field("zipfil",  new ByteArrayInputStream(baos.toByteArray()), "zipfil.zip")
                 .asString();
 
-        if (!oploadRes.isSuccess()) throw new IOException("Fik ikke oploaded filer: "+oploadRes.getBody());
+        if (!oploadRes.isSuccess()) throw new IOException("Fik ikke oploaded filer: "+oploadRes.getBody()+" for URL "+oploadRes);
         String batchId = oploadRes.getBody();
         System.out.println("Fik oploadet "+inputDir+".zip og fik batch ID "+batchId);
         return  batchId;
@@ -131,7 +140,7 @@ public class DaisyRemoteExecution {
                     batch.kørsel.directory = null;
                     batch.kørsel.setId(null);
 
-                    HttpResponse<ExtractedContent> response = Unirest.post(url + "/sim/").body(batch).asObject(ExtractedContent.class);
+                    HttpResponse<ExtractedContent> response = Unirest.post(remoteEndpointUrl + "/sim/").body(batch).asObject(ExtractedContent.class);
                     if (!response.isSuccess()) throw new IOException(response.getStatusText());
 
                     kørslerIgang.put(kørsel.getId(), "4 modtag");
@@ -194,7 +203,7 @@ public class DaisyRemoteExecution {
             batch.kørsel.directory = null;
             batch.kørsel.setId(null);
 
-            HttpResponse<ExtractedContent> response = Unirest.post(url + "/sim/").body(batch).asObject(ExtractedContent.class);
+            HttpResponse<ExtractedContent> response = Unirest.post(remoteEndpointUrl + "/sim/").body(batch).asObject(ExtractedContent.class);
             if (!response.isSuccess()) throw new IOException(response.getStatusText());
 
             ExtractedContent extractedContent = response.getBody();
@@ -207,10 +216,10 @@ public class DaisyRemoteExecution {
 
     public static String getKørselstype() {
         if (maxSamtidigeKørslerIgang==0) return "Lokalt";
-        if (url.contains("localhost")) return "Lokal server";
-        if (url.contains("run.app")) return "Cloud Run";
+        if (remoteEndpointUrl.contains("localhost")) return "Lokal server";
+        if (remoteEndpointUrl.contains("run.app")) return "Cloud Run";
 
-        System.out.println("Ukendt kørselsetype for "+url);
-        return url;
+        System.out.println("Ukendt kørselsetype for "+ remoteEndpointUrl);
+        return remoteEndpointUrl;
     }
 }
