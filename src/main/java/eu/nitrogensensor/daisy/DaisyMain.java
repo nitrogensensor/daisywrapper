@@ -30,16 +30,16 @@ public class DaisyMain implements Callable
   @CommandLine.Option(names = {"-r", "--replace"}, description = "Erstatninger der skal ske i daisyfilen før den køres. Hver erstatning består af et søgeudtryk og en erstatningsstreng adskilt af komma. Eksempler\n" +
           "-r _sand_,37.1   søger efter '_sand_' og erstatter med '37.1'\n" +
           "-r '(stop *),(stop 2015 8 20)'  sætter stoptidspunkt for simuleringen ")
-  List<String> replace;
+  List<String> replace = new ArrayList<String>();
 
   @CommandLine.Option(names = {"-rt", "--repeat-replace"}, description = "Gentagelse af kørslen med forskellige erstatninger." +
             "-rt _sand_:_humus_,10:90,20:80,30:70,40:60,50:50  giver 5 kørsler hvor sand stiger fra 10 til 50 og humus falder fra 90 til 50 i skridt af 10")
-  List<String> repeatReplace;
+  List<String> repeatReplace = new ArrayList<String>();
 
   @CommandLine.Option(names = {"-rp", "--replicate-replace"}, description = "Replikering af kørslen med forskellige erstatninger. Hver består af et søgeudtryk og et antal erstatningsstrenge adskilt af komma." +
           "Formatet er: søg,erstat1,erstat2,erstat3. Er der flere sæt replikerede erstatninger multipliceres de. Eksempelvis giver nedenstående i alt 25 kørsler:\n" +
           "-rp _sand_,0,10,20,30,40 -rp _humus_,50,60,70,80,90")
-  List<String> replicateReplace;
+  List<String> replicateReplace = new ArrayList<String>();
 */
   @CommandLine.Option(names = {"-o", "--outputdirectory"}, description = "Hvor skal resultatet skrives til", defaultValue = ".")
   String outputdirectory;
