@@ -5,7 +5,9 @@ package eu.nitrogensensor.daisylib;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 class DaisyInvoker {
     public void invokeDaisy(Path mappe, String inputFil) throws IOException {
@@ -29,12 +31,13 @@ class DaisyInvoker {
         int exitValue;
         //System.out.println("RUN DAISY! "+mappe+" "+inputFil);
         //System.out.println(new File(prop.getProperty("daisy.executable.path")).getAbsolutePath());
+        Path daisyErr = mappe.resolve("daisyErr.log");
 
         Process process = new ProcessBuilder(daisyPath, inputFil)
                 .redirectInput(ProcessBuilder.Redirect.INHERIT)
                 .redirectOutput(ProcessBuilder.Redirect.INHERIT)
 //                .redirectError(ProcessBuilder.Redirect.DISCARD)
-                .redirectError(ProcessBuilder.Redirect.to(mappe.resolve("daisyErr.log").toFile()))
+                .redirectError(ProcessBuilder.Redirect.to(daisyErr.toFile()))
 //                .inheritIO()
                 .directory(mappe.toFile())
                 .start();
@@ -46,7 +49,10 @@ class DaisyInvoker {
         exitValue = process.exitValue();
         process.destroy();
 
-        if(exitValue != 0)
-            throw new RuntimeException("Something went wrong during execution of the Daisy script. mappe="+mappe+" inputFil="+inputFil);
+        if(exitValue != 0) {
+            List<String> fejllinjer = Files.readAllLines(daisyErr);
+            if (fejllinjer.size()>5) fejllinjer = fejllinjer.subList(fejllinjer.size()-5, fejllinjer.size());
+            throw new RuntimeException("Daisy error. mappe="+mappe+" inputFil="+inputFil+fejllinjer+"\n"+String.join("\n", fejllinjer));
+        }
     }
 }

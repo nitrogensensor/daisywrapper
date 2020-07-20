@@ -120,9 +120,9 @@ public class Server {
 
         UploadedFile file = ctx.uploadedFile("zipfil");
         if (file!=null) {
-            System.out.println("Server upladZip " + file.getFilename());
             InputStream is = file.getContent();
             if (PAK_UD_VED_MODTAGELSEN) {
+                System.out.println("Server upladZip " + file.getFilename()+" pakkes ud i "+denneUploadMappe);
                 if (!is.markSupported()) throw new RuntimeException("is skal kunne spoles tilbage");
                 is.mark(Integer.MAX_VALUE);
                 Utils.unzipMappe(is, denneUploadMappe.toString());
@@ -166,21 +166,25 @@ public class Server {
                     Files.delete(fil);
                 }
                 System.out.println("Server ExecutionBatch " + batch.oploadId);
+                ExtractedContent extractedContent = new ExtractedContent();
 
                 ExecutionCache executionCache = new ExecutionCache(Paths.get("../tmp/daisy-execution-cache/"));
 
                 // Benyt en eksekveringscachen - bemærk at batch.kørsel peger DIREKTE ned i cachen, så det er vigtigt at cachede kørselsmapper ikke ændres
                 boolean varCachet = executionCache.udfyldFraCache(batch.kørsel);
-                if (!varCachet) {
+                if (!varCachet) try {
                     // Vi skal have det over i en anden midlertidig mappe, ellers kan det være vi får knas med at
                     // evt andre samtidige kørsler skriver i de samme outputfiler
                     batch.kørsel.copyToDirectory(Files.createTempDirectory("kørsel_"+batch.kørsel.getId()));
-                    batch.resultExtractor.tjekResultatIkkeAlleredeFindes(batch.kørsel.directory); // burde egentlig ikke være nødvendigt, da det også tjekkes af klienten, men man kan ikke stole på klienter...
+                    //batch.resultExtractor.tjekResultatIkkeAlleredeFindes(batch.kørsel.directory); // burde egentlig ikke være nødvendigt, da det også tjekkes af klienten, men man kan ikke stole på klienter...
                     batch.kørsel.run();
                     executionCache.gemICache(batch.kørsel);
+                } catch (IOException e) {
+                    extractedContent.exception = e;
+                    batch.resultExtractor.addFile("daisy.log");
+                    batch.resultExtractor.addFile("daisyErr.log");
                 }
 
-                ExtractedContent extractedContent = new ExtractedContent();
                 batch.resultExtractor.extract(batch.kørsel.directory, extractedContent.fileContensMap);
                 ctx.json(extractedContent);
                 if (!varCachet) Utils.sletMappe(batch.kørsel.directory); // ryd op - men KUN hvis det ikke kommer fra cachen!

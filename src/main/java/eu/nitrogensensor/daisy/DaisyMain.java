@@ -123,7 +123,9 @@ public class DaisyMain implements Callable
           for (String outputfil : outputfiler) re.addFile(outputfil);
 
           if (remoteEndpointUrl !=null) DaisyRemoteExecution.setRemoteEndpointUrl(remoteEndpointUrl);
+
           Map<String, ExtractedContent> res = DaisyRemoteExecution.runParralel(daisyModels, re);
+
           if (cleanCsvOutput) for (ExtractedContent ec : res.values()) cleanCsv(ec.fileContensMap);
           DaisyRemoteExecution.writeResults(res, Paths.get(outputdirectory));
           System.out.println("res = " + res);

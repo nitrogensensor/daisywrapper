@@ -79,7 +79,7 @@ public class DaisyRemoteExecution {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         Utils.zipMappe(inputDir.toString(), baos);
         String url = remoteEndpointUrl +"/uploadZip";
-        System.out.println("Oploader "+inputDir+".zip på "+baos.size()/1000.0 + " kb til "+url);
+        System.out.println("Oploader ZIP-fil af "+inputDir+" på "+baos.size()/1000.0 + " kb til "+url);
         HttpResponse<String> oploadRes = Unirest.post(url)
                 .field("zipfil",  new ByteArrayInputStream(baos.toByteArray()), "zipfil.zip")
                 .asString();
@@ -168,6 +168,7 @@ public class DaisyRemoteExecution {
                     ExtractedContent extractedContent = response.getBody();
                     extractedContent.id = kørsel.getId();
                     extractedContents.put(kørsel.getId(), extractedContent);
+                    if (extractedContent.exception != null) throw extractedContent.exception; // vis fejlen
                 } catch (IOException e) {
                     System.err.println("FEJL i "+kørselsNr_+" "+kørsel.getId());
                     e.printStackTrace();

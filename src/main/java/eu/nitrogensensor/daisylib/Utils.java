@@ -88,13 +88,20 @@ public class Utils {
         try (ZipOutputStream zs = new ZipOutputStream(os);
              Stream<Path> paths = Files.walk(pp)) {
             paths
-                    .filter(path -> !Files.isDirectory(path))
+                    // Tomme mapper skal også med - f.eks en tom Output-mappe som Daisy-scriptsne antager findes og Daisy desværre ikke opretter selv
+                    //.filter(path -> !Files.isDirectory(path))
                     .forEach(path -> {
-                        ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
                         try {
-                            zs.putNextEntry(zipEntry);
-                            Files.copy(path, zs);
-                            zs.closeEntry();
+                            if (Files.isDirectory(path)) { // Tomme mapper skal også med - f.eks en tom output-mappe hvor Daisy skal lægge sit resultat
+                                ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString()+"/");
+                                zs.putNextEntry(zipEntry);
+                                zs.closeEntry();
+                            } else {
+                                ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
+                                zs.putNextEntry(zipEntry);
+                                Files.copy(path, zs);
+                                zs.closeEntry();
+                            }
                         } catch (IOException e) {
                             System.err.println(e);
                         }
