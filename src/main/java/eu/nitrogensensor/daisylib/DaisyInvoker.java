@@ -52,7 +52,7 @@ class DaisyInvoker {
         if(exitValue != 0) {
             List<String> fejllinjer = Files.readAllLines(daisyErr);
             if (fejllinjer.size()>5) fejllinjer = fejllinjer.subList(fejllinjer.size()-5, fejllinjer.size());
-            throw new RuntimeException("Daisy error. mappe="+mappe+" inputFil="+inputFil+fejllinjer+"\n"+String.join("\n", fejllinjer));
+            throw new IOException("Daisy error. mappe="+mappe+" inputFil="+inputFil+fejllinjer+"\n"+String.join("\n", fejllinjer));
         }
     }
 }
