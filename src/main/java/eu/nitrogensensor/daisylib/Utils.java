@@ -97,7 +97,7 @@ public class Utils {
                                 zs.putNextEntry(zipEntry);
                                 zs.closeEntry();
                             } else {
-                                ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
+                                ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString().replace(File.separatorChar,'/'));
                                 zs.putNextEntry(zipEntry);
                                 Files.copy(path, zs);
                                 zs.closeEntry();

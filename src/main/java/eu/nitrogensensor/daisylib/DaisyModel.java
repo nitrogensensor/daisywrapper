@@ -66,14 +66,16 @@ public class DaisyModel implements Cloneable {
         directory = newFolder;
         return this;
     }
+
     @Override
     public String toString() {
         return "DaisyModel{" +
-                "orgMappe=" + directory +
+                "directory=" + directory +
                 ", scriptFil='" + scriptFil + '\'' +
+                ", erstatninger=" + erstatninger +
+                ", id='" + id + '\'' +
                 '}';
     }
-
 
     public DaisyModel replace(String søgestreng, String erstatning) {
         return replace(søgestreng, erstatning, true);

@@ -12,6 +12,11 @@ class Erstatning {
     private final String erstatning;
     private boolean præcisÉnGang;
 
+    @Override
+    public String toString() {
+        return "Erstat{" + søgestreng + '/' + erstatning + '}'+(præcisÉnGang?"1":"*");
+    }
+
     /**
      * Giver en unik streng, der beskriver erstatningen
      * @return
