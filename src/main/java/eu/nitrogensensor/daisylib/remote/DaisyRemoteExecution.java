@@ -167,7 +167,7 @@ public class DaisyRemoteExecution {
 
                     ExtractedContent extractedContent = response.getBody();
                     extractedContent.id = kørsel.getId();
-                    extractedContents.put(kørsel7.getId(), extractedContent);
+                    extractedContents.put(kørsel.getId(), extractedContent);
                     if (extractedContent.exception != null) extractedContent.exception.printStackTrace(); // vis fejlen
                 } catch (IOException e) {
                     System.err.println("FEJL i "+kørselsNr_+" "+kørsel.getId());
