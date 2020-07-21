@@ -89,9 +89,9 @@ public class DaisyMain implements Callable
                       for (DaisyModel dm0 : daisyModels) {
                           for (int i=1; i<søgErstat.length; i++) {
                               DaisyModel dm1 = dm0.clon();
-                              String[] værdier = søgErstat[i].split("_");
+                              String[] værdier = søgErstat[i].split(":");
 //                              System.out.println("Arrays.toString(nøgler) = " + Arrays.toString(nøgler));
-                              if (nøgler.length!=værdier.length) throw new IllegalArgumentException("Fejl i "+replace+" for "+rElem+". Formatet er søgA:søgB,erstat1A:erstat1B,erstat2A:erstat2B,erstat3A,erstat3B  - med komma imellem.");
+                              if (nøgler.length!=værdier.length) throw new IllegalArgumentException("Fejl i "+rElem+". Formatet er søgA:søgB,erstat1A:erstat1B,erstat2A:erstat2B,erstat3A,erstat3B  - med komma imellem. Du har "+nøgler.length+ " nøgler "+Arrays.asList(nøgler)+" , men " +værdier.length+" værdier "+Arrays.asList(værdier));
                               for (int j = 0; j < nøgler.length; j++) {
                                   dm1.replace(nøgler[j], værdier[j]);
                               }
