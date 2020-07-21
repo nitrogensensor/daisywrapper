@@ -74,6 +74,7 @@ public class DaisyMain implements Callable
               daisyModels.add(dm);
 
               for (String rElem : replace) {
+                  // System.out.println("rElem = " + rElem);
                   String[] søgErstat = rElem.split(",");
                   if (søgErstat.length < 2) throw new IllegalArgumentException(
                           "Fejl i "+replace+" for "+rElem+". Formatet er: \nsøg,erstat  - med komma imellem, eller"
@@ -88,7 +89,7 @@ public class DaisyMain implements Callable
                       for (DaisyModel dm0 : daisyModels) {
                           for (int i=1; i<søgErstat.length; i++) {
                               DaisyModel dm1 = dm0.clon();
-                              String[] værdier = søgErstat[i].split(":");
+                              String[] værdier = søgErstat[i].split("_");
 //                              System.out.println("Arrays.toString(nøgler) = " + Arrays.toString(nøgler));
                               if (nøgler.length!=værdier.length) throw new IllegalArgumentException("Fejl i "+replace+" for "+rElem+". Formatet er søgA:søgB,erstat1A:erstat1B,erstat2A:erstat2B,erstat3A,erstat3B  - med komma imellem.");
                               for (int j = 0; j < nøgler.length; j++) {
