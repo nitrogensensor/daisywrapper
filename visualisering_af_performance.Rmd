@@ -23,4 +23,12 @@ X-aksen er antal kørsler, y-aksen er tid i sekunder.
 ggplot(data = log, aes(x=kørsler, y=tid, group=log$type, color=type)) + geom_line() + geom_point() + ggtitle("Daisysimulering for Taastrup marken")
 ```
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+```{r}
+ggplot(data = log, aes(x=kørsler, y=tid, group=log$type, color=type)) + geom_point() + ggtitle("Daisy runs on the KU Taastrup field")  + xlab("Number of simulations") + ylab("Duration (secs)")
+```
+
+```{r}
+ggplot(data = log, aes(x=kørsler, y=tid, group=log$type, color=type)) + geom_line() + geom_point() + ggtitle("Daisy runs on the KU Taastrup field")  + xlab("Number of simulations") + ylab("Duration (secs)")
+```
+
