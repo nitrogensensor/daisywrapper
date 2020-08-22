@@ -89,7 +89,7 @@ class Erstatning {
                 return scriptIndhold2;
             } else {
                 // Undgå replaceAll, da det kan være det erstattede indhold bliver erstattet igen
-                StringBuilder sb = new StringBuilder();
+                StringBuffer sb = new StringBuffer();
                 matcher.appendReplacement(sb, erstatning);
                 matcher.appendTail(sb);
                 return sb.toString();
