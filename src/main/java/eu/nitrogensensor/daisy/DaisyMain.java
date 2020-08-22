@@ -103,7 +103,12 @@ public class DaisyMain implements Callable
                   }
               }
           }
-          System.out.println("daisyModels = " + daisyModels);
+
+          //TODO Måske dette burde slettes? det giver ofte et output der er så langt og scroller så hurtigt at man
+          // ikke kan undgå at miste meget af den information der printes.
+          // Okay, det tog flere minutter at printe før jeg stoppe
+          //System.out.println("daisyModels = ");
+          //daisyModels.forEach(System.out::println);
 /*
           for (String elem : repeatReplace) {
               ArrayList<DaisyModel> nydaisyModels = new ArrayList<>();
@@ -143,7 +148,6 @@ public class DaisyMain implements Callable
           for (String outputfil : outputfiler) re.addFile(outputfil);
 
           if (remoteEndpointUrl !=null) DaisyRemoteExecution.setRemoteEndpointUrl(remoteEndpointUrl);
-
           Map<String, ExtractedContent> res = DaisyRemoteExecution.runParralel(daisyModels, re);
 
           if (cleanCsvOutput) for (ExtractedContent ec : res.values()) cleanCsv(ec.fileContensMap);
