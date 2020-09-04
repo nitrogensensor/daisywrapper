@@ -97,6 +97,7 @@ public class DaisyRemoteExecution {
         Files.createDirectories(resultDir);
         if (FEJLFINDING) System.out.println("Skriver " + extractedContent.fileContensMap.keySet() + " til " + resultDir);
         for (String filnavn : extractedContent.fileContensMap.keySet()) {
+            filnavn = filnavn.replace(':', '_');
             String filIndhold = extractedContent.fileContensMap.get(filnavn);
             Path fil = resultDir.resolve(filnavn);
             Files.createDirectories(fil.getParent());
