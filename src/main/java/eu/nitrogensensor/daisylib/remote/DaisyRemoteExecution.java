@@ -92,12 +92,12 @@ public class DaisyRemoteExecution {
 
 
     private static void __skriv(ExtractedContent extractedContent, Path resultsDir) throws IOException {
-        Path resultDir = resultsDir.resolve(extractedContent.id);
+        System.out.println("extractedContent.id er "+extractedContent.id);
+        Path resultDir = resultsDir.resolve(extractedContent.id.replace(':', '_'));
         Utils.sletMappe(resultDir);
         Files.createDirectories(resultDir);
         if (FEJLFINDING) System.out.println("Skriver " + extractedContent.fileContensMap.keySet() + " til " + resultDir);
         for (String filnavn : extractedContent.fileContensMap.keySet()) {
-            filnavn = filnavn.replace(':', '_');
             String filIndhold = extractedContent.fileContensMap.get(filnavn);
             Path fil = resultDir.resolve(filnavn);
             Files.createDirectories(fil.getParent());
