@@ -41,10 +41,10 @@ public class DaisyMain implements Callable
   @CommandLine.Option(names = {"-o", "--outputdirectory"}, description = "Hvor skal resultatet skrives til", defaultValue = ".")
   String outputdirectory;
 
-  @CommandLine.Option(names = {"-of", "--outputfil"}, description = "remote: Hvilke outputfiler skal gemmes", defaultValue = "daisy.log")
+  @CommandLine.Option(names = {"-of", "--outputfil"}, description = "remote: Hvilke outputfiler skal gemmes (f.eks -of daisy.log)", defaultValue = ".")
   List<String> outputfiler;
 
-  @CommandLine.Option(names = {"-oc", "--clean-csv"}, description = "normaliser CSV-filer (fjerner header og enheder)", defaultValue = "false")
+  @CommandLine.Option(names = {"-oc", "--clean-csv"}, description = "normalisér CSV-filer (fjerner header og enheder)", defaultValue = "false")
   boolean cleanCsvOutput;
 
 //  @CommandLine.Option(names = {"-p", "--daisy-executable-path"}, description = "Til lokal kørsel: Sti til Daisy executable", defaultValue = "/opt/daisy/bin/daisy")
