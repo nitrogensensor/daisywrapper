@@ -69,11 +69,12 @@ public class DaisyModel implements Cloneable {
 
     @Override
     public String toString() {
-        return "DaisyModel{" +
-                "directory=" + directory +
-                ", scriptFil='" + scriptFil + '\'' +
-                ", erstatninger=" + erstatninger +
+        String erstStr = String.valueOf(erstatninger);
+        if (erstStr.length() > 360) erstStr = erstStr.substring(0, 355)+"...";
+        return "DaisyModel{" + directory +
+                " '" + scriptFil + '\'' +
                 ", id='" + id + '\'' +
+                ", erstatninger=" + erstStr +
                 '}';
     }
 
