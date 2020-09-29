@@ -15,7 +15,8 @@ import java.util.concurrent.Callable;
         description = "Kørsel af Daisy")
 public class DaisyMain implements Callable
 {
-  @CommandLine.Parameters(index = "0", description = "server, run, remote eller testkørsel." )
+    private static final String VERSION = "0.9 (29 sept 2020 fejlfinding til Simon)";
+    @CommandLine.Parameters(index = "0", description = "server, run, remote eller testkørsel." )
   String kommando;
 
   @CommandLine.Option(names = {"-d", "--inputdirectory"}, description = "Mappen med Daisy-filerne, der skal køres", defaultValue = ".")
@@ -56,7 +57,7 @@ public class DaisyMain implements Callable
   private String remoteEndpointUrl;
 
   public static void main(String[] args)  {
-    System.out.println("hej fra DaisyMain");
+    System.out.println("hej fra DaisyMain version "+VERSION );
     int exitCode = new CommandLine(new DaisyMain()).execute(args);
     if (exitCode!=0) System.exit(exitCode);
   }
@@ -106,49 +107,18 @@ public class DaisyMain implements Callable
 
           //TODO Måske dette burde slettes? det giver ofte et output der er så langt og scroller så hurtigt at man
           // ikke kan undgå at miste meget af den information der printes.
-          // Okay, det tog flere minutter at printe før jeg stoppe
+          // Okay, det tog flere minutter at printe før jeg stoppe. Skrevet af Mads august 2020
           //System.out.println("daisyModels = ");
           //daisyModels.forEach(System.out::println);
-/*
-          for (String elem : repeatReplace) {
-              ArrayList<DaisyModel> nydaisyModels = new ArrayList<>();
-              String[] søgErstat = elem.split(",");
-              if (søgErstat.length < 3) throw new IllegalArgumentException("Fejl i "+repeatReplace+" for "+elem+": Formatet er: søgA:søgB,erstat1A:erstat1B,erstat2A:erstat2B,erstat3A,erstat3B  - med komma imellem.");
-
-              for (DaisyModel dm0 : daisyModels) {
-                  for (int i=1; i<søgErstat.length; i++) {
-                      DaisyModel dm1 = dm0.clon();
-                      dm1.replace(søgErstat[0], søgErstat[i]);
-                      dm1.setId(dm0.getId()+","+søgErstat[i]);
-                      nydaisyModels.add(dm1);
-                  }
-              }
-              daisyModels = nydaisyModels;
-          }
-
-
-          for (String elem : replicateReplace) {
-              ArrayList<DaisyModel> nydaisyModels = new ArrayList<>();
-              String[] søgErstat = elem.split(",");
-              if (søgErstat.length < 3) throw new IllegalArgumentException("Fejl i "+replicateReplace+" for "+elem+": Formatet er: søg,erstat1,erstat2,erstat3  - med komma imellem.");
-
-              for (DaisyModel dm0 : daisyModels) {
-                  for (int i=1; i<søgErstat.length; i++) {
-                      DaisyModel dm1 = dm0.clon();
-                      dm1.replace(søgErstat[0], søgErstat[i]);
-                      dm1.setId(dm0.getId()+","+søgErstat[i]);
-                      nydaisyModels.add(dm1);
-                  }
-              }
-              daisyModels = nydaisyModels;
-          }
-*/
 
           ResultExtractor re = new ResultExtractor();
           for (String outputfil : outputfiler) re.addFile(outputfil);
 
           if (remoteEndpointUrl !=null) DaisyRemoteExecution.setRemoteEndpointUrl(remoteEndpointUrl);
           Map<String, ExtractedContent> res = DaisyRemoteExecution.runParralel(daisyModels, re);
+
+          // TODO Hvis der opstår en serverfejl, f.eks. 'Too many open files' eller 'java.lang.IllegalArgumentException: Søgestreng ikke fundet: JORDLAG-30'
+          // så skal den vises hos klienten!
 
           if (cleanCsvOutput) for (ExtractedContent ec : res.values()) cleanCsv(ec.fileContensMap);
           DaisyRemoteExecution.writeResults(res, Paths.get(outputdirectory));

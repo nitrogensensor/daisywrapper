@@ -96,10 +96,12 @@ public class DaisyRemoteExecution {
         Path resultDir = resultsDir.resolve(extractedContent.id.replace(':', '_'));
         Utils.sletMappe(resultDir);
         Files.createDirectories(resultDir);
-        if (FEJLFINDING) System.out.println("Skriver " + extractedContent.fileContensMap.keySet() + " til " + resultDir);
+        //if (FEJLFINDING)
+        System.out.println("Skriver " + extractedContent.fileContensMap.keySet() + " til " + resultDir);
         for (String filnavn : extractedContent.fileContensMap.keySet()) {
             String filIndhold = extractedContent.fileContensMap.get(filnavn);
             Path fil = resultDir.resolve(filnavn);
+            System.out.println("opretter "+fil.toString()+ " i "+fil.getParent()+" "+Files.readAttributes(fil.getParent(), "*"));
             Files.createDirectories(fil.getParent());
             Files.write(fil, filIndhold.getBytes());
         }
