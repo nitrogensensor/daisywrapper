@@ -15,7 +15,7 @@ import java.util.concurrent.Callable;
         description = "Kørsel af Daisy")
 public class DaisyMain implements Callable
 {
-    private static final String VERSION = "0.9 (29 sept 2020 fejlfinding til Simon)";
+    private static final String VERSION = "0.901 (29 sept 2020 fejlfinding til Simon2)";
     @CommandLine.Parameters(index = "0", description = "server, run, remote eller testkørsel." )
   String kommando;
 

@@ -101,7 +101,7 @@ public class DaisyRemoteExecution {
         for (String filnavn : extractedContent.fileContensMap.keySet()) {
             String filIndhold = extractedContent.fileContensMap.get(filnavn);
             Path fil = resultDir.resolve(filnavn);
-            System.out.println("opretter "+fil.toString()+ " i "+fil.getParent()+" "+Files.readAttributes(fil.getParent(), "*"));
+            System.out.println("opretter "+fil.toString()+ " i "+fil.getParent());// kald ikke, kan give exception: +" "+Files.readAttributes(fil.getParent(), "*"));
             Files.createDirectories(fil.getParent());
             Files.write(fil, filIndhold.getBytes());
         }
