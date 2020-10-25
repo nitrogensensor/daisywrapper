@@ -28,8 +28,9 @@ public class ResultExtractor {
         outputfilnavne.addAll(csvEkstraktor.filKolonnerMap.keySet());
     }
 
-    public void addFile(String filename) {
+    public ResultExtractor addFile(String filename) {
         kopiérFiler.add(filename);
+        return this;
     }
 
 
