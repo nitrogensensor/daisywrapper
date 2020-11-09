@@ -6,9 +6,9 @@ import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class MyGsonPathConverter implements JsonDeserializer<Path>, JsonSerializer<Path> {
+class MyGsonPathConverter implements JsonDeserializer<Path>, JsonSerializer<Path> {
 
-    public static Gson buildGson() {
+    static Gson buildGson() {
         Gson gson = new GsonBuilder().registerTypeHierarchyAdapter(Path.class, new MyGsonPathConverter()).create();
         return gson;
     }

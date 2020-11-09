@@ -30,15 +30,7 @@ public class DaisyMain implements Callable
           "-r _sand_:_humus_,10:90,20:80,30:70,40:60,50:50  giver 5 kørsler hvor sand stiger fra 10 til 50 og humus falder fra 90 til 50 i skridt af 10\n" +
           "-r '(stop *),(stop 2015 8 20)' sætter stoptidspunkt for simuleringen.")
   List<String> replace = new ArrayList<>();
-/*
-  @CommandLine.Option(names = {"-rr", "--replace-repeat"}, description = "Gentagelse af kørslen med forskellige erstatninger." +
-  List<String> repeatReplace = new ArrayList<String>();
 
-  @CommandLine.Option(names = {"-rc", "--replicate-replace"}, description = "Replikering af kørslen med forskellige erstatninger. Hver består af et søgeudtryk og et antal erstatningsstrenge adskilt af komma." +
-          "Formatet er: søg,erstat1,erstat2,erstat3. Er der flere sæt replikerede erstatninger multipliceres de. Eksempelvis giver nedenstående i alt 25 kørsler:\n" +
-          "-rr _sand_,0,10,20,30,40 -rr _humus_,50,60,70,80,90")
-  List<String> replicateReplace = new ArrayList<String>();
-*/
   @CommandLine.Option(names = {"-o", "--outputdirectory"}, description = "Hvor skal resultatet skrives til", defaultValue = ".")
   String outputdirectory;
 

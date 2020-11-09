@@ -5,7 +5,7 @@ import kong.unirest.Unirest;
 
 import java.io.File;
 
-public class Testklient {
+class Testklient {
     public static void testkald() {
         Server.start();
 

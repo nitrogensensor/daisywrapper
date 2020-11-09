@@ -51,7 +51,7 @@ public class Utils {
      * @param fraMappe Mappen, der skal kopieres
      * @param tilMappe Destination. Indhold i mappen overskrives hvis det allerede findes
      */
-    public static void klonMappeKopérAlt(Path fraMappe, Path tilMappe) throws IOException {
+    static void klonMappeKopérAlt(Path fraMappe, Path tilMappe) throws IOException {
         sletMappe(tilMappe);
         try (Stream<Path> stream = Files.walk(fraMappe)) {
             stream.forEach(fra -> {
