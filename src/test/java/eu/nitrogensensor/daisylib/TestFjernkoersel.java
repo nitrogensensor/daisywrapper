@@ -1,7 +1,6 @@
 package eu.nitrogensensor.daisylib;
 
 
-import eu.nitrogensensor.daisylib.csv.CsvFile;
 import eu.nitrogensensor.daisylib.remote.DaisyRemoteExecution;
 import eu.nitrogensensor.daisylib.remote.ExtractedContent;
 import eu.nitrogensensor.daisylib.remote.Server;
@@ -12,9 +11,6 @@ import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -40,14 +36,14 @@ public class TestFjernkoersel {
 
         ArrayList<DaisyModel> arrayList = new ArrayList<>();
         arrayList.add(kørsel);
-        arrayList.add(kørsel.clon());
-        arrayList.add(kørsel.clon());
+        arrayList.add(kørsel.createCopy());
+        arrayList.add(kørsel.createCopy());
 
         ResultExtractor re = new ResultExtractor();
         re.addCsvExtractor("crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)", "crop-leaf-stem-AI.csv");
         re.addFile("crop.csv");
 
-        DaisyRemoteExecution.setRemoteEndpointUrl(Server.url);
+        DaisyRemoteExecution.setRemoteEndpointUrl(Server.getUrl());
         Map<String, ExtractedContent> res = DaisyRemoteExecution.runParralel(arrayList, re);
         String cropCsv = res.get(kørsel.getId()).fileContensMap.get("crop.csv");
         String cropLaiCsv = res.get(kørsel.getId()).fileContensMap.get("crop-leaf-stem-AI.csv");
@@ -72,7 +68,7 @@ public class TestFjernkoersel {
         re.addCsvExtractor("crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)", "crop-leaf-stem-AI.csv");
         re.addFile("crop.csv");
 
-        DaisyRemoteExecution.setRemoteEndpointUrl(Server.url);
+        DaisyRemoteExecution.setRemoteEndpointUrl(Server.getUrl());
         ArrayList<ExtractedContent> res = DaisyRemoteExecution.runSerial(arrayList, re, null);
         String cropCsv = res.get(0).fileContensMap.get("crop.csv");
         String cropLaiCsv = res.get(0).fileContensMap.get("crop-leaf-stem-AI.csv");

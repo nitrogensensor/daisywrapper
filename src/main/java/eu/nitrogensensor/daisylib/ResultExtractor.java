@@ -11,10 +11,10 @@ import java.util.*;
 import java.util.stream.Stream;
 
 public class ResultExtractor {
-    public HashSet<String> outputfilnavne = new HashSet<>();
+    private HashSet<String> outputfilnavne = new HashSet<>();
 
-    public ArrayList<CsvEkstraktor> csvEkstraktors = new ArrayList<>();
-    public ArrayList<String> kopiérFiler = new ArrayList<>();
+    private ArrayList<CsvEkstraktor> csvEkstraktors = new ArrayList<>();
+    private ArrayList<String> kopiérFiler = new ArrayList<>();
 
 
     /**

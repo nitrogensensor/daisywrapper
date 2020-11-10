@@ -18,7 +18,7 @@ public class DaisyModel implements Cloneable {
     /**
      * @return en unik streng, der beskriver hvilken scriptFil der er tale om, samt alle de erstatninger der sker i scriptfilen inden kørslen
      */
-    public String unikStreng() {
+    private String unikStreng() {
         StringBuilder sb = new StringBuilder(erstatninger.size()*100 + scriptFil.length());
         sb.append(scriptFil); // navnet på scriptfilen
         for (Erstatning erstatning : erstatninger) sb.append(erstatning.unikStreng());
@@ -47,7 +47,7 @@ public class DaisyModel implements Cloneable {
     }
 
     /** Opretter en kopi af en kørsel og kopi af dets erstatninger r*/
-    public DaisyModel clon() {
+    public DaisyModel createCopy() {
         try {
             DaisyModel kopi = (DaisyModel) this.clone();
             kopi.erstatninger = (ArrayList<Erstatning>) erstatninger.clone();
@@ -115,7 +115,7 @@ public class DaisyModel implements Cloneable {
      * Metoden er kun nyttig hvis den kaldes FØR kørslen af Daisy faktisk sker - efter kørslen er mappen 'forurenet' med logfiler med tidsstempler i og vil derfor altid afvige fra summen i en jombruelig kørsel
      * @return En unik streng for den samlede (jomfruelige) kørsel
      */
-    public String md5sum() throws IOException {
+    String md5sum() throws IOException {
         String unikStreng = this.unikStreng();
         String md5sum = md5sumMappe(this.directory, unikStreng);
         return md5sum;

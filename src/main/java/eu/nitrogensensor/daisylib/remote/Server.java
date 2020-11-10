@@ -3,7 +3,6 @@ package eu.nitrogensensor.daisylib.remote;
 import com.google.gson.Gson;
 import eu.nitrogensensor.daisylib.ExecutionCache;
 import eu.nitrogensensor.daisylib.Utils;
-import eu.nitrogensensor.daisylib.remote.google_cloud_storage.GemOgHentArbejdsfiler;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import io.javalin.http.UploadedFile;
@@ -22,9 +21,11 @@ import java.util.stream.Collectors;
 
 public class Server {
     private static final boolean USIKKER_KØR = false;
-    public static boolean PAK_UD_VED_MODTAGELSEN = true;
-    public static Javalin app;
-    public static String url;
+    private static boolean PAK_UD_VED_MODTAGELSEN = true;
+    private static Javalin app;
+    private static String url;
+
+    private static CloudStorageArbejdsfiler cloudStorageArbejdsfiler = new CloudStorageArbejdsfiler();
 
     //System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tF %1$tT %4$s %2$s %5$s%6$s%n");
     static { System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tT %4$s %2$s %5$s%6$s%n"); }
@@ -32,15 +33,12 @@ public class Server {
     static { log.setLevel( Level.ALL ); log.getParent().getHandlers()[0].setLevel(Level.ALL); } // vis alt log
 
 
+    public static String getUrl() {
+        return url;
+    }
+
     public static void main(String[] args) {
-        /*
-        log.info("hej1 med log.info");
-        log.fine("hej1 med log.fine");
-        log.warning("hej1 med log.warning");
-         */
         start();
-        //Testklient.testkald();
-        //stop();
     }
 
     public static void stop() {
@@ -110,11 +108,20 @@ public class Server {
     }
 
     private static Path uploadMappe = Paths.get("upload");
+    private static long uploadMappeSenesteId;
 
     private static String upload(Context ctx) throws IOException {
         Files.createDirectories(uploadMappe);
 
-        Path denneUploadMappe = Files.createTempDirectory(uploadMappe,"");
+        Path denneUploadMappe;
+
+        synchronized (uploadMappe) {
+            long nu = System.currentTimeMillis();
+            while (nu <= uploadMappeSenesteId) nu++;
+            uploadMappeSenesteId = nu;
+            denneUploadMappe = Files.createDirectory(uploadMappe.resolve(Long.toString(nu, Character.MAX_RADIX)));
+        }
+
         String batchId = uploadMappe.relativize(denneUploadMappe).toString();
         System.out.println("upload får batchId = " + batchId);
 
@@ -128,7 +135,7 @@ public class Server {
                 Utils.unzipMappe(is, denneUploadMappe.toString());
                 is.reset();
             }
-            GemOgHentArbejdsfiler.gem(is, batchId);
+            cloudStorageArbejdsfiler.gem(is, batchId);
         }
 
 
@@ -159,7 +166,8 @@ public class Server {
                 } else {
                     log.fine("Denne instans har ikke batch "+batch.kørsel.directory);
 
-                    Path fil = GemOgHentArbejdsfiler.hent(batch.oploadId);
+                    Path fil = cloudStorageArbejdsfiler.hent(batch.oploadId);
+                    if (fil==null) throw new IllegalArgumentException("No such batch.oploadId "+batch.oploadId);
                     InputStream fis = Files.newInputStream(fil);
                     Utils.unzipMappe(fis, batch.kørsel.directory.toString());
                     fis.close();
@@ -190,7 +198,6 @@ public class Server {
                 if (!varCachet) Utils.sletMappe(batch.kørsel.directory); // ryd op - men KUN hvis det ikke kommer fra cachen!
             }
     }
-
 
 }
 

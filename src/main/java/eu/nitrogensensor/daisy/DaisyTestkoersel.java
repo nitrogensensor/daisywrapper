@@ -35,7 +35,7 @@ public class DaisyTestkoersel
 
       for (int n=0; n<20; n++) {
 
-        DaisyModel kørsel = d.clon()
+        DaisyModel kørsel = d.createCopy()
                 .setId(program+ String.format("_%02d", n))
                 .replace("(run taastrup)", "(run Mark21 (column (\"" + program + "\")))");
 //        kørsel = kørsel.toDirectory(Paths.get("/tmp/daisy/run/remoteParTmp/" + kørsel.getId()));

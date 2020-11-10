@@ -154,7 +154,7 @@ public class DaisyRemoteExecution {
                     ExecutionBatch batch = new ExecutionBatch();
                     batch.resultExtractor = resultExtractor;
                     batch.oploadId = oploadId;
-                    batch.kørsel = kørsel.clon();
+                    batch.kørsel = kørsel.createCopy();
                     batch.kørsel.directory = null;
                     batch.kørsel.setId(null);
 
@@ -213,7 +213,7 @@ public class DaisyRemoteExecution {
             ExecutionBatch batch = new ExecutionBatch();
             batch.resultExtractor = resultExtractor;
             batch.oploadId = oploadId;
-            batch.kørsel = kørsel.clon();
+            batch.kørsel = kørsel.createCopy();
             batch.kørsel.directory = null;
             batch.kørsel.setId(null);
 
