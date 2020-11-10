@@ -159,6 +159,7 @@ public class Server {
             if (batch==null) log.fine("Ingen batch fra "+ctx.body());
             else {
                 //ExecutionBatch batch = ctx.bodyAsClass(ExecutionBatch.class);
+                batch.kørsel.setId(batch.oploadId);
                 batch.kørsel.directory = uploadMappe.resolve(tjekSikkerSti(batch.oploadId));
                 if (Files.exists(batch.kørsel.directory) && batch.kørsel.directory.toFile().list().length>0) {
                     log.fine("Denne instans har allerede batch "+batch.kørsel.directory+" med "
@@ -183,9 +184,12 @@ public class Server {
                 if (!varCachet) try {
                     // Vi skal have det over i en anden midlertidig mappe, ellers kan det være vi får knas med at
                     // evt andre samtidige kørsler skriver i de samme outputfiler
-                    batch.kørsel.copyToDirectory(Files.createTempDirectory("kørsel_"+batch.kørsel.getId()));
+                    batch.kørsel.copyToDirectory(Files.createTempDirectory("kørsel_"+batch.oploadId));
                     //batch.resultExtractor.tjekResultatIkkeAlleredeFindes(batch.kørsel.directory); // burde egentlig ikke være nødvendigt, da det også tjekkes af klienten, men man kan ikke stole på klienter...
+
+                    // HER KØRES MODELLEN !!!!
                     batch.kørsel.run();
+
                     executionCache.gemICache(batch.kørsel);
                 } catch (IOException e) {
                     extractedContent.exception = e;

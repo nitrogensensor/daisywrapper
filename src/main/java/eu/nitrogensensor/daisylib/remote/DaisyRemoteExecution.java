@@ -30,7 +30,7 @@ public class DaisyRemoteExecution {
     private static String remoteEndpointUrl = "http://nitrogen.saluton.dk:3210";
 
     public static void setRemoteEndpointUrl(String url) {
-        while (url.endsWith("/")) url.substring(0, url.length()-1); // fjern afsluttende /-streger
+        while (url.endsWith("/")) url = url.substring(0, url.length()-1); // fjern afsluttende /-streger
         remoteEndpointUrl = url;
     }
 
@@ -156,7 +156,7 @@ public class DaisyRemoteExecution {
                     batch.oploadId = oploadId;
                     batch.kørsel = kørsel.createCopy();
                     batch.kørsel.directory = null;
-                    batch.kørsel.setId(null);
+                    batch.kørsel.setId(null); // sættes til oploadId på serversiden
 
                     HttpResponse<ExtractedContent> response = Unirest.post(remoteEndpointUrl + "/sim/").body(batch).asObject(ExtractedContent.class);
                     kørslerIgang.put(kørsel.getId(), "4 modtag");
