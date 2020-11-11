@@ -1,3 +1,52 @@
+# Daisywrapper
+Daisywrapper wraps [Daisy](https://daisy.ku.dk) executions and runs them remotely.
+This liberates the user of installing Daisy locally, and enables execution on a remote server, 
+either on a self-hosted dedicated hardware or scaled indefinitly in the cloud, using Google Cloud Run.
+
+
+# Usage
+.dai-files:
+```sh
+DaisyModel d = new DaisyModel("C:\Program Files\Daisy 5.72\exercises\", "Exercise01.dai");
+d.replace("(stop *)", "(stop 1994 8 31)");   // Set stop date
+d.run();
+
+
+
+from pydaisy.Daisy import *
+d = DaisyModel(r'C:\Program Files\Daisy 5.72\exercises\Exercise01.dai')
+print(d.starttime)
+dry_bulk_density = d.Input['defhorizon'][0]['dry_bulk_density'].getvalue()
+d.Input['defhorizon'][0]['dry_bulk_density'].setvalue(1.1*dry_bulk_density)
+d.save_as(r'C:\Program Files\Daisy 5.72\exercises\Exercise01_new.dai')
+DaisyModel.path_to_daisy_executable =  r'C:\Program Files\Daisy 5.72\bin\Daisy.exe'
+d.run()
+```
+
+.dlf- and .dwf-files:
+```sh
+from datetime import datetime
+from pydaisy.Daisy import *
+dlf = DaisyDlf(r'C:\Program Files\Daisy 5.72\exercises\Taastrup6201.dwf')
+pandasdata = dlf.Data
+numpy_data = dlf.numpydata
+i=dlf.get_index(datetime(1962,4,14))
+pandasdata['Precip'][i]=10
+dlf.save(r'C:\Program Files\Daisy 5.72\exercises\Taastrup6201_saved.dwf')
+```
+
+
+Parallel runs:
+```sh
+if __name__ == '__main__':
+    from pydaisy.Daisy import *
+    DaisyModel.path_to_daisy_executable =  r'C:\Program Files\Daisy 5.72\bin\Daisy.exe'
+    daisyfiles =[r'c:\daisy\model1\setup.dai', r'c:\daisy\model2\setup.dai', r'c:\daisy\model3\setup.dai']
+    run_many(daisyfiles, NumberOfProcesses=3)
+```
+The code above will run the three daisy-simulations in parallel.
+
+
 # Kørsel af Daisy
 
 

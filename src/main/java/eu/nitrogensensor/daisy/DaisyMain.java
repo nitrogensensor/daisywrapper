@@ -3,6 +3,7 @@ package eu.nitrogensensor.daisy;
 
 import eu.nitrogensensor.daisylib.DaisyModel;
 import eu.nitrogensensor.daisylib.ResultExtractor;
+import eu.nitrogensensor.daisylib.Utils;
 import eu.nitrogensensor.daisylib.remote.DaisyRemoteExecution;
 import eu.nitrogensensor.daisylib.remote.ExtractedContent;
 import picocli.CommandLine;
@@ -11,11 +12,10 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.Callable;
 
-@CommandLine.Command(name = "daisy", mixinStandardHelpOptions = true, version = "daisykørsel 0.9", showDefaultValues = true,
-        description = "Kørsel af Daisy")
+@CommandLine.Command(name = "daisy", mixinStandardHelpOptions = true, showDefaultValues = true, usageHelpWidth = 120)
 public class DaisyMain implements Callable
 {
-    private static final String VERSION = "0.901 (29 sept 2020 fejlfinding til Simon2)";
+    public static final String VERSION = "0.902 (10 nov 2020)";
     @CommandLine.Parameters(index = "0", description = "server, run, remote eller testkørsel." )
   String kommando;
 
@@ -37,8 +37,12 @@ public class DaisyMain implements Callable
   @CommandLine.Option(names = {"-of", "--outputfil"}, description = "remote: Hvilke outputfiler skal gemmes (f.eks -of daisy.log)", defaultValue = ".")
   List<String> outputfiler;
 
-  @CommandLine.Option(names = {"-oc", "--clean-csv"}, description = "normalisér CSV-filer (fjerner header og enheder)", defaultValue = "false")
+  @CommandLine.Option(names = {"-c", "-oc", "--clean-csv"}, description = "normalisér CSV-filer (fjerner header og enheder)", defaultValue = "false")
   boolean cleanCsvOutput;
+
+
+    @CommandLine.Option(names = {"-d", "--debug"}, description = "Print debugging information", defaultValue = "false")
+    boolean debug;
 
 //  @CommandLine.Option(names = {"-p", "--daisy-executable-path"}, description = "Til lokal kørsel: Sti til Daisy executable", defaultValue = "/opt/daisy/bin/daisy")
 //  private String stiTilDaisy;
@@ -49,13 +53,15 @@ public class DaisyMain implements Callable
   private String remoteEndpointUrl;
 
   public static void main(String[] args)  {
-    System.out.println("hej fra DaisyMain version "+VERSION );
+    System.out.println("Daisywrapper version "+VERSION );
+    System.out.println("Copyright 2020 Jacob Nordfalk and nitrogensensor.eu" );
     int exitCode = new CommandLine(new DaisyMain()).execute(args);
     if (exitCode!=0) System.exit(exitCode);
   }
 
   @Override
   public Object call() throws Exception {
+      Utils.debug = debug;
       if ("server".equals(kommando)) eu.nitrogensensor.daisylib.remote.Server.start();
       else if ("testkørsel".equals(kommando)) DaisyTestkoersel.main(null);
       else if ("remote".equals(kommando)) {
@@ -114,7 +120,7 @@ public class DaisyMain implements Callable
 
           if (cleanCsvOutput) for (ExtractedContent ec : res.values()) cleanCsv(ec.fileContensMap);
           DaisyRemoteExecution.writeResults(res, Paths.get(outputdirectory));
-          System.out.println("res = " + res);
+          if (debug) System.out.println("res = " + res);
       }
       else throw new Exception("Ukendt kommando: "+kommando);
       return null;

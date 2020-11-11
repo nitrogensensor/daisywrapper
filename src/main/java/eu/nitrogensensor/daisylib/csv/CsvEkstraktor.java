@@ -46,8 +46,8 @@ public class CsvEkstraktor {
             filKolonnerMap.put(forrigeFil, findKolonner(forrigeKol));
         }
 
-        System.out.println(indhold);
-        System.out.println(this);
+        //System.out.println(indhold);
+        //System.out.println(this);
     }
 
     // Trækker en bestemt fil ud

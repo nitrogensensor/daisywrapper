@@ -41,7 +41,7 @@ public class Taastrup2019Test {
         re.addCsvExtractor("crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)", "crop-leaf-stem-AI.csv");
         re.addFile("crop.csv");
         Path ekstraktOutputmappe = Files.createTempDirectory("ns-daisy-ekstrakt");
-        re.extract(kørsel.directory, ekstraktOutputmappe);
+        re.extractToDirectory(kørsel.directory, ekstraktOutputmappe);
 
         // Linje 10 af "crop.csv" bør være
         // 2015    1       10      0       0       0       00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00   00.00

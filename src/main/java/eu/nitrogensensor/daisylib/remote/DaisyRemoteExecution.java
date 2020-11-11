@@ -86,22 +86,22 @@ public class DaisyRemoteExecution {
 
         if (!oploadRes.isSuccess()) throw new IOException("Fik ikke oploaded filer: "+oploadRes.getBody()+" for URL "+oploadRes);
         String batchId = oploadRes.getBody();
-        System.out.println("Fik oploadet "+inputDir+".zip og fik batch ID "+batchId);
+        if (Utils.debug) System.out.println("Fik oploadet "+inputDir+".zip og fik batch ID "+batchId);
         return  batchId;
     }
 
 
     private static void __skriv(ExtractedContent extractedContent, Path resultsDir) throws IOException {
-        System.out.println("extractedContent.id er "+extractedContent.id);
+        if (Utils.debug) System.out.println("extractedContent.id er "+extractedContent.id);
         Path resultDir = resultsDir.resolve(extractedContent.id.replace(':', '_'));
         Utils.sletMappe(resultDir);
         Files.createDirectories(resultDir);
         //if (FEJLFINDING)
-        System.out.println("Skriver " + extractedContent.fileContensMap.keySet() + " til " + resultDir);
+        if (Utils.debug) System.out.println("Skriver " + extractedContent.fileContensMap.keySet() + " til " + resultDir);
         for (String filnavn : extractedContent.fileContensMap.keySet()) {
             String filIndhold = extractedContent.fileContensMap.get(filnavn);
             Path fil = resultDir.resolve(filnavn);
-            System.out.println("opretter "+fil.toString()+ " i "+fil.getParent());// kald ikke, kan give exception: +" "+Files.readAttributes(fil.getParent(), "*"));
+            if (Utils.debug) System.out.println("opretter "+fil.toString()+ " i "+fil.getParent());// kald ikke, kan give exception: +" "+Files.readAttributes(fil.getParent(), "*"));
             Files.createDirectories(fil.getParent());
             Files.write(fil, filIndhold.getBytes());
         }
@@ -111,6 +111,10 @@ public class DaisyRemoteExecution {
         for (ExtractedContent extractedContent : extractedContents.values()) {
             __skriv(extractedContent, resultsDir);
         }
+    }
+
+    public static Map<String, ExtractedContent> runParralel(Collection<DaisyModel> daisyModels) throws IOException {
+        return runParralel(daisyModels, null, null);
     }
 
     public static Map<String, ExtractedContent> runParralel(Collection<DaisyModel> daisyModels, ResultExtractor resultExtractor, Path resultsDir) throws IOException {
@@ -125,14 +129,14 @@ public class DaisyRemoteExecution {
     public static Map<String, ExtractedContent> runParralel(Collection<DaisyModel> daisyModels, ResultExtractor resultExtractor) throws IOException {
         final Map<String, ExtractedContent> extractedContents = new ConcurrentHashMap<>();
         Path inputDir = getDirectory(daisyModels);
-        resultExtractor.tjekResultatIkkeAlleredeFindes(inputDir);
+        if (resultExtractor!=null) resultExtractor.tjekResultatIkkeAlleredeFindes(inputDir);
 
         String oploadId = __oploadZip(inputDir); // HER OPLOADES!!!!!
 
         //ExecutorService executorService = Executors.newWorkStealingPool();
         int antalKørsler = daisyModels.size();
         int parallelitet = Math.max(5, Math.min(MAX_PARALLELITET, antalKørsler/4)); // minimum 4 kørsler per instans - men mindst 5 instanser
-        System.out.println("parallelitet: "+parallelitet);
+        if (Utils.debug) System.out.println("parallelitet: "+parallelitet);
 
         ExecutorService executorService = Executors.newFixedThreadPool(Math.min(daisyModels.size(),parallelitet)); // max 100 parallele forespørgsler
         AtomicReference<IOException> fejl = new AtomicReference<>(); // Hvis der opstår en exception skal den kastes videre
@@ -141,22 +145,22 @@ public class DaisyRemoteExecution {
             kørselsNr++;
             // Klodset og sikkkert nytteløst forsøg på at håndtere at båndbredden til endpointet sikkert er begrænset
             if (kørslerIgang.size()>100) try { Thread.sleep(50); } catch (Exception e) {}
-            System.out.println(visStatus() + " kørsel "+kørselsNr+" af "+daisyModels.size()+ " sættes i kø.");
+            if (Utils.debug) System.out.println(visStatus() + " kørsel "+kørselsNr+" af "+daisyModels.size()+ " sættes i kø.");
 
             final int kørselsNr_ = kørselsNr;
             Runnable runnable = () -> {
                 try {
                     if (fejl.get() != null) return;
                     kørslerIgang.put(kørsel.getId(), "0 starter");
-                    System.out.println(visStatus() + " kørsel "+kørselsNr_+" 0 starter.");
+                    System.out.println(visStatus() + " kørsel "+kørselsNr_+" starter."+kørsel.getId());
 
                     // Fjern irrelecante oplysninger fra det objekt, der sendes over netværket
                     ExecutionBatch batch = new ExecutionBatch();
                     batch.resultExtractor = resultExtractor;
                     batch.oploadId = oploadId;
                     batch.kørsel = kørsel.createCopy();
+                    batch.kørsel.setId(kørsel.getId()); // til sporing på serversiden
                     batch.kørsel.directory = null;
-                    batch.kørsel.setId(null); // sættes til oploadId på serversiden
 
                     HttpResponse<ExtractedContent> response = Unirest.post(remoteEndpointUrl + "/sim/").body(batch).asObject(ExtractedContent.class);
                     kørslerIgang.put(kørsel.getId(), "4 modtag");
@@ -186,7 +190,7 @@ public class DaisyRemoteExecution {
             //runnable.run(); // serielt
         }
         while (kørslerIgang.size()>0) {
-            System.out.println(visStatus());
+            if (Utils.debug) System.out.println(visStatus());
             synchronized (kørslerIgang) { try { kørslerIgang.wait(5000); } catch (Exception e) { }};
         }
         executorService.shutdown();
@@ -215,7 +219,6 @@ public class DaisyRemoteExecution {
             batch.oploadId = oploadId;
             batch.kørsel = kørsel.createCopy();
             batch.kørsel.directory = null;
-            batch.kørsel.setId(null);
 
             HttpResponse<ExtractedContent> response = Unirest.post(remoteEndpointUrl + "/sim/").body(batch).asObject(ExtractedContent.class);
             if (!response.isSuccess()) throw new IOException(response.getStatusText());
