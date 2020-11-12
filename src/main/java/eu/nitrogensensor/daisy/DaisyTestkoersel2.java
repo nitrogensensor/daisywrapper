@@ -40,8 +40,7 @@ public class DaisyTestkoersel2
     DaisyRemoteExecution.setRemoteEndpointUrl("http://localhost:3210/");
     //DaisyRemoteExecution.setRemoteEndpointUrl("https://daisykoersel-6dl4uoo23q-lz.a.run.app");
 
-    Map<String, ExtractedContent> results = DaisyRemoteExecution.runParralel(daisyModels);
-//    Map<String, ExtractedContent> results = DaisyRemoteExecution.runParralel(daisyModels, Paths.get("remote_result"));
+    Map<String, ExtractedContent> results = DaisyRemoteExecution.runParralel(daisyModels, Paths.get("tmp/remote_result"));
 
     String soil_water_content = results.get("dbd_1.42").fileContensMap.get("Ex1/soil_water_content.dlf");
     System.out.println("soil_water_content = " + soil_water_content);

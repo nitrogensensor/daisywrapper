@@ -11,6 +11,7 @@ import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -31,7 +32,7 @@ public class TestFjernkoersel {
     }
 
     @Test
-    public void testFjernkørsel() throws IOException {
+    public void parrallelFjernkørsel() throws IOException {
         DaisyModel kørsel = Taastrup2019Test.lavTaastrupKørsel();
 
         ArrayList<DaisyModel> arrayList = new ArrayList<>();
@@ -69,7 +70,7 @@ public class TestFjernkoersel {
         re.addFile("crop.csv");
 
         DaisyRemoteExecution.setRemoteEndpointUrl(Server.getUrl());
-        ArrayList<ExtractedContent> res = DaisyRemoteExecution.runSerial(arrayList, re, null);
+        ArrayList<ExtractedContent> res = DaisyRemoteExecution.runSerial(arrayList, re, Paths.get("/tmp/test_serielFjernkørsel"));
         String cropCsv = res.get(0).fileContensMap.get("crop.csv");
         String cropLaiCsv = res.get(0).fileContensMap.get("crop-leaf-stem-AI.csv");
         System.out.println(cropCsv);

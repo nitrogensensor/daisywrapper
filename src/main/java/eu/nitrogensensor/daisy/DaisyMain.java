@@ -119,7 +119,9 @@ public class DaisyMain implements Callable
           // så skal den vises hos klienten!
 
           if (cleanCsvOutput) for (ExtractedContent ec : res.values()) cleanCsv(ec.fileContensMap);
-          DaisyRemoteExecution.writeResults(res, Paths.get(outputdirectory));
+          for (ExtractedContent extractedContent : res.values()) {
+              DaisyRemoteExecution.writeExtractedContentToSubdir(extractedContent, Paths.get(outputdirectory));
+          }
           if (debug) System.out.println("res = " + res);
       }
       else throw new Exception("Ukendt kommando: "+kommando);

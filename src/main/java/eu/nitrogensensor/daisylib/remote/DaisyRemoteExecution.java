@@ -91,9 +91,9 @@ public class DaisyRemoteExecution {
     }
 
 
-    private static void __skriv(ExtractedContent extractedContent, Path resultsDir) throws IOException {
+    public static void writeExtractedContentToSubdir(ExtractedContent extractedContent, Path resultsDir) throws IOException {
         if (Utils.debug) System.out.println("extractedContent.id er "+extractedContent.id);
-        Path resultDir = resultsDir.resolve(extractedContent.id.replace(':', '_'));
+        Path resultDir = resultsDir.resolve(extractedContent.id.replaceAll("[^A-Za-z0-9_]", "_"));
         Utils.sletMappe(resultDir);
         Files.createDirectories(resultDir);
         //if (FEJLFINDING)
@@ -107,26 +107,20 @@ public class DaisyRemoteExecution {
         }
     }
 
-    public static void writeResults(Map<String, ExtractedContent> extractedContents, Path resultsDir) throws IOException {
-        for (ExtractedContent extractedContent : extractedContents.values()) {
-            __skriv(extractedContent, resultsDir);
-        }
-    }
-
     public static Map<String, ExtractedContent> runParralel(Collection<DaisyModel> daisyModels) throws IOException {
         return runParralel(daisyModels, null, null);
     }
 
-    public static Map<String, ExtractedContent> runParralel(Collection<DaisyModel> daisyModels, ResultExtractor resultExtractor, Path resultsDir) throws IOException {
-        Map<String, ExtractedContent> extractedContents = runParralel(daisyModels, resultExtractor);
-        if (resultsDir != null) {
-            writeResults(extractedContents, resultsDir);
-        }
-        return extractedContents;
+    public static Map<String, ExtractedContent> runParralel(Collection<DaisyModel> daisyModels, ResultExtractor resultExtractor) throws IOException {
+        return runParralel(daisyModels, resultExtractor, null);
     }
 
+    public static Map<String, ExtractedContent> runParralel(Collection<DaisyModel> daisyModels, Path resultsDir) throws IOException {
+        return runParralel(daisyModels, null, resultsDir);
+    }
 
-    public static Map<String, ExtractedContent> runParralel(Collection<DaisyModel> daisyModels, ResultExtractor resultExtractor) throws IOException {
+    public static Map<String, ExtractedContent> runParralel(Collection<DaisyModel> daisyModels, ResultExtractor resultExtractor, Path resultsDir) throws IOException {
+
         final Map<String, ExtractedContent> extractedContents = new ConcurrentHashMap<>();
         Path inputDir = getDirectory(daisyModels);
         if (resultExtractor!=null) resultExtractor.tjekResultatIkkeAlleredeFindes(inputDir);
@@ -178,6 +172,8 @@ public class DaisyRemoteExecution {
                     ExtractedContent extractedContent = response.getBody();
                     extractedContent.id = kørsel.getId();
                     extractedContents.put(kørsel.getId(), extractedContent);
+                    if (resultsDir != null) writeExtractedContentToSubdir(extractedContent, resultsDir);
+
                     if (extractedContent.exception != null) {
                         extractedContent.exception.printStackTrace(); // vis fejlen
                         fejl.set(extractedContent.exception);
@@ -232,7 +228,7 @@ public class DaisyRemoteExecution {
             ExtractedContent extractedContent = response.getBody();
             extractedContent.id = kørsel.getId();
             extractedContents.add(extractedContent);
-            if (resultsDir!=null) __skriv(extractedContent, resultsDir);
+            if (resultsDir!=null) writeExtractedContentToSubdir(extractedContent, resultsDir);
         }
         return extractedContents;
     }
