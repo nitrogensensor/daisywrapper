@@ -37,7 +37,7 @@ public class DaisyTestkoersel2
     }
 
 
-    DaisyRemoteExecution.setRemoteEndpointUrl("http://localhost:3210/");
+    //DaisyRemoteExecution.setRemoteEndpointUrl("http://localhost:3210/");
     //DaisyRemoteExecution.setRemoteEndpointUrl("https://daisykoersel-6dl4uoo23q-lz.a.run.app");
 
     Map<String, ExtractedContent> results = DaisyRemoteExecution.runParralel(daisyModels, Paths.get("tmp/remote_result"));

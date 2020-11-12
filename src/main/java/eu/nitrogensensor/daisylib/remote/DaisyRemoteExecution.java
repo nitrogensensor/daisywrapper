@@ -72,7 +72,7 @@ public class DaisyRemoteExecution {
         }
         maxSamtidigeKørslerIgang = Math.max(maxSamtidigeKørslerIgang, kørslerIgang.size());
 
-        return String.format("%tT Der %2d kørsler i gang: %s", new Date(), kørslerIgang.size(), keyCountMap.toString());
+        return String.format("%tT Der er %2d kørsler i gang: %s", new Date(), kørslerIgang.size(), keyCountMap.toString());
     }
 
     private static String __oploadZip(Path inputDir) throws IOException {
@@ -101,7 +101,7 @@ public class DaisyRemoteExecution {
         for (String filnavn : extractedContent.fileContensMap.keySet()) {
             String filIndhold = extractedContent.fileContensMap.get(filnavn);
             Path fil = resultDir.resolve(filnavn);
-            if (Utils.debug) System.out.println("opretter "+fil.toString()+ " i "+fil.getParent());// kald ikke, kan give exception: +" "+Files.readAttributes(fil.getParent(), "*"));
+            if (Utils.debug) System.out.println("Opretter "+fil.toString()); //+ " i "+fil.getParent());// kald ikke, kan give exception: +" "+Files.readAttributes(fil.getParent(), "*"));
             Files.createDirectories(fil.getParent());
             Files.write(fil, filIndhold.getBytes());
         }

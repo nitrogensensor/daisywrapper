@@ -1,5 +1,6 @@
 package eu.nitrogensensor.daisylib;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -89,7 +90,6 @@ public class DaisyModel implements Cloneable {
     }
 
     public DaisyModel run() throws IOException {
-        DaisyInvoker daisyInvoke = new DaisyInvoker();
 
         if (erstatninger.size()>0) {
             String scriptIndhold = new String(Files.readAllBytes(directory.resolve(scriptFil)));
@@ -101,12 +101,53 @@ public class DaisyModel implements Cloneable {
                 id = Integer.toString((int) (Math.random()*Integer.MAX_VALUE), Character.MAX_RADIX);
             }
             Files.write(scriptfilMedErstatninger, scriptIndhold.getBytes());
-            daisyInvoke.invokeDaisy(directory, directory.relativize(scriptfilMedErstatninger).toString());
+            invokeDaisy(directory, directory.relativize(scriptfilMedErstatninger).toString());
             //Files.delete(scriptfilMedErstatninger);
         } else {
-            daisyInvoke.invokeDaisy(directory, scriptFil);
+            invokeDaisy(directory, scriptFil);
         }
         return this;
+    }
+
+    /** Set pato to Daisy.exe */
+    public static String path_to_daisy_executable = null;
+    /** Run Daisy with lower priority */
+    public static boolean nice_daisy = false;
+    private void invokeDaisy(Path mappe, String inputFil) throws IOException {
+        // Kilde: Jeppes arbejde
+        if (path_to_daisy_executable==null) path_to_daisy_executable = System.getenv("DAISY_PATH");
+        if (path_to_daisy_executable==null) path_to_daisy_executable = "/opt/daisy/bin/daisy";
+        if (!new File(path_to_daisy_executable).exists()) {
+            System.err.println("Ingen Daisy i "+path_to_daisy_executable+" og DAISY_PATH er ikke sat");
+            path_to_daisy_executable = "daisy";
+        }
+
+        Path daisyErr = mappe.resolve("daisyErr.log");
+
+        ProcessBuilder processBuilder;
+        if (nice_daisy) processBuilder = new ProcessBuilder("nice", "-n", "10", path_to_daisy_executable, inputFil);
+        else processBuilder = new ProcessBuilder(path_to_daisy_executable, inputFil);
+        Process process = processBuilder
+                .redirectInput(ProcessBuilder.Redirect.INHERIT)
+                .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+//                .redirectError(ProcessBuilder.Redirect.DISCARD)
+                .redirectError(ProcessBuilder.Redirect.to(daisyErr.toFile()))
+//                .inheritIO()
+                .directory(mappe.toFile())
+                .start();
+        try {
+            process.waitFor();
+        } catch (InterruptedException e) {
+            throw new IOException(e);
+        }
+        int exitValue = process.exitValue();
+        process.destroy();
+
+        if(exitValue != 0) {
+            List<String> fejllinjer = Files.readAllLines(daisyErr);
+            if (fejllinjer.size()>5) fejllinjer = fejllinjer.subList(fejllinjer.size()-5, fejllinjer.size());
+            throw new IOException("Daisy error. mappe="+mappe+" inputFil="+inputFil+fejllinjer+"\n"+String.join("\n", fejllinjer));
+        }
     }
 
     /**

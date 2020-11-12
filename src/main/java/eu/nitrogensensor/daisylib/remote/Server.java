@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -153,9 +154,11 @@ public class Server {
         return sti;
     }
 
+    private static Semaphore antalProcesser = new Semaphore(Runtime.getRuntime().availableProcessors()*3/2);
     private static void sim(Context ctx) {
         ExtractedContent extractedContent = new ExtractedContent();
         try {
+            antalProcesser.acquire();
             //System.out.println("Server sim "+ctx.url());
             String body = ctx.body();
             log.fine("Server sim " + body);
@@ -211,6 +214,7 @@ public class Server {
             e.printStackTrace();
             extractedContent.exception = e;
         }
+        antalProcesser.release();
         ctx.json(extractedContent);
     }
 

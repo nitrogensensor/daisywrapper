@@ -44,8 +44,11 @@ public class DaisyMain implements Callable
     @CommandLine.Option(names = {"-v", "--verbose"}, description = "Print debugging information", defaultValue = "false")
     boolean verbose;
 
-//  @CommandLine.Option(names = {"-p", "--daisy-executable-path"}, description = "Til lokal kørsel: Sti til Daisy executable", defaultValue = "/opt/daisy/bin/daisy")
-//  private String stiTilDaisy;
+    @CommandLine.Option(names = {"-n", "--nice"}, description = "Run Daisy executable with lower scheduling priority", defaultValue = "false")
+    boolean nice;
+
+    @CommandLine.Option(names = {"-p", "--daisy-executable-path"}, description = "Til lokal kørsel: Sti til Daisy executable" )
+    private String stiTilDaisy;
 
   @CommandLine.Option(names = {"-u", "--remote-endpoint-url"},
           description = "remote: URL til endpoint på serveren, der udfører Daisy-kørslerne",
@@ -62,6 +65,10 @@ public class DaisyMain implements Callable
   @Override
   public Object call() throws Exception {
       Utils.debug = verbose;
+      if (nice) DaisyModel.nice_daisy = nice;
+      DaisyRemoteExecution.setRemoteEndpointUrl(remoteEndpointUrl);
+      if (stiTilDaisy!=null) DaisyModel.path_to_daisy_executable = stiTilDaisy;
+
       if ("server".equals(kommando)) eu.nitrogensensor.daisylib.remote.Server.start();
       else if ("testkørsel".equals(kommando)) DaisyTestkoersel.main(null);
       else if ("remote".equals(kommando)) {
