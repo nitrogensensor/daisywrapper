@@ -119,7 +119,7 @@ public class Server {
             long nu = System.currentTimeMillis();
             while (nu <= uploadMappeSenesteId) nu++;
             uploadMappeSenesteId = nu;
-            denneUploadMappe = Files.createDirectory(uploadMappe.resolve(Long.toString(nu, Character.MAX_RADIX)));
+            denneUploadMappe = Files.createDirectory(uploadMappe.resolve(Long.toString(nu, Character.MAX_RADIX)+"_"+ctx.req.getRemoteAddr()));
         }
 
         String batchId = uploadMappe.relativize(denneUploadMappe).toString();
