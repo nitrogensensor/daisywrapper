@@ -41,8 +41,8 @@ public class DaisyMain implements Callable
   boolean cleanCsvOutput;
 
 
-    @CommandLine.Option(names = {"-d", "--debug"}, description = "Print debugging information", defaultValue = "false")
-    boolean debug;
+    @CommandLine.Option(names = {"-v", "--verbose"}, description = "Print debugging information", defaultValue = "false")
+    boolean verbose;
 
 //  @CommandLine.Option(names = {"-p", "--daisy-executable-path"}, description = "Til lokal kørsel: Sti til Daisy executable", defaultValue = "/opt/daisy/bin/daisy")
 //  private String stiTilDaisy;
@@ -61,7 +61,7 @@ public class DaisyMain implements Callable
 
   @Override
   public Object call() throws Exception {
-      Utils.debug = debug;
+      Utils.debug = verbose;
       if ("server".equals(kommando)) eu.nitrogensensor.daisylib.remote.Server.start();
       else if ("testkørsel".equals(kommando)) DaisyTestkoersel.main(null);
       else if ("remote".equals(kommando)) {
@@ -122,7 +122,7 @@ public class DaisyMain implements Callable
           for (ExtractedContent extractedContent : res.values()) {
               DaisyRemoteExecution.writeExtractedContentToSubdir(extractedContent, Paths.get(outputdirectory));
           }
-          if (debug) System.out.println("res = " + res);
+          if (verbose) System.out.println("res = " + res);
       }
       else throw new Exception("Ukendt kommando: "+kommando);
       return null;
