@@ -19,32 +19,29 @@ public class DaisyTestkoersel2
     System.out.println("starter DaisyTestkoersel");
 
     // /home/j/Projekter/NitrogenSensor/daisy/PyDaisy
+    //DaisyModel d = new DaisyModel("/home/j/Projekter/NitrogenSensor/daisy/PyDaisy/TestData", "Exercise01.dai");
+    //DaisyModel d = new DaisyModel("/home/j/Projekter/NitrogenSensor/daisy/PyDaisy", "Exercise01.dai");
+
     DaisyModel d = new DaisyModel("daisy/src/test/resources/TestData", "Exercise01.dai");
     //d.copyToDirectory(Paths.get("/tmp/TestData"));
-    d.replace("(stop *)", "(stop 1993 8 1)");   // Set stop date
+    d.replace("(stop *)", "(stop 1995 1 1)");   // Set stop date
     //d.run();
 
 
     ArrayList<DaisyModel> daisyModels = new ArrayList<>();
     for (double dry_bulk_density=1.40; dry_bulk_density<1.60; dry_bulk_density+=0.02) {
-        DaisyModel kørsel = d.createCopy().setId("dbd_"+dry_bulk_density)
+        DaisyModel model = d.createCopy()
+                .setId("dbd_"+dry_bulk_density)
                 .replace("(dry_bulk_density 1.53 [g/cm^3])", "(dry_bulk_density "+dry_bulk_density+" [g/cm^3])");
-        daisyModels.add(kørsel);
+        daisyModels.add(model);
     }
 
 
-    ResultExtractor re = new ResultExtractor();
-    re.addFile("."); // hvis man vil have alle filer med tilbage
-
-    long tid = System.currentTimeMillis();
-    //DaisyExecution.runSerial(daisyModels, re, Paths.get("daisy/run/serRes"));
-    //DaisyExecution.runParralel(daisyModels, re, Paths.get("daisy/run/parRes"));
-
-    //DaisyRemoteExecution.runSerial(daisyModels, re, Paths.get("daisy/run/remoteRes"));
     DaisyRemoteExecution.setRemoteEndpointUrl("http://localhost:3210/");
     //DaisyRemoteExecution.setRemoteEndpointUrl("https://daisykoersel-6dl4uoo23q-lz.a.run.app");
 
     Map<String, ExtractedContent> results = DaisyRemoteExecution.runParralel(daisyModels);
+//    Map<String, ExtractedContent> results = DaisyRemoteExecution.runParralel(daisyModels, Paths.get("remote_result"));
 
     String soil_water_content = results.get("dbd_1.42").fileContensMap.get("Ex1/soil_water_content.dlf");
     System.out.println("soil_water_content = " + soil_water_content);
