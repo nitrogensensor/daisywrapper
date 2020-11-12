@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -123,7 +124,7 @@ public class Server {
         }
 
         String batchId = uploadMappe.relativize(denneUploadMappe).toString();
-        log.fine("upload får batchId = " + batchId);
+        log.fine("\n\n"+new Date() +" Ny upload - den får batchId = " + batchId);
 
         UploadedFile file = ctx.uploadedFile("zipfil");
         if (file!=null) {
@@ -156,11 +157,11 @@ public class Server {
         ExtractedContent extractedContent = new ExtractedContent();
         try {
             //System.out.println("Server sim "+ctx.url());
-            log.fine("Server sim " + ctx.body());
-            ExecutionBatch batch = JavalinJson.fromJson(ctx.body(), ExecutionBatch.class);
-            if (batch == null) log.fine("Ingen batch fra " + ctx.body());
+            String body = ctx.body();
+            log.fine("Server sim " + body);
+            ExecutionBatch batch = JavalinJson.fromJson(body, ExecutionBatch.class);
+            if (batch == null) log.fine("Ingen batch!!");
             else {
-                //ExecutionBatch batch = ctx.bodyAsClass(ExecutionBatch.class);
                 batch.kørsel.setId(batch.oploadId+"_"+batch.kørsel.getId());
                 batch.kørsel.directory = uploadMappe.resolve(tjekSikkerSti(batch.oploadId));
                 if (Files.exists(batch.kørsel.directory) && batch.kørsel.directory.toFile().list().length > 0) {
