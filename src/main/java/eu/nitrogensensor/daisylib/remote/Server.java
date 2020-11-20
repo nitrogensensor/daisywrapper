@@ -1,6 +1,7 @@
 package eu.nitrogensensor.daisylib.remote;
 
 import com.google.gson.Gson;
+import eu.nitrogensensor.daisylib.DaisyModel;
 import eu.nitrogensensor.daisylib.ExecutionCache;
 import eu.nitrogensensor.daisylib.ResultExtractor;
 import eu.nitrogensensor.daisylib.Utils;
@@ -40,6 +41,7 @@ public class Server {
     }
 
     public static void main(String[] args) {
+        DaisyModel.nice_daisy = true; // Vi er en beregningsserver; lad også andre komme til
         start();
     }
 
