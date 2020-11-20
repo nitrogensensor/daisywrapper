@@ -164,7 +164,9 @@ public class DaisyRemoteExecution {
                     //System.out.println(visStatus() + " kørsel "+kørselsNr_+" 4 modtag.");
                     if (!response.isSuccess()) {
                         System.err.println("Serverfejl for "+ kørselsNr_+" "+ kørsel.getId()+": "+response.getStatus() + " " +response.getStatusText());
-                        System.err.println("Serverfejl body: "+response0.asString().getBody());
+                        String body = response0.asString().getBody();
+                        if (body.length()>500) body = body.substring(0, 500) + "...";
+                        System.err.println("Serverfejl body: "+body);
                         fejl.set(new IOException(response.getStatusText()));
                         return;
                     }
