@@ -163,7 +163,7 @@ public class Server {
             antalProcesser.acquire();
             //System.out.println("Server sim "+ctx.url());
             String body = ctx.body();
-            log.fine("Server sim " + body);
+            log.fine("Server sim " + (body.length()<90?body:body.substring(0, 80)));
             ExecutionBatch batch = JavalinJson.fromJson(body, ExecutionBatch.class);
             if (batch == null) log.fine("Ingen batch!!");
             else {
@@ -215,9 +215,11 @@ public class Server {
         } catch (Throwable e) {
             e.printStackTrace();
             extractedContent.exception = e;
+        } finally {
+            antalProcesser.release();
+            log.fine(" ");
+            ctx.json(extractedContent);
         }
-        antalProcesser.release();
-        ctx.json(extractedContent);
     }
 
 }

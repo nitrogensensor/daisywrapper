@@ -4,14 +4,12 @@ import com.google.gson.Gson;
 import eu.nitrogensensor.daisylib.DaisyModel;
 import eu.nitrogensensor.daisylib.ResultExtractor;
 import eu.nitrogensensor.daisylib.Utils;
-import kong.unirest.HttpResponse;
-import kong.unirest.ObjectMapper;
-import kong.unirest.RequestBodyEntity;
-import kong.unirest.Unirest;
+import kong.unirest.*;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -72,7 +70,7 @@ public class DaisyRemoteExecution {
         }
         maxSamtidigeKørslerIgang = Math.max(maxSamtidigeKørslerIgang, kørslerIgang.size());
 
-        return String.format("%tT Der er %2d kørsler i gang: %s", new Date(), kørslerIgang.size(), keyCountMap.toString());
+        return String.format("%tT Der er %2d kørsler i gang: %s - "+kørslerIgang.keySet(), new Date(), kørslerIgang.size(), keyCountMap.toString());
     }
 
     private static String __oploadZip(Path inputDir) throws IOException {
