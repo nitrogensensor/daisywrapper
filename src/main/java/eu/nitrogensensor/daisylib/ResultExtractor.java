@@ -11,10 +11,10 @@ import java.util.*;
 import java.util.stream.Stream;
 
 public class ResultExtractor {
-    public HashSet<String> outputfilnavne = new HashSet<>();
+    private HashSet<String> csvOutputfilnavne = new HashSet<>();
 
-    public ArrayList<CsvEkstraktor> csvEkstraktors = new ArrayList<>();
-    public ArrayList<String> kopiérFiler = new ArrayList<>();
+    private ArrayList<CsvEkstraktor> csvEkstraktors = new ArrayList<>();
+    private ArrayList<String> kopiérFiler = new ArrayList<>();
 
 
     /**
@@ -25,7 +25,7 @@ public class ResultExtractor {
     public void addCsvExtractor(String indhold, String skrivTilFilnavn) {
         CsvEkstraktor csvEkstraktor = new CsvEkstraktor(indhold, skrivTilFilnavn);
         csvEkstraktors.add(csvEkstraktor);
-        outputfilnavne.addAll(csvEkstraktor.filKolonnerMap.keySet());
+        csvOutputfilnavne.addAll(csvEkstraktor.filKolonnerMap.keySet());
     }
 
     public ResultExtractor addFile(String filename) {
@@ -34,12 +34,15 @@ public class ResultExtractor {
     }
 
 
-    public void extract(Path fromDirectory, Path toDirectory) throws IOException {
+    public void extractToDirectory(Path fromDirectory, Path toDirectory) throws IOException {
         if (fromDirectory.equals(toDirectory) && kopiérFiler.size()>0) throw new IllegalArgumentException("Vil ikke kopiere "+kopiérFiler+" til og fra samme mappe:"+fromDirectory);
         //System.out.println("extract "+fromDirectory+ " "+toDirectory);
 
         Utils.sletMappe(toDirectory);
         Files.createDirectories(toDirectory);
+
+        // En tom extractor giver ikke mening - i så fald kopieres hele mappen
+        if (csvEkstraktors.isEmpty() && kopiérFiler.isEmpty()) addFile(".");
 
         for (String fn : kopiérFiler) {
             Path fil = fromDirectory.resolve(fn);
@@ -48,7 +51,7 @@ public class ResultExtractor {
         }
 
         Map<String, CsvFile> readOutput = new LinkedHashMap<String, CsvFile>();
-        for (String filnavn : outputfilnavne) {
+        for (String filnavn : csvOutputfilnavne) {
             CsvFile csvFile = new CsvFile(fromDirectory, filnavn);
             readOutput.put(filnavn, csvFile);
         }
@@ -63,7 +66,10 @@ public class ResultExtractor {
         }
     }
 
-    public void extract(Path fromDirectory, HashMap<String,String> fileContensMap) throws IOException {
+    public void extractToHashMap(Path fromDirectory, HashMap<String,String> fileContensMap) throws IOException {
+
+        // En tom extractor giver ikke mening - i så fald kopieres hele mappen
+        if (csvEkstraktors.isEmpty() && kopiérFiler.isEmpty()) addFile(".");
 
         for (String fn : kopiérFiler) {
             Path fil = fromDirectory.resolve(fn);
@@ -82,7 +88,7 @@ public class ResultExtractor {
         }
 
         Map<String, CsvFile> readOutput = new LinkedHashMap<String, CsvFile>();
-        for (String filnavn : outputfilnavne) {
+        for (String filnavn : csvOutputfilnavne) {
             CsvFile csvFile = new CsvFile(fromDirectory, filnavn);
             readOutput.put(filnavn, csvFile);
         }

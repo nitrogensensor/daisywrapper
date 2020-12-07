@@ -12,6 +12,8 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 public class Utils {
+    public static boolean debug = true;
+
     /**
      * Kloner en mappe rekursivt - en kopi af mappestrukturen laves, og fyldes med symbolske links til den oprindelige mappe
      *
@@ -51,7 +53,7 @@ public class Utils {
      * @param fraMappe Mappen, der skal kopieres
      * @param tilMappe Destination. Indhold i mappen overskrives hvis det allerede findes
      */
-    public static void klonMappeKopérAlt(Path fraMappe, Path tilMappe) throws IOException {
+    static void klonMappeKopérAlt(Path fraMappe, Path tilMappe) throws IOException {
         sletMappe(tilMappe);
         try (Stream<Path> stream = Files.walk(fraMappe)) {
             stream.forEach(fra -> {
@@ -112,7 +114,7 @@ public class Utils {
 
     // Kilde: https://mkyong.com/java/how-to-decompress-files-from-a-zip-file/
     public static void unzipMappe(InputStream inputStream, String outputMappe) throws IOException {
-        System.out.println("unzipMappe  " + outputMappe);
+        if (debug) System.out.println("unzipMappe  " + outputMappe);
 
         byte[] buffer = new byte[1024];
 
@@ -129,7 +131,7 @@ public class Utils {
             if (ze.isDirectory()) {
                 newFile.mkdirs();
             } else {
-                System.out.println("file unzip : " + newFile.getAbsoluteFile());
+                if (debug) System.out.println("file unzip : " + newFile.getAbsoluteFile());
                 new File(newFile.getParent()).mkdirs();
 
                 FileOutputStream fos = new FileOutputStream(newFile);

@@ -21,17 +21,17 @@ class Erstatning {
      * Giver en unik streng, der beskriver erstatningen
      * @return
      */
-    public String unikStreng() {
+    String unikStreng() {
         return søgestreng + erstatning + præcisÉnGang;
     }
 
-    public Erstatning(String søgestreng, String erstatning, boolean præcisÉnGang) {
+    Erstatning(String søgestreng, String erstatning, boolean præcisÉnGang) {
         this.søgestreng = søgestreng;
         this.erstatning = erstatning;
         this.præcisÉnGang = præcisÉnGang;
     }
 
-    public String erstat(String scriptIndhold) {
+    String erstat(String scriptIndhold) {
         return erstat(scriptIndhold, søgestreng, erstatning, præcisÉnGang);
     }
 
@@ -40,7 +40,7 @@ class Erstatning {
      * Går uden om de operatorer, der er inde i en parentes.
      * Simplel løsning, der ikke tager højde for parenteser: udtryk.indexOf(tegn)
      */
-    public static int findUdenforParenteser(char tegn, String tekst, int startPos)
+    private static int findUdenforParenteser(char tegn, String tekst, int startPos)
     {
         int par = 0;
         for (int i = startPos; i<tekst.length(); i++)
@@ -53,7 +53,7 @@ class Erstatning {
         return -1; // tegn ikke fundet udenfor parenteser
     }
 
-    public static String erstat(String scriptIndhold, String søgestreng, String erstatning, boolean præcisÉnGang) {
+    static String erstat(String scriptIndhold, String søgestreng, String erstatning, boolean præcisÉnGang) {
         // Prøv først super simpel erstatning
         int pos = scriptIndhold.indexOf(søgestreng);
         if (pos!=-1) {

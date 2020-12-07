@@ -3,72 +3,108 @@ package eu.nitrogensensor.daisy;
 
 import eu.nitrogensensor.daisylib.DaisyModel;
 import eu.nitrogensensor.daisylib.ResultExtractor;
+import eu.nitrogensensor.daisylib.Utils;
 import eu.nitrogensensor.daisylib.remote.DaisyRemoteExecution;
 import eu.nitrogensensor.daisylib.remote.ExtractedContent;
 import picocli.CommandLine;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.Callable;
 
-@CommandLine.Command(name = "daisy", mixinStandardHelpOptions = true, version = "daisykørsel 0.9", showDefaultValues = true,
-        description = "Kørsel af Daisy")
+@CommandLine.Command(name = "daisy", mixinStandardHelpOptions = true, showDefaultValues = true, usageHelpWidth = 120)
 public class DaisyMain implements Callable
 {
-    private static final String VERSION = "0.901 (29 sept 2020 fejlfinding til Simon2)";
-    @CommandLine.Parameters(index = "0", description = "server, run, remote eller testkørsel." )
-  String kommando;
+    public static final String VERSION = "0.902 (10 nov 2020)";
+//    @CommandLine.Parameters(index = "0", description = "server, run, remote eller testkørsel." )
+    @CommandLine.Parameters(index = "0", description = "remote or server" )
+  String command;
 
-  @CommandLine.Option(names = {"-d", "--inputdirectory"}, description = "Mappen med Daisy-filerne, der skal køres", defaultValue = ".")
+  //@CommandLine.Option(names = {"-d", "--inputdirectory"}, description = "Mappen med Daisy-filerne, der skal køres", defaultValue = ".")
+  @CommandLine.Option(names = {"-d", "--inputdirectory"}, description = "Input directory, containing the Daisy-file(s) to be executed")
   String inputdirectory;
 
-  @CommandLine.Parameters(index = "1..", description = "Daisyfil(er), der skal køres i mappen")
-  List<String> daisyfiler;
+//  @CommandLine.Parameters(index = "1..", description = "Daisyfil(er), der skal køres i mappen")
+  @CommandLine.Parameters(index = "1..", description = "Daisy fil(es) to be executed in the input directory")
+  List<String> daisyfiles;
 
+/*
   @CommandLine.Option(names = {"-r", "--replace"}, description = "Erstatninger der skal ske i daisyfilen før den køres. Hver erstatning består af et søgeudtryk og en erstatningsstreng adskilt af komma. Eksempler\n" +
           "-r _sand_,37.1   erstatter '_sand_' med '37.1'\n" +
           "-r _sand_:_humus_,10:90,20:80,30:70,40:60,50:50  giver 5 kørsler hvor sand stiger fra 10 til 50 og humus falder fra 90 til 50 i skridt af 10\n" +
           "-r '(stop *),(stop 2015 8 20)' sætter stoptidspunkt for simuleringen.")
-  List<String> replace = new ArrayList<>();
-/*
-  @CommandLine.Option(names = {"-rr", "--replace-repeat"}, description = "Gentagelse af kørslen med forskellige erstatninger." +
-  List<String> repeatReplace = new ArrayList<String>();
 
-  @CommandLine.Option(names = {"-rc", "--replicate-replace"}, description = "Replikering af kørslen med forskellige erstatninger. Hver består af et søgeudtryk og et antal erstatningsstrenge adskilt af komma." +
-          "Formatet er: søg,erstat1,erstat2,erstat3. Er der flere sæt replikerede erstatninger multipliceres de. Eksempelvis giver nedenstående i alt 25 kørsler:\n" +
-          "-rr _sand_,0,10,20,30,40 -rr _humus_,50,60,70,80,90")
-  List<String> replicateReplace = new ArrayList<String>();
-*/
-  @CommandLine.Option(names = {"-o", "--outputdirectory"}, description = "Hvor skal resultatet skrives til", defaultValue = ".")
+ */
+  @CommandLine.Option(names = {"-r", "--replace"},
+          description = "Replacements to be the daisy file before it is executed. " +
+                  "Each substitution consists of a search term and a substitution string separated by commas. Examples:\n" +
+          "-r _sand_,37.1   replaces '_sand_' with '37.1'\n" +
+          "-r _sand_:_humus_,10:90,20:80,30:70,40:60,50:50  gives 5 runs where sand rises from 10 to 50 and humus falls from 90 to 50 in steps of 10\n" +
+          "-r '(stop *),(stop 2015 8 20)' sets the stop time for the simulation.")
+  List<String> replace = new ArrayList<>();
+
+//  @CommandLine.Option(names = {"-o", "--outputdirectory"}, description = "Hvor skal resultatet skrives til", defaultValue = ".")
+  @CommandLine.Option(names = {"-o", "--outputdirectory"}, description = "Where to write the result to", defaultValue = ".", showDefaultValue = CommandLine.Help.Visibility.ON_DEMAND)
   String outputdirectory;
 
-  @CommandLine.Option(names = {"-of", "--outputfil"}, description = "remote: Hvilke outputfiler skal gemmes (f.eks -of daisy.log)", defaultValue = ".")
+//  @CommandLine.Option(names = {"-of", "--outputfil"}, description = "remote: Hvilke outputfiler skal gemmes (f.eks -of daisy.log)", defaultValue = ".")
+  @CommandLine.Option(names = {"-of", "--outputfile"}, description = "remote: Which output files to save (eg -of daisy.log)", defaultValue = ".", showDefaultValue = CommandLine.Help.Visibility.ON_DEMAND)
   List<String> outputfiler;
 
-  @CommandLine.Option(names = {"-oc", "--clean-csv"}, description = "normalisér CSV-filer (fjerner header og enheder)", defaultValue = "false")
+//  @CommandLine.Option(names = {"-c", "-oc", "--clean-csv"}, description = "normalisér CSV-filer (fjerner header og enheder)", defaultValue = "false")
+@CommandLine.Option(names = {"-c", "-oc", "--clean-csv"}, description = "all output files with a .csv suffix is reformatted to be valid CSV files (header and units are removed)", defaultValue = "false")
   boolean cleanCsvOutput;
 
-//  @CommandLine.Option(names = {"-p", "--daisy-executable-path"}, description = "Til lokal kørsel: Sti til Daisy executable", defaultValue = "/opt/daisy/bin/daisy")
-//  private String stiTilDaisy;
+
+    @CommandLine.Option(names = {"-v", "--verbose"}, description = "Print debugging information", defaultValue = "false")
+    boolean verbose;
+
+    @CommandLine.Option(names = {"-n", "--nice"}, description = "Run Daisy executable with lower scheduling priority", defaultValue = "false")
+    boolean nice;
+
+//    @CommandLine.Option(names = {"-p", "--daisy-executable-path"}, description = "Til lokal kørsel: Sti til Daisy executable" )
+    @CommandLine.Option(names = {"-p", "--daisy-executable-path"}, description = "Path to Daisy executable (for local execution)" )
+    private String stiTilDaisy=null;
 
   @CommandLine.Option(names = {"-u", "--remote-endpoint-url"},
-          description = "remote: URL til endpoint på serveren, der udfører Daisy-kørslerne",
+//          description = "remote: URL til endpoint på serveren, der udfører Daisy-kørslerne",
+          description = "remote: URL to the endpoint of the server performing the Daisy execution",
           defaultValue = "http://nitrogen.saluton.dk:3210")
   private String remoteEndpointUrl;
 
   public static void main(String[] args)  {
-    System.out.println("hej fra DaisyMain version "+VERSION );
+    System.out.println("Daisywrapper version "+VERSION );
+    System.out.println("Copyright 2020 nitrogensensor.eu & Jacob Nordfalk" );
     int exitCode = new CommandLine(new DaisyMain()).execute(args);
     if (exitCode!=0) System.exit(exitCode);
   }
 
   @Override
   public Object call() throws Exception {
-      if ("server".equals(kommando)) eu.nitrogensensor.daisylib.remote.Server.start();
-      else if ("testkørsel".equals(kommando)) DaisyTestkoersel.main(null);
-      else if ("remote".equals(kommando)) {
+      Utils.debug = verbose;
+      if (nice) DaisyModel.nice_daisy = nice;
+      DaisyRemoteExecution.setRemoteEndpointUrl(remoteEndpointUrl);
+      if (stiTilDaisy!=null) DaisyModel.path_to_daisy_executable = stiTilDaisy;
+
+      if ("server".equals(command)) eu.nitrogensensor.daisylib.remote.Server.start();
+      else if ("testkørsel".equals(command)) DaisyTestkoersel.main(null);
+      else if ("remote".equals(command)) {
+          if (inputdirectory==null) {
+              if (daisyfiles.size()!=1) {
+                  System.err.println("Please use -d to provide the input directory");
+                  return null;
+              }
+              System.err.println("NOTE: You didn't provide an input directory. I am assuming it is in "+ daisyfiles.get(0)+"'s containing folder.");
+              Path sti = Paths.get(daisyfiles.get(0));
+              if (sti.getParent()!=null) inputdirectory = sti.getParent().toString(); else inputdirectory = ".";
+              daisyfiles.clear();
+              daisyfiles.add(sti.getFileName().toString());
+              System.err.println("NOTE: Next time, use: -d "+inputdirectory+" "+ daisyfiles.get(0));
+              System.err.println();
+          }
           ArrayList<DaisyModel> daisyModels = new ArrayList<>();
-          for (String daisyfil : daisyfiler) {
+          for (String daisyfil : daisyfiles) {
               DaisyModel dm = new DaisyModel(inputdirectory, daisyfil);
               if (daisyfil.endsWith(".dai")) daisyfil = daisyfil.substring(0, daisyfil.length()-4);
               dm.setId(daisyfil);
@@ -89,7 +125,7 @@ public class DaisyMain implements Callable
 //                      System.out.println("daisyModels00 = " + daisyModels);
                       for (DaisyModel dm0 : daisyModels) {
                           for (int i=1; i<søgErstat.length; i++) {
-                              DaisyModel dm1 = dm0.clon();
+                              DaisyModel dm1 = dm0.createCopy();
                               String[] værdier = søgErstat[i].split(":");
 //                              System.out.println("Arrays.toString(nøgler) = " + Arrays.toString(nøgler));
                               if (nøgler.length!=værdier.length) throw new IllegalArgumentException("Fejl i "+rElem+". Formatet er søgA:søgB,erstat1A:erstat1B,erstat2A:erstat2B,erstat3A,erstat3B  - med komma imellem. Du har "+nøgler.length+ " nøgler "+Arrays.asList(nøgler)+" , men " +værdier.length+" værdier "+Arrays.asList(værdier));
@@ -121,10 +157,12 @@ public class DaisyMain implements Callable
           // så skal den vises hos klienten!
 
           if (cleanCsvOutput) for (ExtractedContent ec : res.values()) cleanCsv(ec.fileContensMap);
-          DaisyRemoteExecution.writeResults(res, Paths.get(outputdirectory));
-          System.out.println("res = " + res);
+          for (ExtractedContent extractedContent : res.values()) {
+              DaisyRemoteExecution.writeExtractedContentToSubdir(extractedContent, Paths.get(outputdirectory));
+          }
+          if (verbose) System.out.println("res = " + res);
       }
-      else throw new Exception("Ukendt kommando: "+kommando);
+      else throw new Exception("Ukendt kommando: "+ command);
       return null;
   }
 

@@ -1,46 +1,48 @@
 package eu.nitrogensensor.daisylib.remote;
 
 import com.google.gson.Gson;
+import eu.nitrogensensor.daisylib.DaisyModel;
 import eu.nitrogensensor.daisylib.ExecutionCache;
+import eu.nitrogensensor.daisylib.ResultExtractor;
 import eu.nitrogensensor.daisylib.Utils;
-import eu.nitrogensensor.daisylib.remote.google_cloud_storage.GemOgHentArbejdsfiler;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import io.javalin.http.UploadedFile;
 import io.javalin.plugin.json.JavalinJson;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class Server {
     private static final boolean USIKKER_KØR = false;
-    public static boolean PAK_UD_VED_MODTAGELSEN = true;
-    public static Javalin app;
-    public static String url;
+    private static boolean PAK_UD_VED_MODTAGELSEN = true;
+    private static Javalin app;
+    private static String url;
+
+    private static CloudStorageArbejdsfiler cloudStorageArbejdsfiler = new CloudStorageArbejdsfiler();
 
     //System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tF %1$tT %4$s %2$s %5$s%6$s%n");
-    static { System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tT %4$s %2$s %5$s%6$s%n"); }
+    //static { System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tT %4$s %2$s %5$s%6$s%n"); }
+    static { System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tT %5$s%6$s%n"); }
     static Logger log = Logger.getGlobal();
     static { log.setLevel( Level.ALL ); log.getParent().getHandlers()[0].setLevel(Level.ALL); } // vis alt log
 
 
+    public static String getUrl() {
+        return url;
+    }
+
     public static void main(String[] args) {
-        /*
-        log.info("hej1 med log.info");
-        log.fine("hej1 med log.fine");
-        log.warning("hej1 med log.warning");
-         */
+        DaisyModel.nice_daisy = true; // Vi er en beregningsserver; lad også andre komme til
         start();
-        //Testklient.testkald();
-        //stop();
     }
 
     public static void stop() {
@@ -110,25 +112,34 @@ public class Server {
     }
 
     private static Path uploadMappe = Paths.get("upload");
+    private static long uploadMappeSenesteId;
 
     private static String upload(Context ctx) throws IOException {
         Files.createDirectories(uploadMappe);
 
-        Path denneUploadMappe = Files.createTempDirectory(uploadMappe,"");
+        Path denneUploadMappe;
+
+        synchronized (uploadMappe) {
+            long nu = System.currentTimeMillis();
+            while (nu <= uploadMappeSenesteId) nu++;
+            uploadMappeSenesteId = nu;
+            denneUploadMappe = Files.createDirectory(uploadMappe.resolve(Long.toString(nu, Character.MAX_RADIX)+"_"+ctx.req.getRemoteAddr()));
+        }
+
         String batchId = uploadMappe.relativize(denneUploadMappe).toString();
-        System.out.println("upload får batchId = " + batchId);
+        log.fine("\n\n"+new Date() +" Ny upload - den får batchId = " + batchId);
 
         UploadedFile file = ctx.uploadedFile("zipfil");
         if (file!=null) {
             InputStream is = file.getContent();
             if (PAK_UD_VED_MODTAGELSEN) {
-                System.out.println("Server upladZip " + file.getFilename()+" pakkes ud i "+denneUploadMappe);
+                log.fine("Server upladZip " + file.getFilename()+" pakkes ud i "+denneUploadMappe);
                 if (!is.markSupported()) throw new RuntimeException("is skal kunne spoles tilbage");
                 is.mark(Integer.MAX_VALUE);
                 Utils.unzipMappe(is, denneUploadMappe.toString());
                 is.reset();
             }
-            GemOgHentArbejdsfiler.gem(is, batchId);
+            cloudStorageArbejdsfiler.gem(is, batchId);
         }
 
 
@@ -145,52 +156,71 @@ public class Server {
         return sti;
     }
 
-    private static void sim(Context ctx) throws IOException {
-            System.out.println("Server sim "+ctx.url());
-            System.out.println("Server sim "+ctx.body());
-            ExecutionBatch batch = JavalinJson.fromJson(ctx.body(),ExecutionBatch.class);
-            if (batch==null) log.fine("Ingen batch fra "+ctx.body());
+    private static Semaphore antalProcesser = new Semaphore(Runtime.getRuntime().availableProcessors()*3/2);
+    private static void sim(Context ctx) {
+        ExtractedContent extractedContent = new ExtractedContent();
+        try {
+            antalProcesser.acquire();
+            //System.out.println("Server sim "+ctx.url());
+            String body = ctx.body();
+            log.fine("Server sim " + (body.length()<90?body:body.substring(0, 80)));
+            ExecutionBatch batch = JavalinJson.fromJson(body, ExecutionBatch.class);
+            if (batch == null) log.fine("Ingen batch!!");
             else {
-                //ExecutionBatch batch = ctx.bodyAsClass(ExecutionBatch.class);
+                batch.kørsel.setId(batch.oploadId+"_"+batch.kørsel.getId());
                 batch.kørsel.directory = uploadMappe.resolve(tjekSikkerSti(batch.oploadId));
-                if (Files.exists(batch.kørsel.directory) && batch.kørsel.directory.toFile().list().length>0) {
-                    log.fine("Denne instans har allerede batch "+batch.kørsel.directory+" med "
-                            + Files.list(batch.kørsel.directory).collect(Collectors.toList()));
+                if (Files.exists(batch.kørsel.directory) && batch.kørsel.directory.toFile().list().length > 0) {
+                    //log.fine("Denne instans har allerede batch " + batch.kørsel.directory);
+                    // +" med "+ Files.list(batch.kørsel.directory).collect(Collectors.toList())
                 } else {
-                    log.fine("Denne instans har ikke batch "+batch.kørsel.directory);
+                    log.fine("Denne instans har ikke batch " + batch.kørsel.directory);
 
-                    Path fil = GemOgHentArbejdsfiler.hent(batch.oploadId);
+                    Path fil = cloudStorageArbejdsfiler.hent(batch.oploadId);
+                    if (fil == null) throw new IllegalArgumentException("No such batch.oploadId " + batch.oploadId);
                     InputStream fis = Files.newInputStream(fil);
                     Utils.unzipMappe(fis, batch.kørsel.directory.toString());
                     fis.close();
                     Files.delete(fil);
                 }
-                System.out.println("Server ExecutionBatch " + batch.oploadId);
-                ExtractedContent extractedContent = new ExtractedContent();
+                //System.out.println("Server ExecutionBatch " + batch.oploadId);
 
+
+                // Benyt en eksekveringscache - bemærk at batch.kørsel peger DIREKTE ned i cachen, så det er vigtigt at cachede kørselsmapper ikke ændres
                 ExecutionCache executionCache = new ExecutionCache(Paths.get("../tmp/daisy-execution-cache/"));
-
-                // Benyt en eksekveringscachen - bemærk at batch.kørsel peger DIREKTE ned i cachen, så det er vigtigt at cachede kørselsmapper ikke ændres
                 boolean varCachet = executionCache.udfyldFraCache(batch.kørsel);
                 if (!varCachet) try {
                     // Vi skal have det over i en anden midlertidig mappe, ellers kan det være vi får knas med at
                     // evt andre samtidige kørsler skriver i de samme outputfiler
-                    batch.kørsel.copyToDirectory(Files.createTempDirectory("kørsel_"+batch.kørsel.getId()));
+                    batch.kørsel.copyToDirectory(Files.createTempDirectory("tmpkørsel_" + batch.kørsel.getId().replaceAll("[^A-Za-z0-9_]", "_")+"_"));
                     //batch.resultExtractor.tjekResultatIkkeAlleredeFindes(batch.kørsel.directory); // burde egentlig ikke være nødvendigt, da det også tjekkes af klienten, men man kan ikke stole på klienter...
+                    //log.fine("batch.kørsel.directory = " + batch.kørsel.directory);
+
+                    // HER KØRES MODELLEN !!!!
                     batch.kørsel.run();
+
                     executionCache.gemICache(batch.kørsel);
                 } catch (IOException e) {
+                    e.printStackTrace();
                     extractedContent.exception = e;
-                    batch.resultExtractor.addFile("daisy.log");
-                    batch.resultExtractor.addFile("daisyErr.log");
+                    //batch.resultExtractor.addFile("daisy.log");
+                    //batch.resultExtractor.addFile("daisyErr.log");
+                    batch.resultExtractor = new ResultExtractor().addFile("."); // Kopiér alt tilbage til klienten i tilfælde af en fejl
                 }
 
-                batch.resultExtractor.extract(batch.kørsel.directory, extractedContent.fileContensMap);
-                ctx.json(extractedContent);
-                if (!varCachet) Utils.sletMappe(batch.kørsel.directory); // ryd op - men KUN hvis det ikke kommer fra cachen!
+                if (batch.resultExtractor==null) batch.resultExtractor = new ResultExtractor(); // standard er at trække alt ud....
+                batch.resultExtractor.extractToHashMap(batch.kørsel.directory, extractedContent.fileContensMap);
+                if (!varCachet)
+                    Utils.sletMappe(batch.kørsel.directory); // ryd op - men KUN hvis det ikke kommer fra cachen!
             }
+        } catch (Throwable e) {
+            e.printStackTrace();
+            extractedContent.exception = e;
+        } finally {
+            antalProcesser.release();
+            log.fine(" ");
+            ctx.json(extractedContent);
+        }
     }
-
 
 }
 

@@ -35,9 +35,9 @@ public class DaisyTestkoersel
 
       for (int n=0; n<20; n++) {
 
-        DaisyModel kørsel = d.clon()
+        DaisyModel kørsel = d.createCopy()
                 .setId(program+ String.format("_%02d", n))
-                .replace("(run taastrup)", "(run Mark21 (column (\"" + program + "\")))");
+                .replace("(run taastrup)", "(run Mark21 (column (\"" + program + "\"))); "+n);
 //        kørsel = kørsel.toDirectory(Paths.get("/tmp/daisy/run/remoteParTmp/" + kørsel.getId()));
         daisyModels.add(kørsel);
       }
@@ -47,12 +47,15 @@ public class DaisyTestkoersel
     ResultExtractor re = new ResultExtractor();
     re.addCsvExtractor("crop.csv (year, month, mday, LAI), crop_prod.csv (Crop AI, Leaf AI, Stem AI)", "crop-leaf-stem-AI.csv");
     re.addFile("harvest.csv");
+    // re.addFile("."); // hvis man vil have alle filer med tilbage
 
     long tid = System.currentTimeMillis();
     //DaisyExecution.runSerial(daisyModels, re, Paths.get("daisy/run/serRes"));
     //DaisyExecution.runParralel(daisyModels, re, Paths.get("daisy/run/parRes"));
 
     //DaisyRemoteExecution.runSerial(daisyModels, re, Paths.get("daisy/run/remoteRes"));
+    //DaisyRemoteExecution.setRemoteEndpointUrl("http://localhost:3210/");
+    //DaisyRemoteExecution.setRemoteEndpointUrl("https://daisykoersel-6dl4uoo23q-lz.a.run.app");
     DaisyRemoteExecution.runParralel(daisyModels, re, Paths.get("/tmp/daisy/run/remoteParRes"));
 
 

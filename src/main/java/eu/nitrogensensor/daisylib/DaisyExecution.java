@@ -1,12 +1,7 @@
 package eu.nitrogensensor.daisylib;
 
-import eu.nitrogensensor.daisylib.DaisyModel;
-import eu.nitrogensensor.daisylib.csv.CsvEkstraktor;
-
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -39,7 +34,7 @@ public class DaisyExecution {
             kørselsNr++;
             if (re != null) re.tjekResultatIkkeAlleredeFindes(kørsel.directory);
             kørsel.run();
-            if (re != null) re.extract(kørsel.directory, resultsDir.resolve(kørsel.getId()));
+            if (re != null) re.extractToDirectory(kørsel.directory, resultsDir.resolve(kørsel.getId()));
         }
     }
 
@@ -55,7 +50,7 @@ public class DaisyExecution {
         for (DaisyModel kørsel : daisyModels) {
             kørselsNr++;
             if (re != null) re.tjekResultatIkkeAlleredeFindes(kørsel.directory);
-            System.out.println(visStatus() + " kørsel "+kørselsNr+" af "+daisyModels.size()+ " startes.");
+            if (Utils.debug) System.out.println(visStatus() + " kørsel "+kørselsNr+" af "+daisyModels.size()+ " startes.");
             final int kørselsNr_ = kørselsNr;
             Runnable runnable = () -> {
                 kørslerIgang.put(kørsel.getId(), "0 starter");
@@ -64,7 +59,7 @@ public class DaisyExecution {
                     kørslerIgang.put(kørsel.getId(), "3 kører");
                     kørsel.run();
                     kørslerIgang.put(kørsel.getId(), "5 skriver");
-                    if (re != null) re.extract(kørsel.directory, resultsDir.resolve(kørsel.getId()));
+                    if (re != null) re.extractToDirectory(kørsel.directory, resultsDir.resolve(kørsel.getId()));
                 } catch (IOException e) {
                     e.printStackTrace();
                     if (fejl.get() != null) return;
@@ -77,7 +72,7 @@ public class DaisyExecution {
             //runnable.run(); // serielt
         }
         while (kørslerIgang.size()>0) {
-            System.out.println(visStatus()+ " og "+executorService.getQueuedSubmissionCount()+" er i kø.");
+            if (Utils.debug) System.out.println(visStatus()+ " og "+executorService.getQueuedSubmissionCount()+" er i kø.");
             try { Thread.sleep(1000); } catch (Exception e) { };
         }
 
