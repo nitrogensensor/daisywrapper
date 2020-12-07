@@ -1,3 +1,21 @@
+# Daisy Wrapper
+This module wraps the daisy language in an esy to use CLI for 
+quickly simulating many different but similar simulations. The module contains a 
+CLI interface to a client which can run daisy locally or remotely as well as a 
+server which can serve the requests of the client.
+
+## Client
+The client can be found at `src/main/java/eu/nitrogensensor/daisy/DaisyMain.java`
+The client can be used without having Daisy installed _if_ the remote option has been
+chosen, and the server has daisy installed.
+
+
+## Server
+The server code can be found at 
+`src/main/java/eu/nitrogensensor/daisylib/remote/Server.java`.
+To run the server Daisy must be installed on the machine. 
+
+
 # Kørsel af Daisy
 
 
@@ -54,3 +72,4 @@ gsutil cp -r gs://daisykoersel-arbejdsfiler/slamkode/src/main/resources/geotiff-
 gsutil du -h gs://daisykoersel-arbejdsfiler/
 
 gsutil -m rm -rf  gs://daisykoersel-arbejdsfiler/slamkode/
+
