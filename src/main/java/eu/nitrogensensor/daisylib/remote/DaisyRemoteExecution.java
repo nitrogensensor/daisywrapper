@@ -15,8 +15,6 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class DaisyRemoteExecution {
-    private static final boolean FEJLFINDING = false;
-
     public static int MAX_PARALLELITET = 500;
     public static final int MAX_KØRSELSTID = 1000*60*60; // 1 time
 
@@ -94,12 +92,11 @@ public class DaisyRemoteExecution {
         Path resultDir = resultsDir.resolve(extractedContent.id.replaceAll("[^A-Za-z0-9_]", "_"));
         Utils.sletMappe(resultDir);
         Files.createDirectories(resultDir);
-        //if (FEJLFINDING)
-        if (Utils.debug) System.out.println("Skriver " + extractedContent.fileContensMap.keySet() + " til " + resultDir);
+        if (Utils.debug) System.out.println("Skriver " + resultDir  + " indhold " + extractedContent.fileContensMap.keySet());
         for (String filnavn : extractedContent.fileContensMap.keySet()) {
             String filIndhold = extractedContent.fileContensMap.get(filnavn);
             Path fil = resultDir.resolve(filnavn);
-            if (Utils.debug) System.out.println("Opretter "+fil.toString()); //+ " i "+fil.getParent());// kald ikke, kan give exception: +" "+Files.readAttributes(fil.getParent(), "*"));
+            //if (Utils.debug) System.out.println("Opretter "+fil.toString()); // kald ikke, kan give exception: +" "+Files.readAttributes(fil.getParent(), "*"));
             Files.createDirectories(fil.getParent());
             Files.write(fil, filIndhold.getBytes());
         }
@@ -125,12 +122,17 @@ public class DaisyRemoteExecution {
 
         String oploadId = __oploadZip(inputDir); // HER OPLOADES!!!!!
 
-        //ExecutorService executorService = Executors.newWorkStealingPool();
-        int antalKørsler = daisyModels.size();
-        int parallelitet = Math.max(5, Math.min(MAX_PARALLELITET, antalKørsler/4)); // minimum 4 kørsler per instans - men mindst 5 instanser
-        if (Utils.debug) System.out.println("parallelitet: "+parallelitet);
+        int parallelitet = daisyModels.size();
+        if (getKørselstype().startsWith("Cloud")) {
+            // I cloud Run skal vi have minimum 4 kørsler per instans - men dog mindst 5 instanser
+            parallelitet = Math.max(  Math.min(parallelitet, 5), parallelitet/4);
+        }
+        parallelitet = Math.min(MAX_PARALLELITET, parallelitet); // max 100 parallele forespørgsler
 
-        ExecutorService executorService = Executors.newFixedThreadPool(Math.min(daisyModels.size(),parallelitet)); // max 100 parallele forespørgsler
+        if (Utils.debug) System.out.println("parallelitet: "+parallelitet);
+       
+
+        ExecutorService executorService = Executors.newFixedThreadPool(parallelitet);
         AtomicReference<Throwable> fejl = new AtomicReference<>(); // Hvis der opstår en exception skal den kastes videre
         int kørselsNr = 0;
         for (DaisyModel kørsel : daisyModels) {
@@ -157,18 +159,23 @@ public class DaisyRemoteExecution {
 
                     RequestBodyEntity response0 = Unirest.post(remoteEndpointUrl + "/sim/").body(batch);
                     if (fejl.get() != null) return;
-                    kørslerIgang.put(kørsel.getId(), "modtager");
+                    kørslerIgang.put(kørsel.getId(), "modtager0");
                     HttpResponse<ExtractedContent> response = response0.asObject(ExtractedContent.class);
+                    kørslerIgang.put(kørsel.getId(), "modtog1");
+                    if (fejl.get() != null) return;
+                    kørslerIgang.put(kørsel.getId(), "modtog2");
                     //System.out.println(visStatus() + " kørsel "+kørselsNr_+" 4 modtag.");
                     if (!response.isSuccess()) {
                         System.err.println("Serverfejl for "+ kørselsNr_+" "+ kørsel.getId()+": "+response.getStatus() + " " +response.getStatusText());
                         String body = response0.asString().getBody();
                         if (body.length()>500) body = body.substring(0, 500) + "...";
                         System.err.println("Serverfejl body: "+body);
-                        fejl.set(new IOException(response.getStatusText()));
+                        // System.exit(-1);
+                        kørslerIgang.put(kørsel.getId(), "modtog3fejl");
                         return;
                     }
 
+                    kørslerIgang.put(kørsel.getId(), "modtog4");
                     ExtractedContent extractedContent = response.getBody();
                     extractedContent.id = kørsel.getId();
                     extractedContents.put(kørsel.getId(), extractedContent);
@@ -178,7 +185,9 @@ public class DaisyRemoteExecution {
                         extractedContent.exception.printStackTrace(); // vis fejlen
                         fejl.set(extractedContent.exception);
                     }
+                    kørslerIgang.put(kørsel.getId(), "modtog5");
                 } catch (Throwable e) {
+                    kørslerIgang.put(kørsel.getId(), "modtog6fejl");
                     System.err.println("Klientside fejl i "+kørselsNr_+" "+kørsel.getId());
                     e.printStackTrace();
                     if (fejl.get() != null) return;
@@ -195,6 +204,7 @@ public class DaisyRemoteExecution {
             if (Utils.debug) System.out.println(visStatus());
             synchronized (kørslerIgang) { try { kørslerIgang.wait(5000); } catch (Exception e) { }};
         }
+        System.out.println("DaisyRemoteExecution: Alt er afsluttet - med evt fejl="+fejl);
         executorService.shutdown();
         try {
             executorService.awaitTermination(MAX_KØRSELSTID, TimeUnit.MILLISECONDS);
@@ -234,7 +244,6 @@ public class DaisyRemoteExecution {
     }
 
     public static String getKørselstype() {
-        if (maxSamtidigeKørslerIgang==0) return "Lokalt";
         if (remoteEndpointUrl.contains("localhost")) return "Lokal server";
         if (remoteEndpointUrl.contains("run.app")) return "Cloud Run";
 
