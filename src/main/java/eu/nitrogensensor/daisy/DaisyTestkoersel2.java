@@ -30,21 +30,22 @@ public class DaisyTestkoersel2
 
     ArrayList<DaisyModel> daisyModels = new ArrayList<>();
     for (double dry_bulk_density=1.40; dry_bulk_density<1.60; dry_bulk_density+=0.02) {
+        // String dbd = String.format(Locale.US, "%.3f", dry_bulk_density);
         DaisyModel model = d.createCopy()
                 .setId("dbd_"+dry_bulk_density)
                 .replace("(dry_bulk_density 1.53 [g/cm^3])", "(dry_bulk_density "+dry_bulk_density+" [g/cm^3])");
         daisyModels.add(model);
     }
 
-
+    DaisyRemoteExecution.setRemoteEndpointUrl("http://nitrogen.saluton.dk:3210/");
     //DaisyRemoteExecution.setRemoteEndpointUrl("http://localhost:3210/");
     //DaisyRemoteExecution.setRemoteEndpointUrl("https://daisykoersel-6dl4uoo23q-lz.a.run.app");
 
     Map<String, ExtractedContent> results = DaisyRemoteExecution.runParralel(daisyModels, Paths.get("tmp/remote_result"));
     System.out.println("results.keySet() = " + results.keySet());
 
-    // TODO Mere intelligen måde at se resultat på, der ikke crachser hvis nøglen dbd_1.42 tilfæøldigvis ikke findes
-    String soil_water_content = results.get("dbd_1.42").fileContensMap.get("Ex1/soil_water_content.dlf");
+    String id = daisyModels.get(0).getId();
+    String soil_water_content = results.get(id).fileContensMap.get("Ex1/soil_water_content.dlf");
     System.out.println("soil_water_content = " + soil_water_content);
   }
 }
