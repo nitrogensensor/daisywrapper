@@ -16,7 +16,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class DaisyRemoteExecution {
-    public static int MAX_PARALLELITET = 500;
     public static final int MAX_KØRSELSTID = 1000*60*60; // 1 time
 
     private static final ConcurrentHashMap<String, String> kørslerIgang = new ConcurrentHashMap<>();
@@ -46,7 +45,7 @@ public class DaisyRemoteExecution {
                 return gson.toJson(value);
             }
         });
-        Unirest.config().concurrency(MAX_PARALLELITET, MAX_PARALLELITET);
+        //Unirest.config().concurrency(MAX_PARALLELITET, MAX_PARALLELITET);
         Unirest.config().socketTimeout(MAX_KØRSELSTID);
     }
 
@@ -127,6 +126,7 @@ public class DaisyRemoteExecution {
             // I cloud Run skal vi have minimum 4 kørsler per instans - men dog mindst 5 instanser
             parallelitet = Math.max(  Math.min(parallelitet, 5), parallelitet/4);
         }
+        int MAX_PARALLELITET = remoteEndpointUrl.contains("run.app")? 500 : 15; // 500 for cloud run, 15 for nitrogen.saluton.dk
         parallelitet = Math.min(MAX_PARALLELITET, parallelitet); // max 100 parallele forespørgsler
 
         if (Utils.debug) System.out.println("parallelitet: "+parallelitet);
