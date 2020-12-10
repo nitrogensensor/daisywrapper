@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class DaisyRemoteExecution {
@@ -68,7 +69,7 @@ public class DaisyRemoteExecution {
         }
         maxSamtidigeKørslerIgang = Math.max(maxSamtidigeKørslerIgang, kørslerIgang.size());
 
-        return String.format("%tT Der er %2d kørsler i gang: %s - "+kørslerIgang.keySet(), new Date(), kørslerIgang.size(), keyCountMap.toString());
+        return String.format("%tT Der er %2d kørsler i gang: %s - %s", new Date(), kørslerIgang.size(), keyCountMap.toString(), Utils.klipStreng(kørslerIgang.keySet(), 200));
     }
 
     private static String __oploadZip(Path inputDir) throws IOException {
@@ -88,11 +89,10 @@ public class DaisyRemoteExecution {
 
 
     public static void writeExtractedContentToSubdir(ExtractedContent extractedContent, Path resultsDir) throws IOException {
-        if (Utils.debug) System.out.println("extractedContent.id er "+extractedContent.id);
         Path resultDir = resultsDir.resolve(extractedContent.id.replaceAll("[^A-Za-z0-9_]", "_"));
         Utils.sletMappe(resultDir);
         Files.createDirectories(resultDir);
-        if (Utils.debug) System.out.println("Skriver " + resultDir  + " indhold " + extractedContent.fileContensMap.keySet());
+        if (Utils.debug) System.out.println("Skriver " +extractedContent.id+ " til " + resultDir  + ": " + extractedContent.fileContensMap.keySet());
         for (String filnavn : extractedContent.fileContensMap.keySet()) {
             String filIndhold = extractedContent.fileContensMap.get(filnavn);
             Path fil = resultDir.resolve(filnavn);
@@ -114,7 +114,7 @@ public class DaisyRemoteExecution {
         return runParralel(daisyModels, null, resultsDir);
     }
 
-    public static Map<String, ExtractedContent> runParralel(Collection<DaisyModel> daisyModels, ResultExtractor resultExtractor, Path resultsDir) throws IOException {
+    public static Map<String, ExtractedContent> runParralel(Collection<DaisyModel> daisyModels, ResultExtractor resultExtractor, Path resultsDir) throws IOException  {
 
         final Map<String, ExtractedContent> extractedContents = new ConcurrentHashMap<>();
         Path inputDir = getDirectory(daisyModels);
@@ -134,12 +134,14 @@ public class DaisyRemoteExecution {
 
         ExecutorService executorService = Executors.newFixedThreadPool(parallelitet);
         AtomicReference<Throwable> fejl = new AtomicReference<>(); // Hvis der opstår en exception skal den kastes videre
+        AtomicInteger antalFejl = new AtomicInteger();
         int kørselsNr = 0;
+        CountDownLatch countDownLatch = new CountDownLatch(daisyModels.size());
         for (DaisyModel kørsel : daisyModels) {
             kørselsNr++;
             // Klodset og sikkkert nytteløst forsøg på at håndtere at båndbredden til endpointet sikkert er begrænset
             if (kørslerIgang.size()>100) try { Thread.sleep(50); } catch (Exception e) {}
-            if (Utils.debug) System.out.println(visStatus() + ". Kørsel "+kørselsNr+" af "+daisyModels.size()+ " sættes i kø.");
+            //if (Utils.debug) System.out.println(visStatus() + ". Kørsel "+kørselsNr+" af "+daisyModels.size()+ " sættes i kø.");
             kørslerIgang.put(kørsel.getId(), "afventer");
 
             final int kørselsNr_ = kørselsNr;
@@ -147,7 +149,7 @@ public class DaisyRemoteExecution {
                 try {
                     if (fejl.get() != null) return;
                     kørslerIgang.put(kørsel.getId(), "sender");
-                    System.out.println(visStatus() + ". Kørsel "+kørselsNr_+" "+kørsel.getId()+" sendes nu.");
+                    //if (Utils.debug) System.out.println(visStatus() + ". Kørsel "+kørselsNr_+" "+kørsel.getId()+" sendes nu.");
 
                     // Fjern irrelecante oplysninger fra det objekt, der sendes over netværket
                     ExecutionBatch batch = new ExecutionBatch();
@@ -161,15 +163,14 @@ public class DaisyRemoteExecution {
                     if (fejl.get() != null) return;
                     kørslerIgang.put(kørsel.getId(), "modtager0");
                     HttpResponse<ExtractedContent> response = response0.asObject(ExtractedContent.class);
+                    System.out.println("Kørsel "+kørselsNr_+" modtog svar "+response.getStatus()+" "+response.getStatusText()+" isSuccess()="+response.isSuccess());
                     kørslerIgang.put(kørsel.getId(), "modtog1");
                     if (fejl.get() != null) return;
-                    kørslerIgang.put(kørsel.getId(), "modtog2");
-                    //System.out.println(visStatus() + " kørsel "+kørselsNr_+" 4 modtag.");
+
                     if (!response.isSuccess()) {
                         System.err.println("Serverfejl for "+ kørselsNr_+" "+ kørsel.getId()+": "+response.getStatus() + " " +response.getStatusText());
                         String body = response0.asString().getBody();
-                        if (body.length()>500) body = body.substring(0, 500) + "...";
-                        System.err.println("Serverfejl body: "+body);
+                        System.err.println("Serverfejl body: "+Utils.klipStreng(body, 500));
                         // System.exit(-1);
                         kørslerIgang.put(kørsel.getId(), "modtog3fejl");
                         return;
@@ -189,30 +190,27 @@ public class DaisyRemoteExecution {
                 } catch (Throwable e) {
                     kørslerIgang.put(kørsel.getId(), "modtog6fejl");
                     System.err.println("Klientside fejl i "+kørselsNr_+" "+kørsel.getId());
+                    if (antalFejl.getAndIncrement()>20) return;
                     e.printStackTrace();
-                    if (fejl.get() != null) return;
-                    fejl.set(e);
+                    if (fejl.get()==null) fejl.set(e);
                 } finally {
                     kørslerIgang.remove(kørsel.getId());
-                    synchronized (kørslerIgang) { kørslerIgang.notifyAll(); }
+                    countDownLatch.countDown();
                 }
             };
             executorService.submit(runnable); // parallelt
             //runnable.run(); // serielt
         }
-        while (kørslerIgang.size()>0) {
-            if (Utils.debug) System.out.println(visStatus());
-            synchronized (kørslerIgang) { try { kørslerIgang.wait(5000); } catch (Exception e) { }};
-        }
-        System.out.println("DaisyRemoteExecution: Alt er afsluttet - med evt fejl="+fejl);
-        executorService.shutdown();
+
         try {
-            executorService.awaitTermination(MAX_KØRSELSTID, TimeUnit.MILLISECONDS);
+            while (!countDownLatch.await(5, TimeUnit.SECONDS)) System.out.println(visStatus());
+            System.out.println("DaisyRemoteExecution: Alt er afsluttet - med evt fejl="+fejl);
+            if (fejl.get()!=null) throw new IOException(fejl.get());
+            executorService.shutdown();
         } catch (InterruptedException e) {
             e.printStackTrace();
             throw new IOException(e);
         }
-        if (fejl.get()!=null) throw new IOException(fejl.get());
         return extractedContents;
     }
 
