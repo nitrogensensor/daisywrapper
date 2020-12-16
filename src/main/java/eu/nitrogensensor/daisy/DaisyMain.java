@@ -1,6 +1,7 @@
 package eu.nitrogensensor.daisy;
 
 
+import eu.nitrogensensor.daisy.demo.DaisyTaastrup2019TestRun;
 import eu.nitrogensensor.daisylib.DaisyModel;
 import eu.nitrogensensor.daisylib.ResultExtractor;
 import eu.nitrogensensor.daisylib.Utils;
@@ -88,7 +89,7 @@ public class DaisyMain implements Callable
       if (stiTilDaisy!=null) DaisyModel.path_to_daisy_executable = stiTilDaisy;
 
       if ("server".equals(command)) eu.nitrogensensor.daisylib.remote.Server.start();
-      else if ("testkørsel".equals(command)) DaisyTestkoersel.main(null);
+      else if ("testkørsel".equals(command)) DaisyTaastrup2019TestRun.main(null);
       else if ("remote".equals(command) || "client".equals(command)  ) {
           if (inputdirectory==null) {
               if (daisyfiles.size()!=1) {

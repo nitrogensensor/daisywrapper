@@ -2,10 +2,7 @@ package eu.nitrogensensor.daisylib;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -42,6 +39,10 @@ public class DaisyExecution {
         runParralel(daisyModels, null, null);
     }
 
+    public static void runParralel(Collection<DaisyModel> daisyModels, Path resultsDir) throws IOException {
+        runParralel(daisyModels, new ResultExtractor(), resultsDir);
+    }
+
 
     public static void runParralel(Collection<DaisyModel> daisyModels, ResultExtractor re, Path resultsDir) throws IOException {
         AtomicReference<IOException> fejl = new AtomicReference<>(); // Hvis der opstår en exception skal den kastes videre
@@ -53,9 +54,9 @@ public class DaisyExecution {
             if (Utils.debug) System.out.println(visStatus() + " kørsel "+kørselsNr+" af "+daisyModels.size()+ " startes.");
             final int kørselsNr_ = kørselsNr;
             Runnable runnable = () -> {
-                kørslerIgang.put(kørsel.getId(), "0 starter");
-                if (fejl.get() != null) return;
                 try {
+                    kørslerIgang.put(kørsel.getId(), "0 starter");
+                    if (fejl.get() != null) return;
                     kørslerIgang.put(kørsel.getId(), "3 kører");
                     kørsel.run();
                     kørslerIgang.put(kørsel.getId(), "5 skriver");
