@@ -1,4 +1,4 @@
-package eu.nitrogensensor.daisy;
+package eu.nitrogensensor.daisy.demo;
 
 
 import eu.nitrogensensor.daisylib.DaisyExecution;
@@ -12,7 +12,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 
-public class DaisyTestkoersel
+public class DaisyTaastrup2019TestRun
 {
   public static void main(String[] args) throws IOException {
     System.out.println("starter DaisyTestkoersel");

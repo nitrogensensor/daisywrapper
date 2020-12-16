@@ -3,7 +3,6 @@ package eu.nitrogensensor.daisylib;
 import java.io.*;
 import java.net.URI;
 import java.nio.file.*;
-import java.security.MessageDigest;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
@@ -170,4 +169,9 @@ public class Utils {
         }
     }
 
+    public static String klipStreng(Object data, int maxLgd) {
+        String str = data==null?"null":data.toString();
+        if (str.length()<=maxLgd) return str;
+        return str.substring(0, maxLgd-3)+"...";
+    }
 }

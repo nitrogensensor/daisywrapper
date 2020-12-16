@@ -163,7 +163,7 @@ public class Server {
             antalProcesser.acquire();
             //System.out.println("Server sim "+ctx.url());
             String body = ctx.body();
-            log.fine("Server sim " + (body.length()<90?body:body.substring(0, 80)));
+            log.fine("Server sim " + Utils.klipStreng(body, 90));
             ExecutionBatch batch = JavalinJson.fromJson(body, ExecutionBatch.class);
             if (batch == null) log.fine("Ingen batch!!");
             else {
@@ -193,7 +193,7 @@ public class Server {
                     // evt andre samtidige kørsler skriver i de samme outputfiler
                     batch.kørsel.copyToDirectory(Files.createTempDirectory("tmpkørsel_" + batch.kørsel.getId().replaceAll("[^A-Za-z0-9_]", "_")+"_"));
                     //batch.resultExtractor.tjekResultatIkkeAlleredeFindes(batch.kørsel.directory); // burde egentlig ikke være nødvendigt, da det også tjekkes af klienten, men man kan ikke stole på klienter...
-                    //log.fine("batch.kørsel.directory = " + batch.kørsel.directory);
+                    log.fine("Kører "+batch.kørsel.getId()+ " ("+antalProcesser.availablePermits() + "ledige processer) batch.kørsel.directory = " + batch.kørsel.directory);
 
                     // HER KØRES MODELLEN !!!!
                     batch.kørsel.run();

@@ -1,6 +1,7 @@
 package eu.nitrogensensor.daisy;
 
 
+import eu.nitrogensensor.daisy.demo.DaisyTaastrup2019TestRun;
 import eu.nitrogensensor.daisylib.DaisyModel;
 import eu.nitrogensensor.daisylib.ResultExtractor;
 import eu.nitrogensensor.daisylib.Utils;
@@ -18,7 +19,7 @@ public class DaisyMain implements Callable
 {
     public static final String VERSION = "0.902 (10 nov 2020)";
 //    @CommandLine.Parameters(index = "0", description = "server, run, remote eller testkørsel." )
-    @CommandLine.Parameters(index = "0", description = "remote or server" )
+    @CommandLine.Parameters(index = "0", description = "remote/client to run Daisy remotely, or 'server' to start a calculation server" )
   String command;
 
   //@CommandLine.Option(names = {"-d", "--inputdirectory"}, description = "Mappen med Daisy-filerne, der skal køres", defaultValue = ".")
@@ -88,8 +89,8 @@ public class DaisyMain implements Callable
       if (stiTilDaisy!=null) DaisyModel.path_to_daisy_executable = stiTilDaisy;
 
       if ("server".equals(command)) eu.nitrogensensor.daisylib.remote.Server.start();
-      else if ("testkørsel".equals(command)) DaisyTestkoersel.main(null);
-      else if ("remote".equals(command)) {
+      else if ("testkørsel".equals(command)) DaisyTaastrup2019TestRun.main(null);
+      else if ("remote".equals(command) || "client".equals(command)  ) {
           if (inputdirectory==null) {
               if (daisyfiles.size()!=1) {
                   System.err.println("Please use -d to provide the input directory");

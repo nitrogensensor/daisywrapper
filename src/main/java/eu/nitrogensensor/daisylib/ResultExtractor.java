@@ -47,7 +47,18 @@ public class ResultExtractor {
         for (String fn : kopiérFiler) {
             Path fil = fromDirectory.resolve(fn);
             if (!Files.isDirectory(fil)) Files.copy(fromDirectory.resolve(fn), toDirectory.resolve(fn));
-            else throw new IOException("Mapper er endnu ikke understøttet i kopiérFiler: "+kopiérFiler);
+            else try (Stream<Path> stream = Files.walk(fil)) {
+                stream.forEach(fra -> {
+                    if (!Files.isDirectory(fra)) try {
+                        Path til = toDirectory.resolve(fromDirectory.relativize(fra));
+                        Files.createDirectories(til.getParent());
+                        Files.copy(fra, til);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        throw new RuntimeException(e.getMessage(), e);
+                    }
+                });
+            }
         }
 
         Map<String, CsvFile> readOutput = new LinkedHashMap<String, CsvFile>();
