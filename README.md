@@ -5,21 +5,34 @@ This liberates the user of installing Daisy locally, and enables execution on a 
 either on a self-hosted dedicated hardware or scaled out in the cloud, using Google Cloud Run.
 
 
-# Usage
+### Getting the executable.
 
-### Execute Daisy remotely
+We regularly build a new executable, which is available at https://nitrogen.saluton.dk/resultat/diverse/daisy.jar.
 
+If you want to compile it yourself you need to clone the repo and issue
+```
+./gradlew build
+```
+After compilation the wrapper is in daisy/build/libs/daisy.jar. 
+
+
+## Usage - how to execute Daisy remotely
+
+The wrapper is a command line tool. 
+Assuming you that have daisy.jar in your current working directory and that there is 
+a subdirectory called src/test/resources/TestData/ (relative to your current working directory) 
+containing Exercise01.dai the following command
 ```
 java -jar daisy.jar remote -d src/test/resources/TestData/ Exercise01.dai
 ``` 
-A directory is created (Exercise01/) containing the result of the execution.
+will execute Daisy remtely and create a directory (Exercise01/) containing the result of the execution.
 
 #### Options for remote execution
 
 If run as 'remote' (client) usage is as follows:
 
 ```
-java -jar daisy.jar remote  [-chnvV] -d=<inputdirectory> [-o=<outputdirectory>] [-u=<remoteEndpointUrl>]
+java -jar daisy.jar client  [-chnvV] -d=<inputdirectory> [-o=<outputdirectory>] [-u=<remoteEndpointUrl>]
              [-of=<outputfiles>]... [-r=<replace>]... [<daisyfiles>...]
       [<daisyfiles>...]     Daisy fil(es) to be executed in the input directory
 
@@ -44,16 +57,11 @@ java -jar daisy.jar remote  [-chnvV] -d=<inputdirectory> [-o=<outputdirectory>] 
   -h, --help                Show this help message and exit.
 
 ``` 
-##### Examples
 
-
-
-A directory is created (Exercise01/) containing the result of the execution.
 
 #### Options for the execution server 
 
 If run as a server the usage is as follows:
-
 
 ```
 java -jar daisy.jar server 
@@ -65,9 +73,14 @@ java -jar daisy.jar server
   -v, --verbose               Print debugging information
 
   -V, --version               Print version information and exit.
-
-
 ``` 
+
+The server runs only on Linux (and possibly on Mac), 
+If -p is not provided it assumes that Daisy is installed in /opt/daisy/.
+
+If you have problems, please see the Dockerfile which gives a complete 
+description on how to set up an execution server.
+
 
 
 
