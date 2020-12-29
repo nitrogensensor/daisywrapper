@@ -163,7 +163,7 @@ public class Server {
             antalProcesser.acquire();
             //System.out.println("Server sim "+ctx.url());
             String body = ctx.body();
-            log.fine("Server sim " + Utils.klipStreng(body, 90));
+            log.fine("Server sim " + Utils.klipStreng(body, 800));
             ExecutionBatch batch = JavalinJson.fromJson(body, ExecutionBatch.class);
             if (batch == null) log.fine("Ingen batch!!");
             else {

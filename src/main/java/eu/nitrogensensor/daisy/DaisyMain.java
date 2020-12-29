@@ -107,6 +107,8 @@ public class DaisyMain implements Callable
           ArrayList<DaisyModel> daisyModels = new ArrayList<>();
           for (String daisyfil : daisyfiles) {
               DaisyModel dm = new DaisyModel(inputdirectory, daisyfil);
+              //  TODO resultmappe ignoreres i opload. Lige nu oploades result med, fordi den ligger i inputmappen og derfor kan en gammel kørsel ikke genbruges
+              //dm.ignorérDenneMappe(outputdirectory);
               if (daisyfil.endsWith(".dai")) daisyfil = daisyfil.substring(0, daisyfil.length()-4);
               dm.setId(daisyfil);
               daisyModels.add(dm);

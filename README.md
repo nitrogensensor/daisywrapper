@@ -4,7 +4,7 @@ The Daisy wrapper wraps [Daisy](https://daisy.ku.dk) executions and runs them re
 This liberates the user of installing Daisy locally, and enables execution on a remote server, 
 either on a self-hosted dedicated hardware or scaled out in the cloud, using Google Cloud Run.
 
-This module wraps the daisy language in an esy to use CLI for
+This module wraps the daisy execution in a command-line interface CLI for
 quickly simulating many different but similar simulations. The module contains a
 CLI interface to a client which can run daisy locally or remotely as well as a
 server which can serve the requests of the client.
@@ -147,6 +147,8 @@ Assuming that the text `(dry_bulk_density 1.53 [g/cm^3])` is somewhere in
 the `Exercise01.dai` file we can replace that with values 1.40 up to 1.50 using:
 
 ```
+ArrayList<DaisyModel> daisyModels = new ArrayList<>();
+
 DaisyModel copy =d.createCopy()
             .setId("dbd_1.40")
             .replace("(dry_bulk_density 1.53 [g/cm^3])", "(dry_bulk_density 1.40 [g/cm^3])");

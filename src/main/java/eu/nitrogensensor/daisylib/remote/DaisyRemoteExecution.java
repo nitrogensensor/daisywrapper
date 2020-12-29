@@ -162,13 +162,26 @@ public class DaisyRemoteExecution {
                     RequestBodyEntity response0 = Unirest.post(remoteEndpointUrl + "/sim/").body(batch);
                     if (fejl.get() != null) return;
                     kørslerIgang.put(kørsel.getId(), "modtager0");
+                    //System.out.println("response0.asString().getBody() = " + response0.asString().getBody());
                     HttpResponse<ExtractedContent> response = response0.asObject(ExtractedContent.class);
                     System.out.println("Kørsel "+kørselsNr_+" modtog svar "+response.getStatus()+" "+response.getStatusText()+" isSuccess()="+response.isSuccess());
                     kørslerIgang.put(kørsel.getId(), "modtog1");
                     if (fejl.get() != null) return;
 
                     if (!response.isSuccess()) {
-                        System.err.println("Serverfejl for "+ kørselsNr_+" "+ kørsel.getId()+": "+response.getStatus() + " " +response.getStatusText());
+                        fejl.set(new IOException(response.getStatusText()));
+                        System.err.println("(Server)fejl for "+ kørselsNr_+" "+ kørsel.getId()+": "+response.getStatus() + " " +response.getStatusText());
+                        /*
+                        System.out.flush();
+                        System.err.flush();
+                        Thread.sleep(100);
+                        response.getParsingError().ifPresent(e -> {
+                            if (antalFejl.getAndIncrement()>20) return;
+                            e.printStackTrace();
+                            System.err.println("Original body: " + e.getOriginalBody());
+                        });
+                        Files.write(Paths.get("/tmp/FejlFejl.bin"), response0.asBytes().getBody());
+                         */
                         String body = response0.asString().getBody();
                         System.err.println("Serverfejl body: "+Utils.klipStreng(body, 500));
                         // System.exit(-1);
