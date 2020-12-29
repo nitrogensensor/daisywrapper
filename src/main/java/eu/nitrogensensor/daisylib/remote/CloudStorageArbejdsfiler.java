@@ -18,7 +18,7 @@ class CloudStorageArbejdsfiler {
 
     public CloudStorageArbejdsfiler() {
         try {
-            String jsonPath = "/home/j/Projekter/NitrogenSensor/gitlab/nitrogensensor/daisy/daisykørsel-arbejdsfiler-serviceAccountCredentials.json";
+            String jsonPath = "daisykørsel-arbejdsfiler-serviceAccountCredentials.json";
             // You can specify a credential file by providing a path to GoogleCredentials.
             // Otherwise credentials are read from the GOOGLE_APPLICATION_CREDENTIALS environment variable.
             GoogleCredentials credentials = GoogleCredentials.fromStream(new FileInputStream(jsonPath))

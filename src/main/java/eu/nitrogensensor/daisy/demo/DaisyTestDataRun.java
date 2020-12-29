@@ -19,7 +19,7 @@ public class DaisyTestDataRun
   public static void main(String[] args) throws IOException {
     System.out.println("starter DaisyTestkoersel");
 
-    DaisyModel d = new DaisyModel("daisy/src/test/resources/TestData", "Exercise01.dai");
+    DaisyModel d = new DaisyModel("src/test/resources/TestData", "Exercise01.dai");
     d.replace("(stop *)", "(stop 1995 1 1)");   // Set stop date
     //d.run();  // executes in the source directory - not recommended - use .copyToDirectory() first.
 

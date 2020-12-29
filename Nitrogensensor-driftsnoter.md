@@ -4,26 +4,21 @@
 
 ## Lokal kommandolinjetest uden for Docker
 
-Fra overmappen
 ```
-cd ..
-./gradlew jar; 
-java -jar daisy/build/libs/daisy.jar testkørsel
-java -jar daisy/build/libs/daisy.jar server
-java -jar daisy/build/libs/daisy.jar remote -u http://localhost:8080 -d /home/j/Hent/mads replaced_Sim_4_RefSim.dai -o xxx
+./gradlew jar
+java -jar build/libs/daisy.jar testkørsel
+java -jar build/libs/daisy.jar server
+java -jar daisy.jar client -d src/test/resources/TestData/ Exercise01.dai
 ```
-Åbn http://localhost:8080
 
 ## Lokal test i Docker
 Tjek Dockerfile
 
 docker build  --tag=daisykoersel .
-docker run -p 8080:8080 -t -i daisykoersel
-Åbn http://localhost:8080
+docker run -p 3210:3210 -t -i daisykoersel
+Åbn http://localhost:3210
 
 
-docker run -p 8080:8080 -it daisykoersel . 
-docker run -p 8080:8080 -d daisykoersel .
 
 ## Læg op på Google Cloud Run
 
@@ -37,6 +32,8 @@ gcloud config set run/region europe-north1
 gcloud builds submit --tag gcr.io/nitrogensensor/daisykoersel && \
 gcloud run deploy --image gcr.io/nitrogensensor/daisykoersel --platform managed --allow-unauthenticated daisykoersel
 
+
+## Diverse noter
 ### Lagring i Google Cloud bucket (til kørselsfiler)
 
 Oprette

@@ -92,7 +92,7 @@ public class DaisyMain implements Callable
       else if ("testkørsel".equals(command)) DaisyTaastrup2019TestRun.main(null);
       else if ("remote".equals(command) || "client".equals(command)  ) {
           if (inputdirectory==null) {
-              if (daisyfiles.size()!=1) {
+              if (daisyfiles==null || daisyfiles.size()!=1) {
                   System.err.println("Please use -d to provide the input directory");
                   return null;
               }

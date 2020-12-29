@@ -17,7 +17,7 @@ public class DaisyTaastrup2019TestRun
   public static void main(String[] args) throws IOException {
     System.out.println("starter DaisyTestkoersel");
 
-    DaisyModel d = new DaisyModel("daisy/src/test/resources/Taastrup 2019/dtu_model", "Setup_DTU_Taastrup.dai");
+    DaisyModel d = new DaisyModel("src/test/resources/Taastrup 2019/dtu_model", "Setup_DTU_Taastrup.dai");
 
     d.replace("(stop *)", "(stop 2015 8 20)"); // for hurtigere kørsel
     //d.replace("(path *)", "(path \"/opt/daisy/sample\" \"/opt/daisy/lib\" \".\" \"./common\")");
@@ -50,10 +50,10 @@ public class DaisyTaastrup2019TestRun
     // re.addFile("."); // hvis man vil have alle filer med tilbage
 
     long tid = System.currentTimeMillis();
-    //DaisyExecution.runSerial(daisyModels, re, Paths.get("daisy/run/serRes"));
-    //DaisyExecution.runParralel(daisyModels, re, Paths.get("daisy/run/parRes"));
+    //DaisyExecution.runSerial(daisyModels, re, Paths.get("run/serRes"));
+    //DaisyExecution.runParralel(daisyModels, re, Paths.get("run/parRes"));
 
-    //DaisyRemoteExecution.runSerial(daisyModels, re, Paths.get("daisy/run/remoteRes"));
+    //DaisyRemoteExecution.runSerial(daisyModels, re, Paths.get("run/remoteRes"));
     //DaisyRemoteExecution.setRemoteEndpointUrl("http://localhost:3210/");
     //DaisyRemoteExecution.setRemoteEndpointUrl("https://daisykoersel-6dl4uoo23q-lz.a.run.app");
     DaisyRemoteExecution.runParralel(daisyModels, re, Paths.get("/tmp/daisy/run/remoteParRes"));
@@ -77,7 +77,7 @@ public class DaisyTaastrup2019TestRun
             "";
     // kørsler,       samtidig,                           tid,              dato, type
     // Antal kørsler, Samtidige Kørsler I gang Cloud Run, kørselstid (sek), dato, type
-    Files.write(Paths.get("daisy/DaisyTestkoersel_performancelog.csv"), linje.getBytes(), StandardOpenOption.APPEND);
+    Files.write(Paths.get("DaisyTestkoersel_performancelog.csv"), linje.getBytes(), StandardOpenOption.APPEND);
 
 /*
 Omkostninger - se

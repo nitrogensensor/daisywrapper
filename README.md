@@ -28,9 +28,13 @@ We regularly build a new executable, which is available at https://nitrogen.salu
 
 If you want to compile it yourself you need to clone the repo and issue
 ```
-./gradlew build
+./gradlew jar
 ```
-After compilation the wrapper is in daisy/build/libs/daisy.jar. 
+After compilation the wrapper executable is in build/libs/daisy.jar - you may want to copy it to the root of the project:
+
+```
+cp build/libs/daisy.jar .
+```
 
 
 ## Usage - how to execute Daisy on a remote server
@@ -45,7 +49,7 @@ called src/test/resources/TestData/
 
 then the following command
 ```
-java -jar daisy.jar remote -d src/test/resources/TestData/ Exercise01.dai
+java -jar daisy.jar client -d src/test/resources/TestData/ Exercise01.dai
 ``` 
 will execute Daisy remotely and create a directory (Exercise01/) containing the result of the execution.
 
@@ -83,7 +87,7 @@ java -jar daisy.jar client [-chnvV] -d=<inputdirectory> [-o=<outputdirectory>] [
 ### Example
 
 ```
-java -jar daisy.jar remote -r '(stop *),(stop 2015 8 20)' -d src/test/resources/TestData/ Exercise01.dai
+java -jar daisy.jar remote -r '(stop *),(stop 2008 8 20)' -d src/test/resources/TestData/ Exercise01.dai
 ``` 
 
 
@@ -108,6 +112,13 @@ The server runs only on Linux (and possibly on Mac),
 If -p is not provided it assumes that Daisy is installed in the default 
 directory on Linux (which is /opt/daisy/).
 
+You can test your server with
+
+```
+java -jar daisy.jar remote -u http://localhost:3210/ -d src/test/resources/TestData/ Exercise01.dai
+```
+
+
 If you have problems, please see the Dockerfile which gives a complete 
 description on how to set up an execution server.
 
@@ -122,7 +133,7 @@ description on how to set up an execution server.
 import eu.nitrogensensor.daisylib.*;
 ...
 
-DaisyModel d = new DaisyModel("daisy/src/test/resources/TestData", "Exercise01.dai");
+DaisyModel d = new DaisyModel("src/test/resources/TestData", "Exercise01.dai");
 d.replace("(stop *)", "(stop 1995 1 1)");   // Set stop date
 d.run();
 ```

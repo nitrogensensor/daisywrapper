@@ -9,7 +9,7 @@ FROM gradle:5.5.1-jdk11 as builder
 
 COPY build.gradle .
 COPY settings.gradle .
-COPY daisy daisy
+COPY src src
 
 ## Brug gradle-wrapperen der er med i projektet
 #COPY gradlew .
@@ -33,8 +33,7 @@ RUN apt update && apt install libcxsparse3 -y
 RUN curl https://daisy.ku.dk/download/daisy_5.88_amd64.deb > daisy.deb && apt install ./daisy.deb && rm -f daisy.deb
 
 # Kopier JAR fra builder stage.
-COPY --from=builder /home/gradle/daisy/build/libs/daisy.jar /daisy.jar
-COPY daisy daisy
+COPY --from=builder /home/gradle/build/libs/daisy.jar /daisy.jar
 
 
 # Start serveren
@@ -42,4 +41,4 @@ COPY daisy daisy
 CMD [ "java", "-jar", "/daisy.jar", "server" ]
 
 
-# docker run -p 8080:8080 -t -i daisykoersel
+# docker run -p 3210:3210 -t -i daisykoersel
