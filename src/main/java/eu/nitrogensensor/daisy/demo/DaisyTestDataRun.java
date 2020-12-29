@@ -38,7 +38,7 @@ public class DaisyTestDataRun
     // DaisyExecution.runParralel(daisyModels);
 
     // Remote execution - optionally set up remote server endpoint
-    // DaisyRemoteExecution.setRemoteEndpointUrl("http://nitrogen.saluton.dk:3210/");
+    // DaisyRemoteExecution.setRemoteEndpointUrl("http://daisy.nitrogensensor.eu:3210/"); // http://nitrogen.saluton.dk:3210/
     // DaisyRemoteExecution.setRemoteEndpointUrl("http://localhost:3210/");
     // DaisyRemoteExecution.setRemoteEndpointUrl("https://daisykoersel-6dl4uoo23q-lz.a.run.app");
 

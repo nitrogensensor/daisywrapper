@@ -77,7 +77,7 @@ java -jar daisy.jar client [-chnvV] -d=<inputdirectory> [-o=<outputdirectory>] [
                             -r '(stop *),(stop 2015 8 20)' sets the stop time for the simulation.
 
   -u, --remote-endpoint-url URL to the endpoint of the server performing the Daisy execution. 
-                            Default: http://nitrogen.saluton.dk:3210
+                            Default: http://daisy.nitrogensensor.eu:3210
 
   -v, --verbose             Print debugging information
   -V, --version             Print version information and exit.

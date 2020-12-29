@@ -71,7 +71,7 @@ public class DaisyMain implements Callable
   @CommandLine.Option(names = {"-u", "--remote-endpoint-url"},
 //          description = "remote: URL til endpoint på serveren, der udfører Daisy-kørslerne",
           description = "remote: URL to the endpoint of the server performing the Daisy execution",
-          defaultValue = "http://nitrogen.saluton.dk:3210")
+          defaultValue = "http://daisy.nitrogensensor.eu:3210")
   private String remoteEndpointUrl;
 
   public static void main(String[] args)  {

@@ -23,7 +23,7 @@ public class DaisyRemoteExecution {
 
     private static Gson gson = MyGsonPathConverter.buildGson();
     //private static String remoteEndpointUrl = "https://daisykoersel-6dl4uoo23q-lz.a.run.app";
-    private static String remoteEndpointUrl = "http://nitrogen.saluton.dk:3210";
+    private static String remoteEndpointUrl = "http://daisy.nitrogensensor.eu:3210";
 
     public static void setRemoteEndpointUrl(String url) {
         while (url.endsWith("/")) url = url.substring(0, url.length()-1); // fjern afsluttende /-streger

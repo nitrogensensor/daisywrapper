@@ -78,7 +78,7 @@ public class Server {
             log.warning(e.toString());
             e.printStackTrace();
         });
-        app.get("/", ctx -> ctx.contentType("text/html").result("<html><body>Endpoints er skjulte. Du kan evt spoerge på <a href='json'>json</a>"));
+        app.get("/", ctx -> ctx.contentType("text/html").result("<html><body>This is a Daisywrapper server endpoint. <br/>Please contact NitrogenSensor.eu for further information, including how to use such an endpoint and how to set up new endpoints. "));
         app.get("/json", ctx -> ctx.result("Hello World"));
         app.post("/uploadZip", ctx -> upload(ctx));
         if (USIKKER_KØR) app.get("/koer", ctx -> kørKommando(ctx, null));
