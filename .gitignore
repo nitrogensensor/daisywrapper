@@ -1,0 +1,7 @@
+/.gradle/
+/.idea/
+/build/
+/daisykørsel-arbejdsfiler-serviceAccountCredentials.json
+/upload/
+/src/test/resources/TestData/daisy.log
+/src/test/resources/TestData/daisyErr.log
