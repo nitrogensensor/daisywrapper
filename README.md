@@ -24,7 +24,7 @@ To run the server Daisy must be installed on the machine.
 
 ### Getting the executable.
 
-We regularly build a new executable, which is available at https://nitrogen.saluton.dk/resultat/diverse/daisy.jar.
+We regularly build a new executable, which is available at https://daisy.nitrogensensor.eu/resultat/diverse/daisy.jar.
 
 If you want to compile it yourself you need to clone the repo and issue
 ```
@@ -36,6 +36,11 @@ After compilation the wrapper executable is in build/libs/daisy.jar - you may wa
 cp build/libs/daisy.jar .
 ```
 
+### Versions and updates
+
+Currently we use Daisy for Linux version 5.88 (https://daisy.ku.dk/download/linux/) in Google Cloud.
+We don't expect any problems upgrading Daisy to newer versions, 
+as the wrapper in reality is a generic mechansm that could distribute variations of any set of files to any external executable.
 
 ## Usage - how to execute Daisy on a remote server
 
