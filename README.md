@@ -1,17 +1,24 @@
 # Daisywrapper
 The Daisy wrapper wraps [Daisy](https://daisy.ku.dk) executions and runs them remotely.
 
-TLDR: You don't need to run Daisy on your own desktop PC anymore - your simulations are executed in parrallel on remote servers.
+TLDR: You don't need to install/run Daisy on your own PC anymore - your simulations are better executed in parrallel on remote powerful servers.
 
 The servers can either be self-hosted on dedicated hardware or scaled out in the cloud.
-The default server runs at DTU Diplom and can run 16 simulations in parrallel. If you need more then the cloud solution enables you to run several thousand simulations in parralel, only paying for the actual CPU time used.
+The default server runs at DTU Diplom and can run 16 simulations in parrallel. If you need more the cloud solution enables you to run several thousand simulations in parralel, only paying for the actual CPU time used.
+
+In-depth documentation, inclusive
+- how to set up your own server, 
+- how to set up the Google Cloud Run solution, scaling and pricing
+- and how to use it as a Java library
+
+is available [here](documentation).
 
 
 # Quickstart - how to execute Daisy on a remote server
 
 Here is what you need to get started.
 
-In-depth documentation, inclusive how to run a server and how to use it as a Java library, [is available](documentation)
+If you use R there is an [R Studio](https://www.rstudio.com/) notebook that[does it all for you](documentation/rstudio_notebook.Rmd).
 
 
 ## Getting the wrapper.
