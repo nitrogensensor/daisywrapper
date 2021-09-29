@@ -1,0 +1,39 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+
+# Some examples of using the Daisy wrapper for remote execution
+
+
+Read libraries
+
+```{r}
+require(ggplot2)
+```
+
+Download daisy.jar so we can run simulations remotely
+
+```{r}
+getwd()
+daisyJar <- "daisy.jar"
+if (!file.exists(daisyJar)) download.file("https://nitrogen.saluton.dk/resultat/diverse/daisy.jar", daisyJar, mode="wb")
+```
+
+
+# Run a single daisy simulation
+This chunk runs daisy on Exercise01.dai. Make sure that you have that file in the same directory as this script. 
+
+```{r} 
+getwd()
+
+args <-  c("-jar", daisyJar, " remote Exercise01.dai")
+paste(args, collapse = ' ')
+
+system2("java", args = args)
+```
+
+# Load daisy results into dataframes
+
+TBD

@@ -77,7 +77,7 @@ public class DaisyTaastrup2019TestRun
             "";
     // kørsler,       samtidig,                           tid,              dato, type
     // Antal kørsler, Samtidige Kørsler I gang Cloud Run, kørselstid (sek), dato, type
-    Files.write(Paths.get("DaisyTestkoersel_performancelog.csv"), linje.getBytes(), StandardOpenOption.APPEND);
+    Files.write(Paths.get("documentation/DaisyTestkoersel_performancelog.csv"), linje.getBytes(), StandardOpenOption.APPEND);
 
 /*
 Omkostninger - se

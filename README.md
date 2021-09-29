@@ -18,7 +18,7 @@ is available [here](documentation).
 
 Here is what you need to get started.
 
-If you use R there is an [R Studio](https://www.rstudio.com/) example notebook that [does it all for you](documentation/rstudio_notebook.Rmd).
+If you use R there is an [R Studio](https://www.rstudio.com/) example notebook that [does it all for you](src/test/resources/TestData/rstudio_notebook.Rmd).
 
 
 ## Getting the wrapper.
