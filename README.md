@@ -65,8 +65,7 @@ java -jar daisy.jar client [-chnvV] -d=<inputdirectory> [-o=<outputdirectory>] [
                             Each substitution consists of a search term and a substitution string separated by commas. Examples:
                             -r _sand_,37.1   replaces '_sand_' with '37.1'
                             -r _sand_:_humus_,10:90,20:80,30:70,40:60,50:50  gives 5 runs where sand rises from 10 to 50 and humus falls from 90 to 50 in steps of 10
-
-[comment]: <> (                            -r '&#40;stop *&#41;,&#40;stop 2015 8 20&#41;' sets the stop time for the simulation.)
+                            -r '(stop *),(stop 2015 8 20)' sets the stop time for the simulation.
 
   -u, --remote-endpoint-url URL to the endpoint of the server performing the Daisy execution. 
                             Default: http://daisy.nitrogensensor.eu:3210
