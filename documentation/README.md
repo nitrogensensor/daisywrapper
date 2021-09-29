@@ -1,3 +1,10 @@
+The Daisy wrapper wraps [Daisy](https://daisy.ku.dk) executions and runs them remotely.
+
+This module wraps the daisy execution in a command-line interface CLI for
+quickly simulating many different but similar simulations. The module contains a
+CLI interface to a client which can run daisy locally or remotely as well as a
+server which can serve the requests of the client.
+
 # Using Daisywrapper as a Java library
 
 ## Client

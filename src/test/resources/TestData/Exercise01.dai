@@ -10,7 +10,7 @@
 ;;  Defining soil horizons of a fine sandy loam
 (defhorizon		 "Ap F.S.L." FAO3
     "Data from Jacobsen 1983"
-    (dry_bulk_density 1.53 [g/cm^3]) 
+    (dry_bulk_density 1.53 [g/cm^3])
     (clay 0.113 [])
     (silt 0.277 [])
     (sand 0.584 [])
