@@ -12,8 +12,7 @@ server which can serve the requests of the client.
 # Quickstart
 
 Here is what you need to get started.
-In-depth documentation, inclusive how to run a server and how to use it as a Java library, is available at [documentation].
-
+In-depth documentation, inclusive how to run a server and how to use it as a Java library, [is available](documentation)
 
 ### Getting the executable.
 
