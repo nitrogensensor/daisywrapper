@@ -1,25 +1,27 @@
 # Daisywrapper
 The Daisy wrapper wraps [Daisy](https://daisy.ku.dk) executions and runs them remotely.
 
-This liberates the user of installing Daisy locally, and enables execution on a remote server, 
-either on a self-hosted dedicated hardware or scaled out in the cloud, using Google Cloud Run.
+TLDR: You don't need to run Daisy on your own desktop PC anymore - your simulations are executed in parrallel on remote servers.
 
-This module wraps the daisy execution in a command-line interface CLI for
-quickly simulating many different but similar simulations. The module contains a
-CLI interface to a client which can run daisy locally or remotely as well as a
-server which can serve the requests of the client.
+The servers can either be self-hosted on dedicated hardware or scaled out in the cloud.
+The default server runs at DTU Diplom and can run 16 simulations in parrallel. If you need more then the cloud solution enables you to run several thousand simulations in parralel, only paying for the actual CPU time used.
 
-# Quickstart
+
+# Quickstart - how to execute Daisy on a remote server
 
 Here is what you need to get started.
+
 In-depth documentation, inclusive how to run a server and how to use it as a Java library, [is available](documentation)
 
-### Getting the executable.
 
-Download https://daisy.nitrogensensor.eu/resultat/diverse/daisy.jar and save it in a known place on your computer.
+## Getting the wrapper.
+
+You will need to install Java (JRE).
+
+Then download https://daisy.nitrogensensor.eu/resultat/diverse/daisy.jar and save it in a known place on your computer.
 
 
-## Usage - how to execute Daisy on a remote server
+## Usage
 
 The wrapper is a command line tool. 
 
