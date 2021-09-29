@@ -5,22 +5,16 @@ quickly simulating many different but similar simulations. The module contains a
 CLI interface to a client which can run daisy locally or remotely as well as a
 server which can serve the requests of the client.
 
-# Using Daisywrapper as a Java library
 
-## Client
-The client can be found at `src/main/java/eu/nitrogensensor/daisy/DaisyMain.java`
-The client can be used without having Daisy installed _if_ the remote option has been
-chosen, and the server has daisy installed.
+# Daisy versions and updates
 
-
-## Server
-The server code can be found at
-`src/main/java/eu/nitrogensensor/daisylib/remote/Server.java`.
-To run the server Daisy must be installed on the machine.
+Currently we use Daisy for Linux version 5.88 (https://daisy.ku.dk/download/linux/) in Google Cloud.
+We don't expect any problems upgrading Daisy to newer versions,
+as the wrapper in reality is a generic mechansm that could distribute variations of any set of files to any external executable.
 
 
 
-## Compiling the executable.
+# Compiling the executable.
 
 If you want to compile it yourself you need to clone the repo and issue
 ```
@@ -33,17 +27,11 @@ cp build/libs/daisy.jar .
 ```
 
 
-### Versions and updates
+# How to set up a Daisy execution server
 
-Currently we use Daisy for Linux version 5.88 (https://daisy.ku.dk/download/linux/) in Google Cloud.
-We don't expect any problems upgrading Daisy to newer versions,
-as the wrapper in reality is a generic mechansm that could distribute variations of any set of files to any external executable.
+To run an execution server Daisy must (surprise!) be installed on the machine. 
 
-
-
-# Usage - how to set up a Daisy execution server
-
-To run an execution server the usage is as follows:
+The usage is as follows:
 
 ```
 java -jar daisy.jar server 
@@ -58,9 +46,11 @@ java -jar daisy.jar server
   -V, --version               Print version information and exit.
 ``` 
 
-The server runs only on Linux (and possibly on Mac), 
+The server runs only on Linux (and possibly on Mac).
+
 If -p is not provided it assumes that Daisy is installed in the default 
 directory on Linux (which is /opt/daisy/).
+
 
 You can test your server with
 
@@ -75,7 +65,22 @@ description on how to set up an execution server.
 
 
 
-# Usage as a Java library
+
+# Using Daisywrapper as a Java library
+[![](https://jitpack.io/v/nitrogensensor/daisywrapper.svg)](https://jitpack.io/#nitrogensensor/daisywrapper)
+
+To use it as library see instructions on https://jitpack.io/#nitrogensensor/daisywrapper/v1.0 for your favorite build tool-
+
+
+
+# Client
+The client can be found at `src/main/java/eu/nitrogensensor/daisy/DaisyMain.java`
+
+The client can be used without having Daisy installed _if_ the remote option has been
+chosen, and the server has daisy installed.
+
+
+## Example code
 
 
 
@@ -93,10 +98,10 @@ output files will be written there as well by Daisy.
 It only works if you have Daisy installed.
 
 (NOTE: It is not recommended mix source and output - take a 
-copy of the entire source directory, using
-`copyToDirectory()`. 
+copy of the entire source directory, using `copyToDirectory()`. 
 This operation is extremely fast and does not take up space as 
 it is using Unix symbolic links. It only works on Linux and possibly Mac).
+
 
 ## Remote parallel runs
 
@@ -146,7 +151,17 @@ for (double dry_bulk_density=1.40; dry_bulk_density<1.60; dry_bulk_density+=0.02
 
 DaisyExecution.runParralel(daisyModels)
 ```
+
 The code above will run the ten daisy-simulations in parallel - as many at the 
 same time as the number of cores in your PC.
+
+
+
+
+# Server
+The server code can be found at
+`src/main/java/eu/nitrogensensor/daisylib/remote/Server.java`.
+
+To run the server Daisy must be installed on the machine.
 
 
