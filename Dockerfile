@@ -1,25 +1,18 @@
+###
 ### Byggeprocesen
-# Det er
-#FROM gradle:5.1 as builder
+###
 FROM gradle:5.5.1-jdk11 as builder
-#FROM openjdk:12-alpine as builder
-
-# Kun Daisy er nødvendig
-#COPY . .
 
 COPY build.gradle .
 COPY settings.gradle .
 COPY src src
 
-## Brug gradle-wrapperen der er med i projektet
-#COPY gradlew .
-#COPY gradle gradle
-#RUN ./gradlew clean build --no-daemon
-
-# Spring over tests ( -x test) - Daisy er ikke installeret på byggemaskinen
+# Spring over tests ( -x test) - da Daisy er ikke installeret på byggemaskinen kan testsne ikke køre
 RUN gradle clean build -x test --no-daemon
 
-# Under kørsel
+###
+### Under kørsel
+###
 FROM adoptopenjdk/openjdk11:jre
 
 # Bruger vi FROM adoptopenjdk/openjdk11 uden :jre fylder det 140 MB mere - se
@@ -30,7 +23,7 @@ FROM adoptopenjdk/openjdk11:jre
 
 
 RUN apt update && apt install libcxsparse3 -y
-RUN curl https://daisy.ku.dk/download/daisy_5.88_amd64.deb > daisy.deb && apt install ./daisy.deb && rm -f daisy.deb
+RUN curl https://daisy.ku.dk/download/daisy_6.25_amd64.deb > daisy.deb && apt install ./daisy.deb && rm -f daisy.deb
 
 # Kopier JAR fra builder stage.
 COPY --from=builder /home/gradle/build/libs/daisy.jar /daisy.jar

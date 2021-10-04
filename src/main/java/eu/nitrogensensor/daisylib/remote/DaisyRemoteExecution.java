@@ -91,7 +91,8 @@ public class DaisyRemoteExecution {
         Path resultDir = resultsDir.resolve(extractedContent.id.replaceAll("[^A-Za-z0-9_]", "_"));
         Utils.sletMappe(resultDir);
         Files.createDirectories(resultDir);
-        if (Utils.debug) System.out.println("Skriver " +extractedContent.id+ " til " + resultDir  + ": " + extractedContent.fileContensMap.keySet());
+        System.out.println("Skriver " + resultDir);
+        //if (Utils.debug) System.out.println("Skriver " +extractedContent.id+ " til " + resultDir  + ": " + extractedContent.fileContensMap.keySet());
         for (String filnavn : extractedContent.fileContensMap.keySet()) {
             String filIndhold = extractedContent.fileContensMap.get(filnavn);
             Path fil = resultDir.resolve(filnavn);

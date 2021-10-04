@@ -17,7 +17,7 @@ import java.util.concurrent.Callable;
 @CommandLine.Command(name = "daisy", mixinStandardHelpOptions = true, showDefaultValues = true, usageHelpWidth = 120)
 public class DaisyMain implements Callable
 {
-    public static final String VERSION = "0.902 (10 nov 2020)";
+    public static final String VERSION = "v1.0 (4 okt 2021)";
 //    @CommandLine.Parameters(index = "0", description = "server, run, remote eller testkørsel." )
     @CommandLine.Parameters(index = "0", description = "remote/client to run Daisy remotely, or 'server' to start a calculation server" )
   String command;
@@ -76,7 +76,7 @@ public class DaisyMain implements Callable
 
   public static void main(String[] args)  {
     System.out.println("Daisywrapper version "+VERSION );
-    System.out.println("Copyright 2020 nitrogensensor.eu & Jacob Nordfalk" );
+    System.out.println("Copyright 2021 nitrogensensor.eu & Jacob Nordfalk - github.com/nitrogensensor/daisywrapper");
     int exitCode = new CommandLine(new DaisyMain()).execute(args);
     if (exitCode!=0) System.exit(exitCode);
   }
@@ -169,7 +169,7 @@ public class DaisyMain implements Callable
       return null;
   }
 
-    private void cleanCsv(HashMap<String, String> fileContensMap) {
+    private static void cleanCsv(HashMap<String, String> fileContensMap) {
         for (Map.Entry<String, String> fil : fileContensMap.entrySet()) {
             if (!fil.getKey().endsWith(".csv")) continue;
             String csv = fil.getValue();

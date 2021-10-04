@@ -8,7 +8,7 @@ server which can serve the requests of the client.
 
 # Daisy versions and updates
 
-Currently we use Daisy for Linux version 5.88 (https://daisy.ku.dk/download/linux/) in Google Cloud.
+Currently we use Daisy for Linux version 6.25 (https://daisy.ku.dk/download/linux/) in Google Cloud.
 We don't expect any problems upgrading Daisy to newer versions,
 as the wrapper in reality is a generic mechansm that could distribute variations of any set of files to any external executable.
 
