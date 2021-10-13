@@ -1,0 +1,8 @@
+Daisy output will come here.
+
+
+In Exercise01.dai there is an expectation that subdirectory "Ex1" exists.
+(log_prefix "Ex1/")
+
+If the directory doesent exist then Daisy will fail - it doesent create the directory
+
