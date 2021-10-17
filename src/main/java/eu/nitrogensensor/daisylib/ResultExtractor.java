@@ -11,6 +11,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 public class ResultExtractor {
+    public boolean cleanCsvOutput;
     private HashSet<String> csvOutputfilnavne = new HashSet<>();
 
     private ArrayList<CsvEkstraktor> csvEkstraktors = new ArrayList<>();
@@ -138,4 +139,17 @@ public class ResultExtractor {
         }
     }
 
+    public static void cleanCsv(HashMap<String, String> fileContensMap) {
+        for (Map.Entry<String, String> fil : fileContensMap.entrySet()) {
+            if (!fil.getKey().endsWith(".csv")) continue;
+            String csv = fil.getValue();
+            String[] csvsplit = csv.split("--------------------\n");
+            if (csvsplit.length<2) continue;
+            String rest = csvsplit[1];
+            int n1 = rest.indexOf('\n');
+            int n2 = rest.indexOf('\n', n1+1);
+            csv = rest.substring(0, n1) + rest.substring(n2);
+            fil.setValue(csv);
+        }
+    }
 }

@@ -142,14 +142,12 @@ public class DaisyRemoteExecution {
             // Klodset og sikkkert nytteløst forsøg på at håndtere at båndbredden til endpointet sikkert er begrænset
             if (kørslerIgang.size()>100) try { Thread.sleep(50); } catch (Exception e) {}
             //if (Utils.debug) System.out.println(visStatus() + ". Kørsel "+kørselsNr+" af "+daisyModels.size()+ " sættes i kø.");
-            kørslerIgang.put(kørsel.getId(), "pending");
+            kørslerIgang.put(kørsel.getId(), "not started");
 
             final int kørselsNr_ = kørselsNr;
             Runnable runnable = () -> {
                 try {
                     if (fejl.get() != null) return;
-                    kørslerIgang.put(kørsel.getId(), "sending");
-                    //if (Utils.debug) System.out.println(visStatus() + ". Kørsel "+kørselsNr_+" "+kørsel.getId()+" sendes nu.");
 
                     // Fjern irrelecante oplysninger fra det objekt, der sendes over netværket
                     ExecutionBatch batch = new ExecutionBatch();
@@ -159,14 +157,12 @@ public class DaisyRemoteExecution {
                     batch.kørsel.setId(kørsel.getId()); // til sporing på serversiden
                     batch.kørsel.directory = null;
 
+                    kørslerIgang.put(kørsel.getId(), "running");
                     RequestBodyEntity response0 = Unirest.post(remoteEndpointUrl + "/sim/").body(batch);
-                    if (fejl.get() != null) return;
-                    kørslerIgang.put(kørsel.getId(), "sendt");
+
                     //System.out.println("response0.asString().getBody() = " + response0.asString().getBody());
                     HttpResponse<ExtractedContent> response = response0.asObject(ExtractedContent.class);
                     if (Utils.debug) System.out.println("Kørsel "+kørsel.getId()+" modtog svar "+response.getStatus()+" "+response.getStatusText()+" isSuccess()="+response.isSuccess());
-                    kørslerIgang.put(kørsel.getId(), "recieving");
-                    if (fejl.get() != null) return;
 
                     if (!response.isSuccess()) {
                         fejl.set(new IOException(response.getStatusText()));
@@ -188,11 +184,13 @@ public class DaisyRemoteExecution {
                         kørslerIgang.put(kørsel.getId(), "remote error");
                         return;
                     }
+                    kørslerIgang.put(kørsel.getId(), "extracting");
 
-                    kørslerIgang.put(kørsel.getId(), "recieved");
                     ExtractedContent extractedContent = response.getBody();
                     extractedContent.id = kørsel.getId();
                     extractedContents.put(kørsel.getId(), extractedContent);
+                    if (resultExtractor.cleanCsvOutput) ResultExtractor.cleanCsv(extractedContent.fileContensMap);
+
                     if (resultsDir != null) writeExtractedContentToSubdir(extractedContent, resultsDir);
 
                     if (extractedContent.exception != null) {

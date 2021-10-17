@@ -151,35 +151,19 @@ public class DaisyMain implements Callable
           //daisyModels.forEach(System.out::println);
 
           ResultExtractor re = new ResultExtractor();
+          re.cleanCsvOutput = cleanCsvOutput;
           for (String outputfil : outputfiler) re.addFile(outputfil);
 
           if (remoteEndpointUrl !=null) DaisyRemoteExecution.setRemoteEndpointUrl(remoteEndpointUrl);
-          Map<String, ExtractedContent> res = DaisyRemoteExecution.runParralel(daisyModels, re);
+          Map<String, ExtractedContent> res = DaisyRemoteExecution.runParralel(daisyModels, re, Paths.get(outputdirectory));
 
           // TODO Hvis der opstår en serverfejl, f.eks. 'Too many open files' eller 'java.lang.IllegalArgumentException: Søgestreng ikke fundet: JORDLAG-30'
           // så skal den vises hos klienten!
 
-          if (cleanCsvOutput) for (ExtractedContent ec : res.values()) cleanCsv(ec.fileContensMap);
-          for (ExtractedContent extractedContent : res.values()) {
-              DaisyRemoteExecution.writeExtractedContentToSubdir(extractedContent, Paths.get(outputdirectory));
-          }
           if (verbose) System.out.println("res = " + res);
       }
       else throw new Exception("Ukendt kommando: "+ command);
       return null;
   }
 
-    private static void cleanCsv(HashMap<String, String> fileContensMap) {
-        for (Map.Entry<String, String> fil : fileContensMap.entrySet()) {
-            if (!fil.getKey().endsWith(".csv")) continue;
-            String csv = fil.getValue();
-            String[] csvsplit = csv.split("--------------------\n");
-            if (csvsplit.length<2) continue;
-            String rest = csvsplit[1];
-            int n1 = rest.indexOf('\n');
-            int n2 = rest.indexOf('\n', n1+1);
-            csv = rest.substring(0, n1) + rest.substring(n2);
-            fil.setValue(csv);
-        }
-    }
 }
