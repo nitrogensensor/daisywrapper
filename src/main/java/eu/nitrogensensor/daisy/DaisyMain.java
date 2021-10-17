@@ -17,7 +17,7 @@ import java.util.concurrent.Callable;
 @CommandLine.Command(name = "daisy", mixinStandardHelpOptions = true, showDefaultValues = true, usageHelpWidth = 120)
 public class DaisyMain implements Callable
 {
-    public static final String VERSION = "v1.0 (4 okt 2021)";
+    public static final String VERSION = "v1.0 (18 okt 2021)";
 //    @CommandLine.Parameters(index = "0", description = "server, run, remote eller testkørsel." )
     @CommandLine.Parameters(index = "0", description = "remote/client to run Daisy remotely, or 'server' to start a calculation server" )
   String command;
