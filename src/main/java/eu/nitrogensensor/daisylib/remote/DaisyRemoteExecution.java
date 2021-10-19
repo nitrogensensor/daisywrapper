@@ -22,7 +22,6 @@ public class DaisyRemoteExecution {
     public static int maxSamtidigeKørslerIgang;
 
     private static Gson gson = MyGsonPathConverter.buildGson();
-    //private static String remoteEndpointUrl = "https://daisykoersel-6dl4uoo23q-lz.a.run.app";
     private static String remoteEndpointUrl = "http://daisy.nitrogensensor.eu:3210";
 
     public static void setRemoteEndpointUrl(String url) {
@@ -68,7 +67,7 @@ public class DaisyRemoteExecution {
         }
         maxSamtidigeKørslerIgang = Math.max(maxSamtidigeKørslerIgang, kørslerIgang.size());
 
-        return String.format("%tT %2d runs pending %s - %s", new Date(), kørslerIgang.size(), keyCountMap.toString(), Utils.klipStreng(kørslerIgang.keySet(), 200));
+        return String.format("%tT %2d runs pending %s - %s", new Date(), kørslerIgang.size(), keyCountMap.toString(), Utils.klipStreng(kørslerIgang, 200));
     }
 
     private static String __oploadZip(Path inputDir) throws IOException {
@@ -120,7 +119,7 @@ public class DaisyRemoteExecution {
         Path inputDir = getDirectory(daisyModels);
         if (resultExtractor!=null) resultExtractor.tjekResultatIkkeAlleredeFindes(inputDir);
 
-        String oploadId = __oploadZip(inputDir); // HER OPLOADES!!!!!
+        String oploadId = __oploadZip(inputDir);
 
         int parallelitet = daisyModels.size();
         if (getKørselstype().startsWith("Cloud")) {
@@ -147,7 +146,10 @@ public class DaisyRemoteExecution {
             final int kørselsNr_ = kørselsNr;
             Runnable runnable = () -> {
                 try {
-                    if (fejl.get() != null) return;
+                    if (fejl.get() != null) {
+                        kørslerIgang.put(kørsel.getId(), "canceled");
+                        return;
+                    }
 
                     // Fjern irrelecante oplysninger fra det objekt, der sendes over netværket
                     ExecutionBatch batch = new ExecutionBatch();
@@ -166,7 +168,7 @@ public class DaisyRemoteExecution {
 
                     if (!response.isSuccess()) {
                         fejl.set(new IOException(response.getStatusText()));
-                        System.err.println("(Server)fejl for "+ kørselsNr_+" "+ kørsel.getId()+": "+response.getStatus() + " " +response.getStatusText());
+                        System.err.println("(Server)fejl for "+ kørsel.getId()+": "+response.getStatus() + " " +response.getStatusText());
                         /*
                         System.out.flush();
                         System.err.flush();
@@ -179,7 +181,7 @@ public class DaisyRemoteExecution {
                         Files.write(Paths.get("/tmp/FejlFejl.bin"), response0.asBytes().getBody());
                          */
                         String body = response0.asString().getBody();
-                        System.err.println("Serverfejl body: "+Utils.klipStreng(body, 500));
+                        System.err.println("Serverfejl for: "+ kørsel.getId()+ "body: "+Utils.klipStreng(body, 500));
                         // System.exit(-1);
                         kørslerIgang.put(kørsel.getId(), "remote error");
                         return;
