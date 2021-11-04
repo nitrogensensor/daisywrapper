@@ -6,12 +6,12 @@ TLDR: ***You don't need to install/run Daisy on your own PC anymore - your simul
 The servers can either be self-hosted on dedicated hardware or scaled out in the cloud.
 The default server runs at DTU Diplom and can run 16 simulations in parrallel. If you need more the cloud solution enables you to run several thousand simulations in parralel, only paying for the actual CPU time used.
 
-In-depth documentation, inclusive
+Please see in-depth [documentation](documentation) for
 - how to set up your own server, 
 - how to set up the Google Cloud Run solution, scaling and pricing
 - and how to use it as a Java library
 
-is available [here](documentation).
+Also read this slideset: https://bit.ly/daisywrapper
 
 
 # Quickstart - how to execute Daisy on a remote server
