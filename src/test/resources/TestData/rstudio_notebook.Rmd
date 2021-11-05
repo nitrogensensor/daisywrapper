@@ -18,7 +18,7 @@ Download daisy.jar so we can run simulations remotely
 ```{r}
 getwd()
 daisyJar <- "daisy.jar"
-if (!file.exists(daisyJar)) download.file("https://nitrogen.saluton.dk/resultat/diverse/daisy.jar", daisyJar, mode="wb")
+if (!file.exists(daisyJar)) download.file("https://daisy.nitrogensensor.eu/resultat/diverse/daisy.jar", daisyJar, mode="wb")
 ```
 
 
