@@ -12,7 +12,7 @@ Please see in-depth [documentation](documentation) for
 - how to set up the Google Cloud Run solution, scaling and pricing
 - and how to use it as a Java library
 
-Also read this slideset: https://bit.ly/daisywrapper
+Also try out this notebook https://rpubs.com/nordfalk/daisywrapper and read this slideset: https://bit.ly/daisywrapper
 
 
 # Quickstart - how to execute Daisy on a remote server

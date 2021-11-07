@@ -4,16 +4,10 @@ output:
   pdf_document: default
 ---
 
-# Some examples of using the Daisy wrapper for remote execution
+An example of using the Daisy wrapper for remote execution
 
 
-Read libraries
-
-```{r}
-require(ggplot2)
-```
-
-Download daisy.jar so we can run simulations remotely, if we don't have it already
+First download daisy.jar so we can run simulations remotely, if we don't have it already
 
 ```{r}
 if (!file.exists("daisy.jar")) 
@@ -90,7 +84,7 @@ script='
 
 ;; Start and end of simulation.
 (time 1993 1 1)
-(stop 1994 1 1)
+(stop 1995 1 1)
 
 ;; Selecting management
 (manager activity
@@ -106,7 +100,7 @@ script='
         ("Crop Production" (when daily))
 ;;      Water balance 0-100 cm  
         ("Field water" (to -400 [cm])(when daily)
-         (where "Daily_FWB.dlf"))  
+         (where "Daily_FWB.csv") (print_header false) (print_dimension false))  
 ;;      Nitrogen balance 0-100 cm  
         ("Field nitrogen" (to -400 [cm])(when daily)
           (where "Daily_FNB.dlf"))  
@@ -116,7 +110,8 @@ script='
         ("Soil NO3 Concentration"   (when daily))
 )
 '
-write(script,"daisyInput/Excercise01.dai")
+
+write(script,"daisyInput/Exercise01.dai")
 dir.create("daisyInput/Ex1/")
 
 
@@ -130,10 +125,23 @@ Make sure that you have that file in the same directory as this script.
 
 ```{r}
 getwd()
-args <-  c("-jar daisy.jar client -d daisyInput Excercise01.dai -o daisyOutput  -u http://localhost:3210")
-system2("java", args = args)
+# unlink("daisyOutput", recursive = TRUE)
+system2("java", "-jar daisy.jar client -d daisyInput Exercise01.dai -o daisyOutput")
 ```
 
-# Load daisy results into dataframes
+Load daisy results into a dataframe
 
-TBD
+
+```{r}
+Daily_FWB <- read.delim("daisyOutput/Exercise01/Ex1/Daily_FWB.csv")
+Daily_FWB$date <- as.Date(paste(Daily_FWB$year, Daily_FWB$month, Daily_FWB$mday, sep = '-'), format = '%Y-%m-%d')
+head(Daily_FWB)
+```
+
+
+Plot the results
+
+```{r}
+plot(Daily_FWB$date, Daily_FWB$Actual.evapotranspiration)
+```
+

@@ -7,3 +7,8 @@
 /src/test/resources/TestData/daisyErr.log
 /run/
 /tmp/
+/src/test/resources/TestData/daisyInput/
+/src/test/resources/TestData/daisyOutput/
+/src/test/resources/TestData/daisy.jar
+/daisy.jar
+/local.properties

@@ -21,8 +21,6 @@ if (!file.exists("daisy.jar"))
 ```
 
 
-
-
 Run a single daisy simulation.
 
 This chunk runs daisy on Exercise01.dai. 

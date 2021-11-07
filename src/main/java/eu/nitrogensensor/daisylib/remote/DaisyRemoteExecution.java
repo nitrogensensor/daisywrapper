@@ -215,7 +215,7 @@ public class DaisyRemoteExecution {
 
         try {
             while (!countDownLatch.await(15, TimeUnit.SECONDS)) System.out.println(visStatus());
-            System.out.println("DaisyRemoteExecution: Alt er afsluttet - med evt fejl="+fejl);
+            if (Utils.debug) System.out.println("DaisyRemoteExecution: Alt er afsluttet - med evt fejl="+fejl);
             if (fejl.get()!=null) throw new IOException(fejl.get());
             executorService.shutdown();
         } catch (InterruptedException e) {
