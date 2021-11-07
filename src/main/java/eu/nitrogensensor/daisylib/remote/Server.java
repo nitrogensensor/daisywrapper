@@ -209,7 +209,7 @@ public class Server {
 
                 if (batch.resultExtractor==null) batch.resultExtractor = new ResultExtractor(); // standard er at trække alt ud....
                 batch.resultExtractor.extractToHashMap(batch.kørsel.directory, extractedContent.fileContensMap);
-                if (!varCachet)
+                if (!varCachet && extractedContent.exception==null)
                     Utils.sletMappe(batch.kørsel.directory); // ryd op - men KUN hvis det ikke kommer fra cachen!
             }
         } catch (Throwable e) {

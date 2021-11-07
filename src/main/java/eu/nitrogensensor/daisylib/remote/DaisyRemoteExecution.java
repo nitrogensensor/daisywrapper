@@ -90,7 +90,7 @@ public class DaisyRemoteExecution {
         Path resultDir = resultsDir.resolve(extractedContent.id.replaceAll("[^A-Za-z0-9_]", "_"));
         Utils.sletMappe(resultDir);
         Files.createDirectories(resultDir);
-        System.out.println("Skriver " + resultDir);
+        System.out.println("Writing " + resultDir+"/");
         //if (Utils.debug) System.out.println("Skriver " +extractedContent.id+ " til " + resultDir  + ": " + extractedContent.fileContensMap.keySet());
         for (String filnavn : extractedContent.fileContensMap.keySet()) {
             String filIndhold = extractedContent.fileContensMap.get(filnavn);
@@ -179,12 +179,11 @@ public class DaisyRemoteExecution {
                             System.err.println("Original body: " + e.getOriginalBody());
                         });
                         Files.write(Paths.get("/tmp/FejlFejl.bin"), response0.asBytes().getBody());
-                         */
                         String body = response0.asString().getBody();
                         System.err.println("Serverfejl for: "+ kørsel.getId()+ "body: "+Utils.klipStreng(body, 500));
                         // System.exit(-1);
+                         */
                         kørslerIgang.put(kørsel.getId(), "remote error");
-                        return;
                     }
                     kørslerIgang.put(kørsel.getId(), "extracting");
 

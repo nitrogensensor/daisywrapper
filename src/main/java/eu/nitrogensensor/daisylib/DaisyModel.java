@@ -136,6 +136,7 @@ public class DaisyModel implements Cloneable {
                 .directory(mappe.toFile())
                 .start();
         try {
+            System.out.println(path_to_daisy_executable + " " +inputFil + "    fra mappe = " + mappe);
             process.waitFor();
         } catch (InterruptedException e) {
             throw new IOException(e);
@@ -145,8 +146,8 @@ public class DaisyModel implements Cloneable {
 
         if(exitValue != 0) {
             List<String> fejllinjer = Files.readAllLines(daisyErr);
-            if (fejllinjer.size()>5) fejllinjer = fejllinjer.subList(fejllinjer.size()-5, fejllinjer.size());
-            throw new IOException("Daisy error. mappe="+mappe+" inputFil="+inputFil+fejllinjer+"\n"+String.join("\n", fejllinjer));
+            if (fejllinjer.size()>7) fejllinjer = fejllinjer.subList(fejllinjer.size()-7, fejllinjer.size());
+            throw new IOException("Daisy error. mappe="+mappe+" inputFil="+String.join("\n", fejllinjer));
         }
     }
 
