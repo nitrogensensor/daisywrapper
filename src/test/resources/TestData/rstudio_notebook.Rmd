@@ -16,8 +16,9 @@ require(ggplot2)
 Download daisy.jar so we can run simulations remotely, if we don't have it already
 
 ```{r}
+# unlink("daisy.jar")  # delete old jarfile, if an update is needed. You need to run this once awhile, and then to comment out this line
 if (!file.exists("daisy.jar")) 
-  download.file("https://daisy.nitrogensensor.eu/resultat/diverse/daisy.jar", "daisy.jar")
+  download.file("https://daisy.nitrogensensor.eu/resultat/diverse/daisy.jar", "daisy.jar", mode="wb")
 ```
 
 
