@@ -31,7 +31,9 @@ class CloudStorageArbejdsfiler {
         }
 
         try {
-            bucket = storage.get("daisykoersel-arbejdsfiler");
+            String BUCKET_NAME = "daisykoersel-arbejdsfiler2"; //storage.getOptions().getApplicationName() ???
+            bucket = storage.get(BUCKET_NAME);
+            if (bucket == null) bucket = storage.create(BucketInfo.newBuilder(BUCKET_NAME).build());
         } catch (StorageException e) {
             System.out.println("Der er IKKE adgang til Cloud Storage: "+e);
         }

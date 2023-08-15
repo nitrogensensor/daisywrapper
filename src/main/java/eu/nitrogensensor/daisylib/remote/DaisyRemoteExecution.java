@@ -86,15 +86,21 @@ public class DaisyRemoteExecution {
     }
 
 
+    /** Remove risky characters that Windows cant have in the file name */
+    private static String sanitizeToWindows(String riskyFilename) {
+        String safeName = riskyFilename.replaceAll("[:\\\\/*?|<>]", "_");
+        return safeName;
+    }
+
     public static void writeExtractedContentToSubdir(ExtractedContent extractedContent, Path resultsDir) throws IOException {
-        Path resultDir = resultsDir.resolve(extractedContent.id.replaceAll("[^A-Za-z0-9_]", "_"));
+        Path resultDir = resultsDir.resolve(sanitizeToWindows(extractedContent.id));
         Utils.sletMappe(resultDir);
         Files.createDirectories(resultDir);
         System.out.println("Writing " + resultDir+"/");
         //if (Utils.debug) System.out.println("Skriver " +extractedContent.id+ " til " + resultDir  + ": " + extractedContent.fileContensMap.keySet());
         for (String filnavn : extractedContent.fileContensMap.keySet()) {
             String filIndhold = extractedContent.fileContensMap.get(filnavn);
-            Path fil = resultDir.resolve(filnavn);
+            Path fil = resultDir.resolve(sanitizeToWindows(filnavn));
             //if (Utils.debug) System.out.println("Opretter "+fil.toString()); // kald ikke, kan give exception: +" "+Files.readAttributes(fil.getParent(), "*"));
             Files.createDirectories(fil.getParent());
             Files.write(fil, filIndhold.getBytes());
